@@ -111,10 +111,30 @@ engine's grammar, and each is machine-checked.
   hook targets, every shipped script parsing under `bash -n`, and the evidence
   being present and non-empty.
 
-### Fixed — what the first CI run found, and no local run could
+### Fixed — what CI found, and no local run could
 
-Three defects, none of which this machine could see. This is the entry that
-justifies the CI job existing.
+Six defects, none of which this machine could see. This is the entry that
+justifies the CI job existing. Two of them were *capabilities the engine
+claimed and did not have on macOS* — restored rather than downgraded to a
+skipped test.
+
+- **The acceptance suite had no per-case watchdog on macOS at all.** Stock
+  macOS ships neither `timeout` nor `gtimeout`, and `run_isolated` fell back to
+  running each case unguarded *while the header still printed
+  `per-case watchdog: 900s`*. A hanging case did not fail; it hung the run, and
+  the case that exists to prove a hang cannot freeze the suite failed after
+  120 seconds having demonstrated the opposite. There is now a portable
+  watchdog (detached watcher, marker file, normalised to exit 124 so a timeout
+  is never reported as an anonymous crash), and `GF_FORCE_PORTABLE_WATCHDOG=1`
+  exercises that path **on every platform** — because a fallback that can only
+  run where nobody is watching is how this defect survived in the first place.
+- **The event rate limiter silently degraded on every macOS machine.** It used
+  `date -d`, which is GNU coreutils; macOS has neither that nor `gdate`, so the
+  limiter took its "no date arithmetic" branch and journalled 3 records where
+  1 is declared. BSD `date -j -f` does the same job, so `gf_iso_to_epoch` now
+  tries both and the capability is restored. The degraded path is still
+  reachable, still journals *more* rather than less, and is still tested via
+  `GF_NO_DATE_D=1`.
 
 - **The gate did not parse on macOS at all.** Stock macOS ships bash 3.2.57,
   and bash 3.2 does not suspend quote parsing inside a comment that sits inside

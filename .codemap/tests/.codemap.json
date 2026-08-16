@@ -2,18 +2,18 @@
   "directory": "tests",
   "files": {
     "run_tests.sh": {
-      "hash": "0c36d2e38c47",
-      "indexed_at": "2026-08-16T01:59:13.189826+00:00",
+      "hash": "5682c6ccb03b",
+      "indexed_at": "2026-08-16T02:24:40.326230+00:00",
       "language": "shell",
-      "lines": 3026,
-      "mtime_ns": 1786845550905720800,
-      "size": 173367,
+      "lines": 3083,
+      "mtime_ns": 1786847078176146500,
+      "size": 176262,
       "symbols": [
         {
           "docstring": "------------------------------------------------------- pure-bash JSON check Structural well-formedness: balanced braces/brackets outside strings, no",
           "lines": [
             53,
-            3027
+            3084
           ],
           "name": "json_wellformed",
           "type": "function"
@@ -94,7 +94,7 @@
         {
           "lines": [
             209,
-            3027
+            3084
           ],
           "name": "test_guard_tamper_deny",
           "type": "function"
@@ -231,39 +231,39 @@
         {
           "lines": [
             567,
-            615
+            631
           ],
           "name": "test_suite_survives_hostile_environment",
           "type": "function"
         },
         {
           "lines": [
-            617,
-            743
+            633,
+            759
           ],
           "name": "test_flaky_detection",
           "type": "function"
         },
         {
           "lines": [
-            745,
-            851
+            761,
+            867
           ],
           "name": "test_flake_scope_is_the_seal",
           "type": "function"
         },
         {
           "lines": [
-            853,
-            952
+            869,
+            968
           ],
           "name": "test_clock_cannot_hide_a_flip",
           "type": "function"
         },
         {
           "lines": [
-            954,
-            1022
+            970,
+            1038
           ],
           "name": "test_every_law_is_enforced",
           "type": "function"
@@ -271,272 +271,272 @@
         {
           "docstring": "---- portability: the machine the author does not own ---------------------- Shared scanners. The negative controls below run THESE functions against",
           "lines": [
-            1028,
-            1040
+            1044,
+            1056
           ],
           "name": "gf_scan_winvar",
           "type": "function"
         },
         {
           "lines": [
-            1041,
-            1043
+            1057,
+            1059
           ],
           "name": "gf_scan_cr",
           "type": "function"
         },
         {
           "lines": [
-            1044,
-            1092
+            1060,
+            1108
           ],
           "name": "gf_scan_bash32",
           "type": "function"
         },
         {
           "lines": [
-            1094,
-            1177
+            1110,
+            1193
           ],
           "name": "test_a_refusal_always_carries_a_way_forward",
           "type": "function"
         },
         {
           "lines": [
-            1179,
-            1244
+            1195,
+            1260
           ],
           "name": "test_records_are_append_only",
           "type": "function"
         },
         {
           "lines": [
-            1246,
-            1334
+            1262,
+            1350
           ],
           "name": "test_the_contract_binds_the_engine",
           "type": "function"
         },
         {
           "lines": [
-            1336,
-            1339
+            1352,
+            1355
           ],
           "name": "gf_json_str",
           "type": "function"
         },
         {
           "lines": [
-            1341,
-            1443
+            1357,
+            1459
           ],
           "name": "test_the_plugin_installs_as_declared",
           "type": "function"
         },
         {
           "lines": [
-            1445,
-            1696
+            1461,
+            1712
           ],
           "name": "test_portable_to_a_stranger_machine",
           "type": "function"
         },
         {
           "lines": [
-            1698,
-            1783
+            1714,
+            1799
           ],
           "name": "test_completion_is_simultaneous",
           "type": "function"
         },
         {
           "lines": [
-            1785,
-            1900
+            1801,
+            1916
           ],
           "name": "test_many_goals_run_in_order",
           "type": "function"
         },
         {
           "lines": [
-            1902,
-            2005
+            1918,
+            2021
           ],
           "name": "test_untrusted_output_cannot_forge_a_verdict",
           "type": "function"
         },
         {
           "lines": [
-            2007,
-            2045
+            2023,
+            2061
           ],
           "name": "test_every_event_is_consumed",
           "type": "function"
         },
         {
           "lines": [
-            2047,
-            2077
+            2063,
+            2093
           ],
           "name": "test_ships_no_tooling_artifacts",
           "type": "function"
         },
         {
           "lines": [
-            2079,
-            2119
+            2095,
+            2135
           ],
           "name": "test_docs_counts_are_generated",
           "type": "function"
         },
         {
           "lines": [
-            2121,
-            2171
+            2137,
+            2187
           ],
           "name": "test_attestation_survives_a_stranger",
           "type": "function"
         },
         {
           "lines": [
-            2173,
-            2220
+            2189,
+            2236
           ],
           "name": "test_mutation_reaches_undeclared_deps",
           "type": "function"
         },
         {
           "lines": [
-            2222,
-            2265
+            2238,
+            2281
           ],
           "name": "test_one_source_of_record",
           "type": "function"
         },
         {
           "lines": [
-            2267,
-            2314
+            2283,
+            2330
           ],
           "name": "test_forensic_events_surface",
           "type": "function"
         },
         {
           "lines": [
-            2316,
-            2340
+            2332,
+            2356
           ],
           "name": "test_friction_reaches_the_gate",
           "type": "function"
         },
         {
           "lines": [
-            2342,
-            2385
+            2358,
+            2401
           ],
           "name": "test_timings_rotation",
           "type": "function"
         },
         {
           "lines": [
-            2387,
-            2414
+            2403,
+            2430
           ],
           "name": "test_snapshot_ring",
           "type": "function"
         },
         {
           "lines": [
-            2416,
-            2454
+            2432,
+            2470
           ],
           "name": "test_license_is_one_story",
           "type": "function"
         },
         {
           "lines": [
-            2456,
-            2528
+            2472,
+            2544
           ],
           "name": "test_learned_timeouts",
           "type": "function"
         },
         {
           "lines": [
-            2530,
-            2567
+            2546,
+            2583
           ],
           "name": "test_timeout_corpus_binds_lean",
           "type": "function"
         },
         {
           "lines": [
-            2569,
-            2607
+            2585,
+            2623
           ],
           "name": "test_semantic_mutation_operators",
           "type": "function"
         },
         {
           "lines": [
-            2609,
-            2654
+            2625,
+            2670
           ],
           "name": "test_gate_mutation_policy",
           "type": "function"
         },
         {
           "lines": [
-            2656,
-            2703
+            2672,
+            2719
           ],
           "name": "test_precompact_snapshot",
           "type": "function"
         },
         {
           "lines": [
-            2705,
-            2727
+            2721,
+            2743
           ],
           "name": "test_hooks_survive_garbage_stdin",
           "type": "function"
         },
         {
           "lines": [
-            2729,
-            2745
+            2745,
+            2761
           ],
           "name": "test_invariant_completion_is_never_declarable",
           "type": "function"
         },
         {
           "lines": [
-            2747,
-            2764
+            2763,
+            2780
           ],
           "name": "test_invariant_state_is_inspectable",
           "type": "function"
         },
         {
           "lines": [
-            2766,
-            2777
+            2782,
+            2793
           ],
           "name": "test_invariant_floor_stays_light",
           "type": "function"
         },
         {
           "lines": [
-            2779,
-            2814
+            2795,
+            2830
           ],
           "name": "test_version_is_honest",
           "type": "function"
         },
         {
           "lines": [
-            2816,
-            2878
+            2832,
+            2894
           ],
           "name": "test_docs_carry_the_argument",
           "type": "function"
@@ -544,8 +544,8 @@
         {
           "docstring": "One case, one process, one watchdog. Returns the child's exit code; its output (including the GF_CASE_RESULT line) goes to stdout.",
           "lines": [
-            2970,
-            2978
+            2986,
+            3035
           ],
           "name": "run_isolated",
           "type": "function"
@@ -553,6 +553,6 @@
       ]
     }
   },
-  "generated_at": "2026-08-16T01:59:13.190161+00:00",
+  "generated_at": "2026-08-16T02:24:40.326396+00:00",
   "version": "1.0"
 }

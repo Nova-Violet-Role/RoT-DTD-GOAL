@@ -21,7 +21,7 @@
   ok   schema control: both sides are printed
   ok   schema control: a numbering gap FAILS the check
   ok   schema control: named as numbering
-      10s
+      12s
 [56/57] test_the_contract_binds_the_engine
   ok   contract: verifies against the tree
   ok   contract: the agent roster is checked
@@ -54,7 +54,7 @@
   ok   refusals: it issues a task, tagged as one
   ok   refusals: and tells the reader what ends the loop
   ok   refusals: the gate never tells the reader to stop trying
-      4s
+      5s
 
-passed: 656   failed: 0
+passed: 659   failed: 0
 ALL GREEN

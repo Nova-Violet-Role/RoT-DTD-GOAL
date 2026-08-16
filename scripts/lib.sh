@@ -1196,15 +1196,28 @@ gf_event_last_iso() { # event -> ISO of the most recent journalled hit ("" if no
     | grep -E "EVENT $1( |\$)" | tail -n1 | cut -c1-19
 }
 
+gf_iso_to_epoch() { # "YYYY-MM-DD HH:MM:SS" -> epoch seconds, empty if neither
+  # MEASURED on a macos-latest runner: `date -d` is GNU coreutils and stock
+  # macOS has neither it nor `gdate`, so the limiter fell into its degraded
+  # path on every macOS machine and journalled 3 records where 1 was declared.
+  # BSD date can do the same job with a different spelling, so the capability
+  # is RESTORED rather than the expectation lowered. Same fallback discipline
+  # as gf_sha256: try each implementation, report nothing only if none exists.
+  local e
+  e="$(date -d "$1" +%s 2>/dev/null)" && [ -n "$e" ] && { printf '%s' "$e"; return 0; }
+  e="$(date -j -f '%Y-%m-%d %H:%M:%S' "$1" +%s 2>/dev/null)" && [ -n "$e" ] && { printf '%s' "$e"; return 0; }
+  return 1
+}
+
 gf_event_rate_ok() { # event -> 0 if it may be journalled now
   local ev="$1" last last_epoch now_epoch
   last="$(gf_event_last_iso "$ev")"
   [ -n "$last" ] || return 0
-  # `date -d` is coreutils but not universal. Where it is missing the limiter
-  # degrades toward MORE journalling, never less: a missing instrument must not
-  # be able to hide an event. GF_NO_DATE_D=1 forces that path for the test.
+  # Where no date arithmetic exists at all the limiter degrades toward MORE
+  # journalling, never less: a missing instrument must not be able to hide an
+  # event. GF_NO_DATE_D=1 forces that path for the test.
   if [ -n "${GF_NO_DATE_D:-}" ]; then return 0; fi
-  last_epoch="$(date -d "$last" +%s 2>/dev/null || true)"
+  last_epoch="$(gf_iso_to_epoch "$last" 2>/dev/null || true)"
   [ -n "$last_epoch" ] || return 0
   now_epoch="$(date +%s)"
   [ $((now_epoch - last_epoch)) -ge "$GF_EVENT_MIN_INTERVAL" ]

@@ -597,6 +597,22 @@ test_suite_survives_hostile_environment() {
   #    from a dead one by a human watching the output
   assert_contains "hostile: heartbeat shows case progress" "$out" "[1/1]"
   assert_contains "hostile: the header states the watchdog" "$out" "per-case watchdog: 3s"
+  # 2b. THE SAME GUARANTEE WITHOUT COREUTILS. Stock macOS ships neither
+  #     `timeout` nor `gtimeout`, and this suite used to fall back to running
+  #     each case with NO watchdog while the header above still announced one.
+  #     A hanging case then hung the whole run. Forcing the portable path here
+  #     means the fallback is exercised on every platform, not only on the one
+  #     where nobody is watching.
+  t0="$(date +%s)"
+  out="$(GF_FORCE_PORTABLE_WATCHDOG=1 GF_CASE_TIMEOUT=3 bash "$HARNESS" test__selfcheck_hang 2>&1)"; rc=$?
+  elapsed=$(( $(date +%s) - t0 ))
+  assert_eq "hostile: the coreutils-free watchdog also fails the run" "$rc" "1"
+  assert_contains "hostile: and names it a timeout, not an anonymous crash" "$out" "TIMED OUT"
+  if [ "$elapsed" -lt 60 ]; then
+    ok "hostile: the coreutils-free watchdog returned in ${elapsed}s (<60)"
+  else
+    bad "hostile: the coreutils-free watchdog returned promptly" "took ${elapsed}s"
+  fi
   # 4. isolation is real: cases run in their own process
   out="$(bash "$HARNESS" --one test_syntax_all_scripts 2>&1)"; rc=$?
   assert_eq "hostile: --one runs a single case and exits 0 when it passes" "$rc" "0"
@@ -2968,13 +2984,54 @@ done
 # One case, one process, one watchdog. Returns the child's exit code; its
 # output (including the GF_CASE_RESULT line) goes to stdout.
 run_isolated() {
-  if command -v timeout > /dev/null 2>&1; then
-    GF_ROOT="$GF_ROOT" timeout -k 5 "$GF_CASE_TIMEOUT" bash "$SELF" --one "$1" 2>&1
-  else
-    # No coreutils timeout (stock macOS): still isolate the case, and say so
-    # rather than pretending there is a watchdog.
-    GF_ROOT="$GF_ROOT" bash "$SELF" --one "$1" 2>&1
+  # GF_FORCE_PORTABLE_WATCHDOG=1 takes the no-coreutils path on a machine that
+  # HAS coreutils. Without it the fallback below could only ever be exercised
+  # on stock macOS -- that is, only where nobody could watch it -- and an
+  # untested fallback is exactly how the suite ended up announcing a watchdog
+  # it did not have.
+  if [ -z "${GF_FORCE_PORTABLE_WATCHDOG:-}" ]; then
+    if command -v timeout > /dev/null 2>&1; then
+      GF_ROOT="$GF_ROOT" timeout -k 5 "$GF_CASE_TIMEOUT" bash "$SELF" --one "$1" 2>&1
+      return $?
+    fi
+    if command -v gtimeout > /dev/null 2>&1; then
+      GF_ROOT="$GF_ROOT" gtimeout -k 5 "$GF_CASE_TIMEOUT" bash "$SELF" --one "$1" 2>&1
+      return $?
+    fi
   fi
+  # MEASURED, on a GitHub macos-latest runner: stock macOS ships NEITHER
+  # `timeout` NOR `gtimeout`, so this branch used to run every case with no
+  # watchdog at all while the header still announced one. A hanging case did
+  # not fail -- it hung the whole suite until something outside killed it, and
+  # `test_a_hostile_verify_command_cannot_hang_the_suite` failed after 120s
+  # having proved the opposite of what it claims.
+  #
+  # So the watchdog is implemented here rather than declared missing. The
+  # watcher is fully detached from our stdio so a lingering sleep can never
+  # hold the output pipe open, and it leaves a marker before killing so the
+  # outcome is reported as a TIMEOUT (124, what coreutils would return) and
+  # not as an anonymous crash. Same shape as gf_run_with_timeout in lib.sh.
+  local tmp pid watcher rc
+  tmp="$(mktemp "${TMPDIR:-/tmp}/gf-case.XXXXXX")"
+  GF_ROOT="$GF_ROOT" bash "$SELF" --one "$1" > "$tmp" 2>&1 < /dev/null &
+  pid=$!
+  (
+    sleep "$GF_CASE_TIMEOUT"
+    : > "$tmp.killed"
+    kill -TERM "$pid" 2>/dev/null
+    sleep 5
+    kill -KILL "$pid" 2>/dev/null
+  ) < /dev/null > /dev/null 2>&1 &
+  watcher=$!
+  wait "$pid" 2>/dev/null; rc=$?
+  # Kill the watcher by PID -- never by pattern. Its sleep child is reaped
+  # through the parent-pid form, which cannot match an unrelated process.
+  kill -TERM "$watcher" 2>/dev/null
+  command -v pkill > /dev/null 2>&1 && pkill -TERM -P "$watcher" 2>/dev/null
+  cat "$tmp"
+  if [ -f "$tmp.killed" ]; then rc=124; fi
+  rm -f "$tmp" "$tmp.killed"
+  return "$rc"
 }
 
 TOTAL_CASES=0; for t in $RUN; do TOTAL_CASES=$((TOTAL_CASES + 1)); done

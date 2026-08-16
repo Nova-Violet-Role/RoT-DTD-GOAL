@@ -313,12 +313,12 @@
       "symbols": []
     },
     "lib.sh": {
-      "hash": "d410fd7636fa",
-      "indexed_at": "2026-08-16T00:07:34.645562+00:00",
+      "hash": "f5f3379744d4",
+      "indexed_at": "2026-08-16T02:23:11.081336+00:00",
       "language": "shell",
-      "lines": 1228,
-      "mtime_ns": 1786838852031792600,
-      "size": 55841,
+      "lines": 1241,
+      "mtime_ns": 1786846988700856600,
+      "size": 56590,
       "symbols": [
         {
           "lines": [
@@ -884,7 +884,15 @@
         {
           "lines": [
             1199,
-            1211
+            1210
+          ],
+          "name": "gf_iso_to_epoch",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1212,
+            1224
           ],
           "name": "gf_event_rate_ok",
           "type": "function"
@@ -892,8 +900,8 @@
         {
           "docstring": "The VIEW over that one record. Regenerated on demand, never stored -- a view that is written to disk is just a second record with extra steps.",
           "lines": [
-            1215,
-            1228
+            1228,
+            1241
           ],
           "name": "gf_events_view",
           "type": "function"
@@ -945,6 +953,6 @@
       ]
     }
   },
-  "generated_at": "2026-08-16T01:53:39.004520+00:00",
+  "generated_at": "2026-08-16T02:23:11.081482+00:00",
   "version": "1.0"
 }
