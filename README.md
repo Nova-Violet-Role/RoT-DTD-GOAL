@@ -21,6 +21,7 @@
 [![Plugin Extra Gift](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci2.yml/badge.svg)](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci2.yml)
 [![Proved in Lean 4](https://img.shields.io/badge/Proved%20in-Lean%204-2C3E50?style=flat-square)](lean/Proofs/)
 [![Kernel re-verified](https://img.shields.io/badge/leanchecker-exit%200-27ae60?style=flat-square)](#-verify-it-yourself)
+[![Listed on ClaudePluginHub](https://www.claudepluginhub.com/badge/nova-violet-role-rot-dtd-goal)](https://www.claudepluginhub.com/plugins/nova-violet-role-rot-dtd-goal?ref=badge)
 [![Zero sorry](https://img.shields.io/badge/sorry-0-27ae60?style=flat-square)](#-verify-it-yourself)
 [![Zero dependencies](https://img.shields.io/badge/dependencies-bash%20%2B%20coreutils-27ae60?style=flat-square)](#-requirements)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-D97757?style=flat-square)](https://claude.com/claude-code)
