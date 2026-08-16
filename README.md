@@ -938,6 +938,69 @@ freely, the licence means it:
 
 ---
 
+## 🎁 The Extra — a gift the plugin built for you
+
+[`extra/trinum-calc/`](extra/trinum-calc/) is an advanced calculator across
+three ancient numeral systems — **Roman** (subtractive, `MCMXCIV`), **Ionian
+Greek** (`͵θϡϟθ`), and **Egyptian hieroglyphic** (`𓆼𓍢𓎆𓏺`) — with an
+auto-detecting parser, mixed-system expression evaluation, a CLI, and a
+**Slint** graphical UI. It exists for one reason: to show the plugin doing a
+real, multi-file, compiled-language build end to end.
+`/rot-dtd-goal:goal` drove the whole thing against ten sealed criteria —
+planner first, forty-two engine tests, the red team at green, a contract
+audit at the close — and
+[`extra/trinum-calc/BUILD.md`](extra/trinum-calc/BUILD.md) tells that story
+straight from the journal shipped in [`EVIDENCE/extra/`](EVIDENCE/extra/).
+The three-OS claim is measured by its own workflow, **Plugin Extra Gift**
+(`.github/workflows/ci2.yml`) — deliberately separate from the plugin's CI,
+so a gift can never redden the gate.
+
+<details>
+<summary><b>🎞️ The build, gate by gate — open to watch the plugin work</b></summary>
+
+Every gate event of the real build, replayed against the exact state the
+snapshotter captured at that moment. Nothing is mocked; only pacing is staged.
+
+**Event 01 — `BLOCK`** · `2026-08-16 18:31:25 BLOCK iter=1/10 fail=10 sig=e60c9e3a33da5a58`
+
+![ev01-block](docs/assets/extra/ev01-block.gif)
+
+> the gate refuses a stop before a line of Rust exists — ten failures, targeted feedback, the next step
+
+**Event 02 — `CONFIRM`** · `2026-08-16 18:40:13 CONFIRM re-running all 10 criteria before completion`
+
+![ev02-confirm](docs/assets/extra/ev02-confirm.gif)
+
+> first completion sweep — every criterion re-run the moment all ten look green
+
+**Event 03 — `CONFIRM`** · `2026-08-16 18:47:38 CONFIRM re-running all 10 criteria before completion`
+
+![ev03-confirm](docs/assets/extra/ev03-confirm.gif)
+
+> a later sweep after more work — the gate never trusts a pass it did not just watch
+
+**Event 04 — `CONFIRM`** · `2026-08-16 18:47:56 CONFIRM re-running all 10 criteria before completion`
+
+![ev04-confirm](docs/assets/extra/ev04-confirm.gif)
+
+> the pre-completion double sweep on the earned attempt
+
+**Event 05 — `COMPLETE`** · `2026-08-16 18:47:58 COMPLETE all 10 criteria passed`
+
+![ev05-complete](docs/assets/extra/ev05-complete.gif)
+
+> COMPLETE — all ten criteria pass at the moment of the verdict, and only then does the gate let go
+
+**Event 06 — `CONFIRM`** · `2026-08-16 18:50:06 CONFIRM re-running all 10 criteria before completion`
+
+![ev06-confirm](docs/assets/extra/ev06-confirm.gif)
+
+> the post-audit sweep — even the contract-auditor's closing pass gets re-verified
+
+</details>
+
+---
+
 ## 🧠 The rest of the machinery
 
 - **Dependency-scoped freshness** — editing a file invalidates only the criteria
