@@ -1,19 +1,30 @@
 SHELL MUTATION LOG -- RoT DTD GOAL
-produced by: bash tests/mutate/mutate-shell.sh   (re-runnable; this file is its output)
-date: 2026-08-16 10:25:33
+produced by: bash tests/mutate/mutate-shell.sh   (re-runnable; this file IS its output)
 
 rule: the needle is COUNTED in the file before the edit (must be 1) and
       after it (must be 0). A patch that did not apply is DISCARDED,
-      never reported as survived.
+      never folded into survived -- the two mean opposite things.
 attribution: read from the suite's own 'failing tests:' line, not declared
-      in advance. The 1.0.0 log named a killer per mutation by hand; two
-      of those attributions were guesses nobody could check.
+      in advance. The 1.0.0 log named a killer per mutation by hand.
+
+HISTORY OF THIS FILE, because a clean sheet hides what the campaign found:
+  run 1 (10 mutations): 9 killed, M8 SURVIVED.
+        M8 flips the flaky gate's fallback strict -> off. goal.sh init
+        always writes GATE_FLAKY, so the fallback is reachable only from
+        a state file written by an OLDER version. On upgrade that goal
+        loses its flake gate in silence.
+  run 2: the two sibling fallbacks were added as M11/M12. BOTH SURVIVED.
+        M11 GATE_REDTEAM :-warn -> :-off, M12 LAST_PASSED :-0 -> :-999.
+        Three defaults, three untested: a class, not an incident.
+  run 3: test_gate_defaults_survive_an_upgrade covers all three.
+
+CURRENT RUN -- 12 mutations, full campaign, nothing filtered:
 
 M1 KILLED     by test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip 
     flaky detector: the generation filter is inverted, so rows from a retired seal come back
-M2 KILLED     by test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip test_completion_is_simultaneous 
+M2 KILLED     by test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip test_completion_is_simultaneous test_gate_defaults_survive_an_upgrade 
     flaky detector: a fail after a pass is counted but never marked as a regression
-M3 KILLED     by test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip test_completion_is_simultaneous 
+M3 KILLED     by test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip test_completion_is_simultaneous test_gate_defaults_survive_an_upgrade 
     seal generation is always reported as 0, so every historical row looks current
 M4 KILLED     by test_untrusted_output_cannot_forge_a_verdict 
     the untrusted fence stops escaping its own terminator, so output can close the frame
@@ -21,34 +32,22 @@ M5 KILLED     by test_untrusted_output_cannot_forge_a_verdict
     fenced output loses its per-line prefix, so a printed line looks like engine text
 M6 KILLED     by test_many_goals_run_in_order 
     the queue stops checking dependencies: everything pending is eligible at once
-M7 KILLED     by test_gate_block test_gate_stall_escalate test_gate_budget_escalate test_progress_resets_stall test_completion_is_simultaneous test_many_goals_run_in_order test_untrusted_output_cannot_forge_a_verdict test_friction_reaches_the_gate test_invariant_state_is_inspectable test_the_contract_binds_the_engine test_a_refusal_always_carries_a_way_forward 
+M7 KILLED     by test_gate_block test_gate_stall_escalate test_gate_budget_escalate test_progress_resets_stall test_completion_is_simultaneous test_many_goals_run_in_order test_untrusted_output_cannot_forge_a_verdict test_friction_reaches_the_gate test_invariant_state_is_inspectable test_the_contract_binds_the_engine test_a_refusal_always_carries_a_way_forward test_gate_defaults_survive_an_upgrade 
     the gate completes even when criteria are failing
-M8 SURVIVED   the whole suite stayed green with this defect in place
+M8 KILLED     by test_gate_defaults_survive_an_upgrade 
     the flaky gate's default flips from strict back to off
-M9 KILLED     by test_gate_redteam_strict_refuses_completion 
+M9 KILLED     by test_gate_redteam_strict_refuses_completion test_gate_defaults_survive_an_upgrade 
     the completion red team stops running, so a check that passes in an empty dir completes
-M10 KILLED     by test_gate_block test_gate_complete test_gate_stall_escalate test_gate_budget_escalate test_ledger_detects_tampering test_seal_never_grants_a_pass test_gate_redteam_strict_refuses_completion test_sharpen test_progress_resets_stall test_history_is_recorded test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip test_completion_is_simultaneous test_many_goals_run_in_order test_untrusted_output_cannot_forge_a_verdict test_friction_reaches_the_gate test_gate_mutation_policy test_invariant_state_is_inspectable test_the_contract_binds_the_engine test_a_refusal_always_carries_a_way_forward 
+M10 KILLED     by test_gate_block test_gate_complete test_gate_stall_escalate test_gate_budget_escalate test_ledger_detects_tampering test_seal_never_grants_a_pass test_gate_redteam_strict_refuses_completion test_sharpen test_progress_resets_stall test_history_is_recorded test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip test_completion_is_simultaneous test_many_goals_run_in_order test_untrusted_output_cannot_forge_a_verdict test_friction_reaches_the_gate test_gate_mutation_policy test_invariant_state_is_inspectable test_the_contract_binds_the_engine test_a_refusal_always_carries_a_way_forward test_gate_defaults_survive_an_upgrade 
     the ledger hash is never compared, so an edited criterion is never detected as drift
+M11 KILLED     by test_gate_defaults_survive_an_upgrade 
+    the red-team default falls back to off instead of warn on a legacy state
+M12 KILLED     by test_gate_defaults_survive_an_upgrade 
+    the last-passed default is a large number, so a legacy state looks freshly green
 
-applied and verified present: 10
-KILLED:    9
-SURVIVED:  1 M8
-DISCARDED: 0  (patch did not apply -- NOT counted as survived)
-total records: 10
-
-M8 was the one SURVIVOR of that run, and it was a real finding:
-  goal.sh init always writes GATE_FLAKY=strict, so the gate's fallback
-  ${fpolicy:-strict} is unreachable for goals created by this version.
-  It IS reachable for a state file written by an older one -- on upgrade,
-  that goal would silently lose its flake gate. Nothing tested it.
-  Closed by test_the_flaky_default_survives_an_upgrade; re-run of M8 alone:
-
-M8 KILLED     by test_the_flaky_default_survives_an_upgrade 
-    the flaky gate's default flips from strict back to off
-
-applied and verified present: 1
-KILLED:    1
+applied and verified present: 12
+KILLED:    12
 SURVIVED:  0
 DISCARDED: 0  (patch did not apply -- NOT counted as survived)
-total records: 1
+total records: 12
 TREE RESTORED -- suite green again (exit 0)
