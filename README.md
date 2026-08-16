@@ -110,7 +110,7 @@ reply at all means the plugin is wired:
 ```
 
 Then start working: **[How to use it](#-how-to-use-it--seven-slash-commands-and-only-one-to-start-with)**
-— seven slash commands, and only `/goal` to begin.
+— nine slash commands, and only `/goal` to begin.
 
 Or point Claude Code at the plugin directory directly — `hooks/hooks.json` is
 the whole wiring, and removing the plugin removes the behaviour. Nothing is
@@ -202,6 +202,10 @@ disallowedTools: Write, Edit
   want the roster to follow your choice of model and effort automatically; pin
   a specific model where the job is narrow enough that a smaller one is
   sufficient and cheaper.
+- **Per-invocation, without editing anything**: `/goal-agent <name> model=…
+  effort=… <task>` overrides model and effort for one dispatch, and
+  `/goal-swarm model=… effort=… <thing>` for one whole fan-out — the front
+  matter stays the durable default, the argument wins for that call.
 - **`tools` / `disallowedTools`** are the agent's real boundary. Six of the
   seven are denied `Write` and `Edit` on purpose: they produce *proposals*, and
   a proposal that can edit the tree is not a proposal. If you loosen this, you
@@ -226,7 +230,7 @@ from earlier.
 
 ---
 
-## 🎮 How to use it — seven slash commands, and only one to start with
+## 🎮 How to use it — nine slash commands, and only one to start with
 
 **You never have to type a `.sh` command.** Everything below is a slash command
 inside Claude Code. The shell script exists underneath, and the raw form is
@@ -244,6 +248,8 @@ plugin is here.
 | **`/goal-pause`** | The Stop gate goes dormant. You can end the session normally. | Interruption, meeting, end of day, or you need to ship something unrelated. |
 | **`/goal-resume`** | Wakes a paused *or* human-escalated goal, and resets the iteration budget and stall detector. | After a pause, or after the gate escalated to you and you have given guidance. |
 | **`/goal-abort`** | Ends the goal. State stays on disk for post-mortem. Asks for confirmation if there was real progress. | The goal was wrong, or the world changed. |
+| **`/goal-agent`** | Dispatches ONE declared agent on a task — the name is validated against the trust contract's roster, and `model=` / `effort=` are selectable per call. | "Let the red team at this criterion", "have the critic look at my plan" — one perspective, on demand. |
+| **`/goal-swarm`** | Fans out ALL the agents (or an `agents=` subset) on one thing at once — a workflow when the harness has one, parallel dispatches otherwise — and synthesizes without flattening disagreements. `model=` / `effort=` apply to the whole swarm. | Before sealing a big goal, or when a plan deserves every perspective the contract declares, in one pass. |
 
 ### Your first goal, start to finish
 
@@ -286,14 +292,19 @@ attempts to end the turn, the gate runs every criterion for real:
 | "The goal itself was wrong." | `/goal-abort`. State is kept so you can read what happened. |
 | "It refused to let me stop and I do not know why." | The refusal always names the failing criterion **and the next step** — that is `LAW.17`, enforced by a test. Paste it back to Claude. |
 
-### The agents come along for free
+### The agents come along for free — and can now be sent
 
 Seven sub-agents ship with the plugin (planner, verifier, critic, red team,
-forensic, queue architect, contract auditor). **You do not invoke them by
-name** — Claude reaches for them when the situation matches, and each is
-declared in the trust contract with the one thing it may never do. See
+forensic, queue architect, contract auditor). You never *have* to invoke them
+— Claude reaches for them when the situation matches, and each is declared in
+the trust contract with the one thing it may never do. Since 3.0.0 you can
+also send them yourself: **`/goal-agent redteam <task>`** dispatches one, and
+**`/goal-swarm <the thing>`** fans out the whole roster at once, in parallel.
+Both validate the agent names against the contract at dispatch time (the DTD
+stays the single source of who exists), and both take `model=` and `effort=`
+per invocation. See
 [The agents](#-the-agents-and-how-to-configure-them) to pin their model or
-loosen their tool boundary.
+loosen their tool boundary permanently instead.
 
 > One thing worth knowing early: **a sub-agent cannot escape the gate.** The
 > Stop hook fires when the *session* ends, so delegating work does not let an
