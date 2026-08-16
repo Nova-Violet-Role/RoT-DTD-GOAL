@@ -2,12 +2,12 @@
   "directory": "",
   "files": {
     "CHANGELOG.md": {
-      "hash": "88a735f31b4a",
-      "indexed_at": "2026-08-16T01:23:54.104351+00:00",
+      "hash": "4be98666a6a8",
+      "indexed_at": "2026-08-16T01:59:59.130395+00:00",
       "language": "markdown",
-      "lines": 196,
-      "mtime_ns": 1786843432248756400,
-      "size": 11882,
+      "lines": 223,
+      "mtime_ns": 1786845596416721300,
+      "size": 13621,
       "symbols": [
         {
           "children": [
@@ -39,10 +39,19 @@
               "type": "subsection"
             },
             {
-              "docstring": "- Version labels in shipped artefacts say `1.0.0`; the `v2 \u2192 v3.6` lineage is mapped below. - **`REVIEW.md` moved to `docs/`; `AMPLIFY.md` removed.**",
+              "docstring": "Three defects, none of which this machine could see. This is the entry that justifies the CI job existing.",
               "lines": [
                 114,
-                127
+                140
+              ],
+              "name": "Fixed \u2014 what the first CI run found, and no local run could",
+              "type": "subsection"
+            },
+            {
+              "docstring": "- Version labels in shipped artefacts say `1.0.0`; the `v2 \u2192 v3.6` lineage is mapped below. - **`REVIEW.md` moved to `docs/`; `AMPLIFY.md` removed.**",
+              "lines": [
+                141,
+                154
               ],
               "name": "Changed",
               "type": "subsection"
@@ -50,8 +59,8 @@
             {
               "docstring": "Renamed from `goal-forge` to **RoT DTD GOAL**; published under the Nova-Violet Role organisation with a `marketplace.json`.",
               "lines": [
-                128,
-                167
+                155,
+                194
               ],
               "name": "Added \u2014 the engine (question: how many goals, and who may speak?)",
               "type": "subsection"
@@ -59,8 +68,8 @@
             {
               "docstring": "- **No Linux or macOS suite tail from the author's machine.** There is no Linux runtime reachable here: the only WSL distro is Docker Desktop's LinuxK",
               "lines": [
-                168,
-                182
+                195,
+                209
               ],
               "name": "Not done, and why",
               "type": "subsection"
@@ -69,7 +78,7 @@
           "docstring": "**The first public release.** Two questions, answered in one version because nothing before this was ever published: *how many goals, and who may spea",
           "lines": [
             18,
-            182
+            209
           ],
           "name": "[1.0.0] \u2014 2026-08-16",
           "type": "section"
@@ -77,8 +86,8 @@
         {
           "docstring": "The questions, in order, each raised by a review of the previous answer:",
           "lines": [
-            183,
-            197
+            210,
+            224
           ],
           "name": "v2 \u2192 v3.6 (development line, unpublished)",
           "type": "section"
@@ -87,10 +96,10 @@
     },
     "README.md": {
       "hash": "e460255d9ddd",
-      "indexed_at": "2026-08-16T01:39:57.800905+00:00",
+      "indexed_at": "2026-08-16T02:07:07.965531+00:00",
       "language": "markdown",
       "lines": 706,
-      "mtime_ns": 1786844278356145600,
+      "mtime_ns": 1786845612392721200,
       "size": 35546,
       "symbols": [
         {
@@ -352,6 +361,6 @@
       ]
     }
   },
-  "generated_at": "2026-08-16T01:39:57.800997+00:00",
+  "generated_at": "2026-08-16T02:07:08.097507+00:00",
   "version": "1.0"
 }

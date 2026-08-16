@@ -233,7 +233,14 @@ reason="$(
     #                                validate against.
     #   INSTRUCTION (<gf:...>)    -- the task, tagged as a task.
     #   DATA (<![GF-UNTRUSTED[)   -- what a command printed. Never executed,
-    #                                never in the engine's voice.
+    #                                never in the voice of the engine.
+    #
+    # NOTE, and it cost a red CI run to learn: no apostrophe may appear in a
+    # comment inside this command substitution. bash 3.2 -- what stock macOS
+    # ships, and what a stranger will run this on -- does not stop parsing
+    # quotes at a comment inside a command substitution, so one possessive
+    # here swallows the rest of the file and every gate assertion fails at
+    # once. Enforced tree-wide by test_portable_to_a_stranger_machine.
     #
     # The refusal is the moment this matters. A bare "no" invites argument, a
     # re-run, or an edited criterion; a declaration plus a task invites work.

@@ -125,12 +125,12 @@
     "tests",
     "tests\\experiments"
   ],
-  "generated_at": "2026-08-16T01:37:25.401452+00:00",
+  "generated_at": "2026-08-16T01:59:59.131521+00:00",
   "root": "C:\\Goal_Forge_Plugin\\goal-forge",
   "stats": {
-    "last_full_index": "2026-08-16T01:37:25.400400+00:00",
+    "last_full_index": "2026-08-16T01:59:59.130478+00:00",
     "total_files": 38,
-    "total_symbols": 466
+    "total_symbols": 468
   },
   "version": "1.0"
 }

@@ -77,12 +77,56 @@ jobs:
 
       # This is the real test of .gitattributes: a checkout on Windows, where
       # git would otherwise hand out CRLF, must still be LF.
+      # MEASURED DEFECT in this very step, found by its own first run: it used
+      # `grep -lU $'\r'`, and on the Windows runner that matched the EMPTY
+      # STRING -- so it reported all 33 text files as CRLF while a byte scan of
+      # the same checkout found zero 0x0d. The tree was clean; the CHECKER was
+      # broken, and it failed in the alarming direction, which is the only
+      # reason it was caught rather than believed.
+      #
+      # So this step now (a) uses two independent instruments, and (b) proves
+      # on planted files that each one can fire, BEFORE trusting either. A
+      # broken instrument exits 2 and says so; a dirty tree exits 1. Those are
+      # different findings and must never share an exit code.
       - name: no carriage returns survived the checkout
         run: |
-          bad=$(find scripts tests hooks lean commands agents .claude-plugin -type f \
-                 -exec grep -lU $'\r' {} + 2>/dev/null || true)
-          if [ -n "$bad" ]; then echo "CRLF found in:"; echo "$bad"; exit 1; fi
-          echo "clean: zero carriage returns"
+          set -u
+          crcount() { tr -dc '\r' < "$1" | wc -c | tr -d '[:space:]'; }
+
+          # --- the instrument must be able to fire, and to stay silent ---
+          printf 'clean\nlines\n'     > /tmp/gf_clean.txt
+          printf 'dirty\r\nlines\r\n' > /tmp/gf_dirty.txt
+          if [ "$(crcount /tmp/gf_dirty.txt)" != "2" ]; then
+            echo "INSTRUMENT BROKEN: cannot see a planted CRLF"; exit 2; fi
+          if [ "$(crcount /tmp/gf_clean.txt)" != "0" ]; then
+            echo "INSTRUMENT BROKEN: reports CR in a file that has none"; exit 2; fi
+          echo "control: detector sees a planted CRLF and not a clean file"
+
+          # --- instrument 1: a byte scan of every tracked file ---
+          # NOTE: `[ x ] && y` as the last command of a loop body EXITS under
+          # `set -e` when the test is false -- that is, on every CLEAN file.
+          # An `if` is used deliberately; the shorter form was wrong here.
+          bad=""
+          git ls-files > /tmp/gf_tracked.txt
+          while IFS= read -r f; do
+            case "$f" in *.zip|*.png|*.gif|*.jpg|*.ico) continue ;; esac
+            n="$(crcount "$f")"
+            if [ "$n" != "0" ]; then bad="$bad  $f ($n CR)"; fi
+          done < /tmp/gf_tracked.txt
+
+          # --- instrument 2: git's own view. i/ = stored, w/ = checked out ---
+          eol="$(git ls-files --eol)"
+          if [ "$(printf '%s\n' "$eol" | wc -l)" -lt 40 ]; then
+            echo "INSTRUMENT BROKEN: git ls-files --eol returned almost nothing"; exit 2; fi
+          eol_bad="$(printf '%s\n' "$eol" | grep -E 'i/crlf|i/mixed|w/crlf|w/mixed' || true)"
+
+          rc=0
+          if [ -n "$bad" ];     then echo "CR bytes found in:"; printf '%s\n' "$bad"; rc=1; fi
+          if [ -n "$eol_bad" ]; then echo "git reports CRLF for:"; printf '%s\n' "$eol_bad"; rc=1; fi
+          if [ "$rc" -eq 0 ]; then
+            echo "clean: zero carriage returns, by byte scan and by git ls-files --eol"
+          fi
+          exit $rc
 
       - name: attestation verifies on this platform
         run: bash scripts/attest.sh --verify ATTESTATION.txt

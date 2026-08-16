@@ -1041,6 +1041,55 @@ gf_scan_winvar() { # file -> prints offending lines, empty if clean
 gf_scan_cr() { # file -> number of carriage returns
   tr -dc '\r' < "$1" 2>/dev/null | wc -c | tr -d ' '
 }
+gf_scan_bash32() { # file -> prints "file:line:text" for each fatal-on-macOS comment
+  # MEASURED, on a machine this project does not own: stock macOS ships bash
+  # 3.2.57, and bash 3.2 does NOT suspend quote parsing inside a comment that
+  # sits inside a command substitution. One possessive apostrophe in such a
+  # comment consumed the remaining 700 lines of stop_gate.sh, and the CI run
+  # reported `unexpected EOF while looking for matching '` -- pointing at the
+  # END of the file, 33 lines below the actual cause. Every gate assertion in
+  # the suite failed at once from one apostrophe.
+  #
+  # Why a context STACK and not a counter: the first version of this scanner
+  # counted `$(` and `)`, and the `)` inside the double-quoted string
+  # "(iteration $iter/$max)" decremented it to zero, so the scanner reported
+  # the tree CLEAN while the defect was sitting in it. A checker that cannot
+  # see the bug you already have is not evidence; it is decoration. The stack
+  # tracks whether a `)` is syntax or a literal character.
+  #
+  # DECLARED HOLE: a `)` that closes a `case` pattern inside a substitution
+  # pops the substitution context early, so this can MISS a later offender in
+  # such a block. It does not invent one. The macOS `bash -n` job in CI is the
+  # exact oracle; this scanner is the fast local approximation of it.
+  awk '
+    BEGIN { sp = 0 }
+    function top() { return sp > 0 ? st[sp] : "top" }
+    function insubst(  k) { for (k = 1; k <= sp; k++) if (st[k] == "subst") return 1; return 0 }
+    {
+      line = $0; n = length(line); i = 1; in_c = 0
+      while (i <= n) {
+        c = substr(line, i, 1); nx = substr(line, i + 1, 1)
+        if (in_c) {
+          if (c == "\047" && insubst()) { printf "%s:%d:%s\n", FILENAME, FNR, line; break }
+          i++; continue
+        }
+        if (top() == "squote") { if (c == "\047") sp--; i++; continue }
+        if (top() == "dquote") {
+          if (c == "\\") { i += 2; continue }
+          if (c == "$" && nx == "(") { st[++sp] = "subst"; i += 2; continue }
+          if (c == "\"") { sp--; i++; continue }
+          i++; continue
+        }
+        if (c == "\\") { i += 2; continue }
+        if (c == "\047") { st[++sp] = "squote"; i++; continue }
+        if (c == "\"")   { st[++sp] = "dquote"; i++; continue }
+        if (c == "#")    { in_c = 1; i++; continue }
+        if (c == "$" && nx == "(") { st[++sp] = "subst"; i += 2; continue }
+        if (c == ")" && top() == "subst") { sp--; i++; continue }
+        i++
+      }
+    }' "$1" 2>/dev/null
+}
 
 test_a_refusal_always_carries_a_way_forward() {
   # THE TRAP THIS AVOIDS, and it is the failure of the thing this replaces.
@@ -1497,6 +1546,92 @@ test_portable_to_a_stranger_machine() {
       || bad "repo: CI runs on macOS" "no macos runner"
     grep -q 'run_tests.sh' "$ci" && ok "repo: CI actually runs this suite" \
       || bad "repo: CI actually runs this suite" "workflow never invokes the suite"
+  fi
+
+  # 4b. nothing the .gitignore forbids may be TRACKED. These are different
+  #     questions and the difference cost a published commit: `git check-ignore`
+  #     silently SKIPS files that are in the index unless --no-index is passed,
+  #     so the obvious spelling reports "all clean" precisely when a build
+  #     artefact has been committed. 12 generated .codemap files -- carrying
+  #     CRLF, which the repository forbids -- reached the remote that way.
+  #
+  #     Stated as a property rather than a snapshot: it names no directory, so
+  #     it keeps working when the ignore list changes.
+  if [ -d "$root/.git" ] && command -v git > /dev/null 2>&1; then
+    local tracked_but_ignored
+    tracked_but_ignored="$(git -C "$root" ls-files \
+      | git -C "$root" check-ignore --stdin --no-index 2>/dev/null || true)"
+    if [ -z "$tracked_but_ignored" ]; then
+      ok "repo: no ignored path is tracked"
+    else
+      bad "repo: no ignored path is tracked" "$(printf '%s' "$tracked_but_ignored" | tr '\n' ' ')"
+    fi
+    # The instrument must be able to fire. --no-index is the whole point: the
+    # default spelling would report this planted case as clean.
+    local ign_probe; ign_probe="$(printf 'EVIDENCE/lean\n' \
+      | git -C "$root" check-ignore --stdin --no-index 2>/dev/null || true)"
+    local ign_ctl; ign_ctl="$(printf '.codemap/x.json\n' \
+      | git -C "$root" check-ignore --stdin --no-index 2>/dev/null || true)"
+    if [ -n "$ign_ctl" ] && [ -z "$ign_probe" ]; then
+      ok "repo control: check-ignore --no-index answers for an ignored path and not a shipped one"
+    else
+      bad "repo control: check-ignore --no-index answers for an ignored path and not a shipped one" \
+          "ignored probe [$ign_ctl] shipped probe [$ign_probe]"
+    fi
+  else
+    ok "repo: no git index here -- ignored-but-tracked checked by CI (not measured)"
+  fi
+
+  # 5a. bash 3.2 is the floor, because stock macOS has never shipped anything
+  #     newer. `bash -n` on THIS machine cannot see the defect -- bash 5.2
+  #     parses the construct fine -- so the property is scanned structurally
+  #     instead, and CI runs the real 3.2 parser as the oracle.
+  local b32_hits=0 b32_file
+  for b32_file in "$root"/scripts/*.sh "$root"/tests/run_tests.sh "$root"/tests/experiments/*.sh; do
+    [ -f "$b32_file" ] || continue
+    local hits
+    hits="$(gf_scan_bash32 "$b32_file")"
+    if [ -n "$hits" ]; then
+      b32_hits=$((b32_hits + 1))
+      echo "    bash 3.2 would choke: $hits" >&2
+    fi
+  done
+  assert_eq "portable: no apostrophe in a comment inside a command substitution" "$b32_hits" "0"
+
+  # ...and the scanner must be able to SEE that defect. This control is the
+  # exact line that took macOS down, rebuilt from parts so the needle never
+  # exists literally in this file, plus the "(iteration N/M)" string that made
+  # the first version of the scanner report clean.
+  local b32_dir; b32_dir="$(mktemp -d "${TMPDIR:-/tmp}/gf-b32.XXXXXX")"
+  local b32_ctl="$b32_dir/b32_control.sh"
+  {
+    printf '#!/usr/bin/env bash\n'
+    printf 'reason="$(\n'
+    printf '  {\n'
+    printf '    echo "gate: 1 of 2 criteria FAILING (iteration 3/8)."\n'
+    printf '    # never in the engine%svoice.\n' "'s "
+    printf '    echo done\n'
+    printf '  }\n'
+    printf ')"\n'
+  } > "$b32_ctl"
+  local ctl_needles
+  ctl_needles="$(grep -c "engine's" "$b32_ctl")"
+  if [ "$ctl_needles" -ne 1 ]; then
+    bad "portable: bash 3.2 control was planted" "needle count $ctl_needles, expected 1 -- control DISCARDED, not survived"
+  else
+    ok "portable: bash 3.2 control was planted"
+    if [ -n "$(gf_scan_bash32 "$b32_ctl")" ]; then
+      ok "portable control: the scanner CATCHES the apostrophe macOS died on"
+    else
+      bad "portable control: the scanner CATCHES the apostrophe macOS died on" "scanner reported a file that bash 3.2 refuses to parse as clean"
+    fi
+  fi
+  # ...and does not cry wolf on the same file with the apostrophe removed.
+  sed "s/engine's/engine/" "$b32_ctl" > "$b32_ctl.clean"
+  if [ -z "$(gf_scan_bash32 "$b32_ctl.clean")" ]; then
+    ok "portable control: the scanner stays silent once the apostrophe is gone"
+  else
+    bad "portable control: the scanner stays silent once the apostrophe is gone" "false alarm on a clean file"
   fi
 
   # 5b. the community health files. A stranger arriving at a published

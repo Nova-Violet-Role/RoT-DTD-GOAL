@@ -111,6 +111,33 @@ engine's grammar, and each is machine-checked.
   hook targets, every shipped script parsing under `bash -n`, and the evidence
   being present and non-empty.
 
+### Fixed — what the first CI run found, and no local run could
+
+Three defects, none of which this machine could see. This is the entry that
+justifies the CI job existing.
+
+- **The gate did not parse on macOS at all.** Stock macOS ships bash 3.2.57,
+  and bash 3.2 does not suspend quote parsing inside a comment that sits inside
+  a command substitution. One possessive apostrophe in a comment inside
+  `stop_gate.sh` swallowed the remaining lines of the file; `bash -n` reported
+  `unexpected EOF` pointing 33 lines *below* the real cause, and every gate
+  assertion in the suite failed at once. Fixed, and the class is now scanned
+  tree-wide by `gf_scan_bash32` with the real macOS parser as the CI oracle.
+- **The CI's own CRLF check was broken, in the reassuring-looking direction.**
+  It used `grep -lU $'\r'`, which on the Windows runner matched the **empty
+  string** and so reported all 33 text files as CRLF — while a byte scan of the
+  same checkout found zero `0x0d`. The tree was clean; the checker was wrong.
+  It now uses two independent instruments (a byte scan and `git ls-files
+  --eol`) and **proves on planted files that each can fire before trusting
+  either**. A broken instrument exits 2; a dirty tree exits 1. Those are
+  different findings and no longer share an exit code.
+- **12 generated `.codemap/` artefacts were committed and pushed**, CRLF and
+  all, despite being listed in `.gitignore`. The reason is worth writing down:
+  `git check-ignore` **skips files that are in the index** unless `--no-index`
+  is passed, so the obvious way to ask "is anything ignored also tracked?"
+  answers *no* precisely when the answer is *yes*. Now asserted with
+  `--no-index`, as a property that names no directory.
+
 ### Changed
 - Version labels in shipped artefacts say `1.0.0`; the `v2 → v3.6` lineage is mapped below.
 - **`REVIEW.md` moved to `docs/`; `AMPLIFY.md` removed.** The root carries

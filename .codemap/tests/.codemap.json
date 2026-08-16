@@ -2,18 +2,18 @@
   "directory": "tests",
   "files": {
     "run_tests.sh": {
-      "hash": "539466e45f56",
-      "indexed_at": "2026-08-16T01:29:25.970570+00:00",
+      "hash": "0c36d2e38c47",
+      "indexed_at": "2026-08-16T01:59:13.189826+00:00",
       "language": "shell",
-      "lines": 2891,
-      "mtime_ns": 1786843764113144000,
-      "size": 166553,
+      "lines": 3026,
+      "mtime_ns": 1786845550905720800,
+      "size": 173367,
       "symbols": [
         {
           "docstring": "------------------------------------------------------- pure-bash JSON check Structural well-formedness: balanced braces/brackets outside strings, no",
           "lines": [
             53,
-            2892
+            3027
           ],
           "name": "json_wellformed",
           "type": "function"
@@ -94,7 +94,7 @@
         {
           "lines": [
             209,
-            2892
+            3027
           ],
           "name": "test_guard_tamper_deny",
           "type": "function"
@@ -287,248 +287,256 @@
         },
         {
           "lines": [
-            1045,
-            1128
+            1044,
+            1092
+          ],
+          "name": "gf_scan_bash32",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1094,
+            1177
           ],
           "name": "test_a_refusal_always_carries_a_way_forward",
           "type": "function"
         },
         {
           "lines": [
-            1130,
-            1195
+            1179,
+            1244
           ],
           "name": "test_records_are_append_only",
           "type": "function"
         },
         {
           "lines": [
-            1197,
-            1285
+            1246,
+            1334
           ],
           "name": "test_the_contract_binds_the_engine",
           "type": "function"
         },
         {
           "lines": [
-            1287,
-            1290
+            1336,
+            1339
           ],
           "name": "gf_json_str",
           "type": "function"
         },
         {
           "lines": [
-            1292,
-            1394
+            1341,
+            1443
           ],
           "name": "test_the_plugin_installs_as_declared",
           "type": "function"
         },
         {
           "lines": [
-            1396,
-            1561
+            1445,
+            1696
           ],
           "name": "test_portable_to_a_stranger_machine",
           "type": "function"
         },
         {
           "lines": [
-            1563,
-            1648
+            1698,
+            1783
           ],
           "name": "test_completion_is_simultaneous",
           "type": "function"
         },
         {
           "lines": [
-            1650,
-            1765
+            1785,
+            1900
           ],
           "name": "test_many_goals_run_in_order",
           "type": "function"
         },
         {
           "lines": [
-            1767,
-            1870
+            1902,
+            2005
           ],
           "name": "test_untrusted_output_cannot_forge_a_verdict",
           "type": "function"
         },
         {
           "lines": [
-            1872,
-            1910
+            2007,
+            2045
           ],
           "name": "test_every_event_is_consumed",
           "type": "function"
         },
         {
           "lines": [
-            1912,
-            1942
+            2047,
+            2077
           ],
           "name": "test_ships_no_tooling_artifacts",
           "type": "function"
         },
         {
           "lines": [
-            1944,
-            1984
+            2079,
+            2119
           ],
           "name": "test_docs_counts_are_generated",
           "type": "function"
         },
         {
           "lines": [
-            1986,
-            2036
+            2121,
+            2171
           ],
           "name": "test_attestation_survives_a_stranger",
           "type": "function"
         },
         {
           "lines": [
-            2038,
-            2085
+            2173,
+            2220
           ],
           "name": "test_mutation_reaches_undeclared_deps",
           "type": "function"
         },
         {
           "lines": [
-            2087,
-            2130
+            2222,
+            2265
           ],
           "name": "test_one_source_of_record",
           "type": "function"
         },
         {
           "lines": [
-            2132,
-            2179
+            2267,
+            2314
           ],
           "name": "test_forensic_events_surface",
           "type": "function"
         },
         {
           "lines": [
-            2181,
-            2205
+            2316,
+            2340
           ],
           "name": "test_friction_reaches_the_gate",
           "type": "function"
         },
         {
           "lines": [
-            2207,
-            2250
+            2342,
+            2385
           ],
           "name": "test_timings_rotation",
           "type": "function"
         },
         {
           "lines": [
-            2252,
-            2279
+            2387,
+            2414
           ],
           "name": "test_snapshot_ring",
           "type": "function"
         },
         {
           "lines": [
-            2281,
-            2319
+            2416,
+            2454
           ],
           "name": "test_license_is_one_story",
           "type": "function"
         },
         {
           "lines": [
-            2321,
-            2393
+            2456,
+            2528
           ],
           "name": "test_learned_timeouts",
           "type": "function"
         },
         {
           "lines": [
-            2395,
-            2432
+            2530,
+            2567
           ],
           "name": "test_timeout_corpus_binds_lean",
           "type": "function"
         },
         {
           "lines": [
-            2434,
-            2472
+            2569,
+            2607
           ],
           "name": "test_semantic_mutation_operators",
           "type": "function"
         },
         {
           "lines": [
-            2474,
-            2519
+            2609,
+            2654
           ],
           "name": "test_gate_mutation_policy",
           "type": "function"
         },
         {
           "lines": [
-            2521,
-            2568
+            2656,
+            2703
           ],
           "name": "test_precompact_snapshot",
           "type": "function"
         },
         {
           "lines": [
-            2570,
-            2592
+            2705,
+            2727
           ],
           "name": "test_hooks_survive_garbage_stdin",
           "type": "function"
         },
         {
           "lines": [
-            2594,
-            2610
+            2729,
+            2745
           ],
           "name": "test_invariant_completion_is_never_declarable",
           "type": "function"
         },
         {
           "lines": [
-            2612,
-            2629
+            2747,
+            2764
           ],
           "name": "test_invariant_state_is_inspectable",
           "type": "function"
         },
         {
           "lines": [
-            2631,
-            2642
+            2766,
+            2777
           ],
           "name": "test_invariant_floor_stays_light",
           "type": "function"
         },
         {
           "lines": [
-            2644,
-            2679
+            2779,
+            2814
           ],
           "name": "test_version_is_honest",
           "type": "function"
         },
         {
           "lines": [
-            2681,
-            2743
+            2816,
+            2878
           ],
           "name": "test_docs_carry_the_argument",
           "type": "function"
@@ -536,8 +544,8 @@
         {
           "docstring": "One case, one process, one watchdog. Returns the child's exit code; its output (including the GF_CASE_RESULT line) goes to stdout.",
           "lines": [
-            2835,
-            2843
+            2970,
+            2978
           ],
           "name": "run_isolated",
           "type": "function"
@@ -545,6 +553,6 @@
       ]
     }
   },
-  "generated_at": "2026-08-16T01:29:25.970717+00:00",
+  "generated_at": "2026-08-16T01:59:13.190161+00:00",
   "version": "1.0"
 }
