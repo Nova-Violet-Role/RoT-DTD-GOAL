@@ -824,7 +824,7 @@ cmd_version() {
   # is how the suite and the attestation read it, and a display name with a
   # space in it would silently shift that field.
   echo "rot-dtd-goal ${v:-unknown}"
-  echo "RoT DTD GOAL -- formerly goal-forge; the engine's lineage in CHANGELOG.md; published as 1.0.0"
+  echo "RoT DTD GOAL -- formerly goal-forge; the engine's lineage in CHANGELOG.md; first published as 1.0.0"
   echo "capabilities: ledger-integrity redteam-negative-control mutation-probe content-mutation semantic-mutation gate-mutation compaction-snapshot criteria-sharpening deps-freshness cross-goal-learning learned-timeouts timings-rotation snapshot-ring flaky-detection gate-flaky event-consumer-map friction-feedback hostile-shell-suite event-rate-limit seal-scoped-flake attestation events-single-record forensic-surfacing inferred-deps-mutation generation-scoped-flake regression-flake-definition simultaneous-completion trust-contract untrusted-output-fencing goal-queue enforced-invariants 31-hook-events"
 }
 

@@ -3170,7 +3170,15 @@ test_version_is_honest() {
   pv="$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$GF_ROOT/.claude-plugin/plugin.json" | head -n1 | sed 's/.*"\([^"]*\)"$/\1/')"
   gv="$(G version | head -n1 | awk '{print $2}')"
   assert_eq "version: goal.sh version matches plugin.json" "$gv" "$pv"
-  assert_ne "version: bumped past v2" "$pv" "2.0.0"
+  # Through 1.0.0 this line FORBADE the value 2.0.0, so a public version could
+  # never collide with the internal v2 development line. The owner released
+  # 2.0.0 deliberately -- CHANGELOG.md carries the mapping between the public
+  # numbers and the dev line, and the install test binds every shipped version
+  # to a CHANGELOG entry. What remains checkable here is the shape:
+  case "$pv" in
+    [0-9]*.[0-9]*.[0-9]*) ok "version: is semver-shaped ($pv)" ;;
+    *) bad "version: is semver-shaped" "got [$pv]" ;;
+  esac
   assert_contains "version: advertises the new capabilities" "$(G version)" "ledger-integrity"
   assert_contains "version: advertises content mutation (v3.1)" "$(G version)" "content-mutation"
   assert_contains "version: advertises the compaction snapshot (v3.1)" "$(G version)" "compaction-snapshot"

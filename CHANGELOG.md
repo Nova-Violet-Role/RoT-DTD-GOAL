@@ -15,9 +15,37 @@ by a review that tried to break the previous answer.
 
 ---
 
-## [Unreleased]
+## [2.0.0] — 2026-08-16
 
 *The question: **which of our guarantees is only a comment?***
+
+**And the answer that forced the major bump: the install itself was one.**
+Claude Code loads `hooks/hooks.json` automatically and rejects a manifest that
+declares the same file again — so `/plugin install` on 2.1.233 produced a
+plugin whose status was `failed to load`: no hooks, no gate, nothing. The suite
+did not miss the defect; it *enforced* it — `test_the_plugin_installs_as_declared`
+asserted the presence of the very `"hooks"` key that breaks loading. The key is
+removed and the assertion inverted: the standard file must ship, and the
+manifest must NOT re-declare it. Found by installing the plugin for real and
+exercising every command, which also surfaced three smaller lies:
+
+* **The mutation report printed the kill count under the label `SURVIVED`** —
+  `SURVIVED 1/6 -- survived: truncate,corrupt,constflip,negate,hunk` showed
+  five survivors labelled as one. The number is now the survivor count, the
+  same thing the list beside it names. Verdict logic unchanged.
+* **The docs told the reader to verify `EVIDENCE/ATTESTATION.txt`**; the file
+  ships at the repository root, so the documented command exited 2 for every
+  reader who tried it.
+* **`lint_workflows.sh` assumed the Go `yq`.** On a machine with the Python
+  jq-wrapper of the same name, `eval` is read as the filter and the parse
+  "fails" on YAML that is fine. The flavor is now probed and each gets its own
+  invocation.
+
+The public version 2.0.0 deliberately does not collide with the internal `v2`
+development line — the mapping between public numbers and the dev line is this
+file's job, stated at the top. The suite guard that forbade the number is
+replaced by a shape check plus the existing binding of every shipped version to
+a CHANGELOG entry.
 
 Answered by making the shell mutation campaign re-runnable and then running it.
 The 1.0.0 evidence log listed ten mutations and their killers **by hand** — a
