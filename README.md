@@ -621,8 +621,12 @@ by being written down where a reader will see it.
   tests that run the real functions, not by extraction — "proved" means the
   model is proved and the binding is tested, never that bash was verified.
 - **Linux and macOS are verified by CI, not by the author.** There is no Linux
-  runtime on the author's machine; the suite tails from those platforms come
-  from the workflow run, and until one exists they are UNVERIFIED.
+  runtime on the author's machine, so those suite tails come from the workflow
+  run and not from a machine anyone here can inspect. They are now *measured*
+  — 667/0 on ubuntu, macOS and Windows for the released commit — but the
+  instrument is GitHub's runner, and that is a different kind of evidence from
+  something you watched happen. Six red runs preceded the green one, and every
+  one found a real defect this machine could not see.
 - **The rename is deliberate skin.** The command is still `goal.sh` and the
   state directory is still `.claude/goal/`. Breaking a running goal's state to
   satisfy a label would be exactly the trade this project refuses.

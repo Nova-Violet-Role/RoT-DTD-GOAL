@@ -250,18 +250,39 @@ Role organisation with a `marketplace.json`.
   is not decisional*, and `learn` reports the sample size behind each
   recommendation with a warning under three samples.
 
-### Not done, and why
-- **No Linux or macOS suite tail from the author's machine.** There is no
-  Linux runtime reachable here: the only WSL distro is Docker Desktop's
-  LinuxKit VM (no bash, no DNS to install one) and the Docker engine is not
-  running. Starting it would be a background service launch, which the
-  operator forbade. CI produces those tails on push; until a CI run exists,
-  **Linux and macOS are UNVERIFIED by the author's own hardware** and are
-  labelled that way rather than assumed.
-- **The mutation suite was not re-run for the repository work.** The
-  `EVIDENCE/mutation-*.log` files come from the engine's own mutation
-  campaign; the repository fixes above are covered instead by the nine
-  applied-and-verified controls inside the new test cases.
+### Was not done, and is now — closed by CI itself
+
+Both gaps this release opened with are closed, and by the instrument rather
+than by assertion.
+
+- **Linux and macOS are no longer UNVERIFIED.** They were labelled that way
+  because this machine has no Linux runtime (the only WSL distro is Docker
+  Desktop's LinuxKit VM — no bash, no DNS to install one — and starting the
+  engine would have been a background service launch, which was forbidden).
+  CI answered it: run `31926346937` on commit `ac2ddaf`, **667 assertions and
+  0 failures on ubuntu-latest, macos-latest AND windows-latest (Git Bash)**,
+  with the `green` job refusing any upstream result other than `success` — a
+  *skipped* job is not a pass. It took **six red runs** to get there, and
+  every one of them found something real: a gate that would not parse on
+  macOS, a CRLF checker matching the empty string, build artefacts committed
+  past `.gitignore`, a policy check silently off the air on BSD sed, and a
+  path destroyed by a blanket rename. None of those was visible from here.
+  That is the entire argument for the job existing.
+- **The mutation campaign was re-run, and now ships as a runnable suite.**
+  `lean/mutate/mutate-lean.sh`: **8 applied, 8 killed, 0 survived, 0
+  discarded**, with per-theorem attribution and its own negative control. See
+  `lean/README.md`.
+
+### Still not done, and why
+- **The shell mutation campaign (`EVIDENCE/mutation-shell.log`) was not
+  re-run** and has no runnable harness yet — only the Lean one does. Its ten
+  results stand from the engine work; the repository fixes in this release are
+  covered instead by the **21 applied-and-verified controls** inside the test
+  cases — counted from the run, not from memory, each one a check that plants
+  a defect and requires the assertion to fail. Stated as a gap rather than
+  folded into the green.
+- **CI does not verify the Lean modules**, on purpose, and claims nothing about
+  them. See the header of `.github/workflows/ci.yml`.
 
 ---
 
