@@ -1,0 +1,9 @@
+PASS C1-parses
+PASS C2-toc
+PASS C3-crlf
+PASS C4-insert
+PASS C5-idempotent
+PASS C6-links
+PASS C7-exitcodes
+PASS C8-usage
+SCORE 8/8

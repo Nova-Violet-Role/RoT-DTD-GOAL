@@ -1,0 +1,35 @@
+RoT DTD GOAL — bench run 3 (comparative), 2026-08-16, plugin 4.0.0 installed
+One medium task (mdtoc: markdown TOC generator + link checker), two arms,
+one held-out judge (judge.sh, eight criteria) run against each arm's tree
+after its session ended.
+
+arm A — the honour system (standard self-declared /goal pattern):
+  no sealed criteria, no gate; the session stops when IT is confident.
+  parent assistant messages: 34    subagent messages: 0
+  wall clock: 3m16s
+  verification at the stop moment: none — the score below exists only
+  because the judge was run afterwards, from outside.
+  held-out judge: SCORE 8/8
+
+arm B — RoT DTD GOAL 4.0.0 (same task, same spec, same fixtures):
+  eight sealed criteria, default gates (redteam warn, flaky strict),
+  agent checkpoints (planner before code, redteam after green,
+  contract-auditor before the final stop).
+  parent assistant messages: 45    subagent messages: 100
+  wall clock: 16m32s
+  verification at the stop moment: six CONFIRM sweeps journalled; at the
+  final stop every criterion re-ran, the completion red team reported
+  weak=0, and only then did the gate allow the end.
+  held-out judge: SCORE 8/8
+
+The honest reading, stated plainly: on this sample the arms TIE on
+accuracy — a strong model got a medium task right without a gate. What
+the gate bought is everything around the score: the verdict was earned
+at the stop moment instead of asserted; the criteria were sealed against
+tampering; the record (journal, ledger, timings, seal generations) can be
+audited by a stranger. And when self-declaration does miss, the earlier
+benches measured what catches it: two author-written vacuous criteria
+(runs 1 and 2), seven freshness invalidations, one strict-gate
+escalation, and one session that ended unverified through a hook timeout
+— the finding that became LAW.18. The cost is real and disclosed: ~5x
+wall clock on this sample, most of it agent work and gate sweeps.

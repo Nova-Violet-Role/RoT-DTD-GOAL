@@ -328,7 +328,7 @@ loosen their tool boundary permanently instead.
 
 ---
 
-## 🎬 Seen working — a real refusal, on real state
+## 🎬 Seen working · the 3.0.0 bench campaign
 
 ![The Stop gate refusing completion, then allowing it once earned](docs/assets/gate.gif)
 
@@ -417,6 +417,60 @@ refused from inside their declared element (`"My charter forbids this"`, in
 What the probes *did* flag is in the open ledger:
 [`docs/FINDINGS-4.0.0.md`](docs/FINDINGS-4.0.0.md), fourteen findings, each
 with the observable a fix must flip.
+
+---
+
+## 🥊 The 4.0.0 bench — RoT DTD GOAL vs the honour system
+
+One medium task — `mdtoc`, a markdown TOC generator and link checker — run
+twice on the fixed 4.0.0 engine, and scored by a **held-out judge** neither
+arm could see: arm A worked the standard way (no gate, no sealed criteria,
+the session stops when *it* is confident — the self-declared `/goal` pattern),
+arm B under RoT DTD GOAL with the same eight checks sealed. Full record:
+[`EVIDENCE/bench3/`](EVIDENCE/bench3/summary.log).
+
+**The honest headline first: both arms scored eight of eight.** A strong
+model got a medium task right without any gate — this page does not shade
+that. What the comparison actually measures is everything *around* the
+score, and that is what the ProtoGraph's panels hold:
+
+```mermaid
+flowchart TB
+  subgraph P1["P1 · Who decides done"]
+    A1["honour system:<br/>the model says so, in prose"] ~~~ B1["RoT DTD GOAL:<br/>exit codes, re-run AT the stop"]
+  end
+  subgraph P2["P2 · The stop moment"]
+    A2["arm A: session ends on confidence —<br/>its score exists only because<br/>a judge ran afterwards, from outside"] ~~~ B2["arm B: six CONFIRM sweeps journalled;<br/>final stop re-ran all eight + red team weak=0<br/>before the gate let go"]
+  end
+  subgraph P3["P3 · Accuracy, this sample"]
+    C3["held-out judge: eight of eight — BOTH arms.<br/>A tie, stated plainly."]
+  end
+  subgraph P4["P4 · Cost, this sample"]
+    A4["arm A: 34 messages · 3m16s"] ~~~ B4["arm B: 45 + 100 agent messages · 16m32s<br/>(~5x — mostly agents and gate sweeps)"]
+  end
+  subgraph P5["P5 · What only the gated arm has"]
+    B5["sealed criteria (tamper-evident ledger) ·<br/>freshness wipes on every edit ·<br/>unlimited criteria text, no 4k prompt ceiling ·<br/>cannot stop until verified — or escalates to YOU"]
+  end
+  subgraph P6["P6 · When self-declaration misses (measured, runs 1–2)"]
+    B6["two author-written vacuous criteria caught ·<br/>strict-gate escalation exercised ·<br/>seven freshness invalidations ·<br/>the hook-timeout hole → LAW.18"]
+  end
+  P1 --> P2 --> P3 --> P4
+  P2 --> P5
+  P3 --> P6
+```
+
+![Arm B's gate refusing the early stop, then allowing the earned one](docs/assets/bench3/gate.gif)
+
+> **Fig. — the two stop moments of arm B, replayed against its real state**
+> (panels **P1** and **P2**): first the session tries to end at zero of
+> eight — the gate re-runs everything and blocks with only the failures and
+> the next step; then, work done and agents heard, the same gate re-runs all
+> eight at the moment of the verdict and lets go. Arm A had no equivalent of
+> either moment — that absence *is* panel P2.
+
+The 3.0.0 campaign's gifs above are that engine's own record (panel **P6** is
+their summary); the pre-4.0.0 material stays untouched in the section above,
+because a bench that rewrites its history is not a bench.
 
 ---
 

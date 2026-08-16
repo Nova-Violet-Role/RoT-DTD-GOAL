@@ -1,0 +1,45 @@
+2026-08-16 18:07:43 INIT (draft) goal='Build mdtoc.sh per SPEC.md: TOC generation, idempotent insert, broken-link detec' budget=8 stall=3
+2026-08-16 18:07:43 ACTIVATE criteria=8 budget=8 sealed=8
+2026-08-16 18:07:57 EVENT PostToolBatch  status=active passed=0/8
+2026-08-16 18:08:16 EVENT SubagentStart agent=rot-dtd-goal:goal-planner status=active passed=0/8
+2026-08-16 18:08:18 EVENT MessageDisplay  status=active passed=0/8
+2026-08-16 18:08:21 BLOCK iter=1/8 fail=8 sig=05dac58b7d78f28f
+2026-08-16 18:08:21 GATE-CYCLE end iter=1
+2026-08-16 18:08:27 EVENT PostToolBatch  status=active passed=0/8
+2026-08-16 18:08:29 EVENT PostToolUseFailure tool=ScheduleWakeup status=active passed=0/8
+2026-08-16 18:09:23 EVENT SubagentStop agent=rot-dtd-goal:goal-planner status=active passed=0/8
+2026-08-16 18:10:27 EVENT MessageDisplay  status=active passed=0/8
+2026-08-16 18:10:35 EVENT PostToolBatch  status=active passed=0/8
+2026-08-16 18:10:38 CONFIRM re-running all 8 criteria before completion
+2026-08-16 18:10:38 VERIFY manual pass=8 fail=0
+2026-08-16 18:10:44 EVENT SubagentStart agent=rot-dtd-goal:goal-redteam status=active passed=8/8
+2026-08-16 18:10:47 CONFIRM re-running all 8 criteria before completion
+2026-08-16 18:10:48 COMPLETE all 8 criteria passed
+2026-08-16 18:12:21 CONFIRM re-running all 8 criteria before completion
+2026-08-16 18:12:21 VERIFY manual pass=8 fail=0
+2026-08-16 18:12:23 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:12:53 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:13:24 REDTEAM manual weak=0
+2026-08-16 18:13:24 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:15:25 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:15:33 MUTATE ops=delete,truncate,corrupt,constflip,negate,hunk criteria_with_survivors=2 criteria_all_killed=6
+2026-08-16 18:17:30 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:18:29 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:19:52 EVENT SubagentStop agent=rot-dtd-goal:goal-redteam status=complete passed=8/8
+2026-08-16 18:21:28 EVENT MessageDisplay  status=complete passed=8/8
+2026-08-16 18:21:28 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:21:45 CONFIRM re-running all 8 criteria before completion
+2026-08-16 18:21:46 VERIFY manual pass=8 fail=0
+2026-08-16 18:21:56 CONFIRM re-running all 8 criteria before completion
+2026-08-16 18:21:56 VERIFY manual pass=8 fail=0
+2026-08-16 18:21:58 EVENT MessageDisplay  status=complete passed=8/8
+2026-08-16 18:22:01 EVENT SubagentStart agent=rot-dtd-goal:goal-contract-auditor status=complete passed=8/8
+2026-08-16 18:22:02 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:22:35 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:22:50 CONFIRM re-running all 8 criteria before completion
+2026-08-16 18:22:50 VERIFY manual pass=8 fail=0
+2026-08-16 18:23:07 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:23:41 REDTEAM manual weak=0
+2026-08-16 18:23:41 EVENT PostToolBatch  status=complete passed=8/8
+2026-08-16 18:24:09 EVENT SubagentStop agent=rot-dtd-goal:goal-contract-auditor status=complete passed=8/8
+2026-08-16 18:24:17 EVENT MessageDisplay  status=complete passed=8/8
