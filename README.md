@@ -116,7 +116,7 @@ reply at all means the plugin is wired:
 > accept the short names above. A harness behavior, not this plugin's, but
 > you will hit it the first time you script a session.
 
-Then start working: **[How to use it](#-how-to-use-it--seven-slash-commands-and-only-one-to-start-with)**
+Then start working: **[How to use it](#-how-to-use-it--nine-slash-commands-and-only-one-to-start-with)**
 — nine slash commands, and only `/goal` to begin.
 
 Or point Claude Code at the plugin directory directly — `hooks/hooks.json` is
@@ -1149,7 +1149,7 @@ closure.
   exercised **live on Linux** by the bench campaign: real headless sessions
   with the released plugin installed, driving real goals through the gate —
   the journals, matrices and gifs in [`EVIDENCE/`](EVIDENCE/) and the
-  [Seen working](#-seen-working--a-real-refusal-on-real-state) section are
+  [Seen working](#-seen-working--the-300-bench-campaign) section are
   that runtime, inspectable.
 - ~~"A gate slower than its hook timeout ends the session unverified."~~ It
   did — measured to the second in bench 2 — and it was never even in this
