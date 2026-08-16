@@ -15,6 +15,7 @@
 [![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/saimonokuma)
 [![Nova-Violet Role](https://img.shields.io/badge/Nova--Violet-Role-9b59b6?style=for-the-badge)](https://github.com/Nova-Violet-Role)
 [![License](https://img.shields.io/badge/License-AGPL--3.0_OR_EUPL--1.2-764ba2?style=for-the-badge)](LICENSE)
+[![Worked beside Claude Fable 5](https://img.shields.io/badge/Worked_beside-Claude_Fable_5-26619C?style=for-the-badge&logoColor=white)](#-the-verdict--quoted-and-worn-as-a-badge)
 
 [![CI](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci.yml/badge.svg)](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci.yml)
 [![Proved in Lean 4](https://img.shields.io/badge/Proved%20in-Lean%204-2C3E50?style=flat-square)](lean/Proofs/)
