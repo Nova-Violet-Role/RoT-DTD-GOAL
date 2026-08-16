@@ -70,6 +70,37 @@ only by a commit that closes them with a test.
    file path appears among the verify command's arguments — same spirit as
    the existing `can-never-fail` refusal, weaker verdict.*
 
+11. **A gate slower than the hook timeout is an open gate.** Measured, not
+    theorized: bench run 2's final completion pipeline (two verify sweeps over
+    a goal with a 100k-row performance criterion, plus a warn-mode mutation
+    probe copying the tree per operator per criterion) exceeded the Stop
+    hook's `timeout: 300`, the harness killed the hook mid-verdict — journal
+    ends at `CONFIRM`, no verdict line — and **the session was allowed to end
+    unverified**, five minutes to the second after the sweep began.
+    Completion cannot be self-declared, but it can be out-waited. *Proposed
+    fix: the gate watches its own elapsed time against a budget below the
+    hook timeout; when the pipeline cannot finish in budget it emits a
+    `block` — "verification incomplete (out of time at <stage>): stop again"
+    — so a timeout costs an iteration, never a verdict. Plus: scale the
+    shipped `timeout` to the measured cost, and document that hook timeouts
+    fail OPEN in Claude Code.*
+
+12. **Five verdict-shaped strings the contract never declares.** Found by the
+    goal-contract-auditor in the bench's closing audit: `LEDGER DRIFT` (vs
+    declared `INTEGRITY DRIFT`), `ATTESTATION FAILED`, `STALL DETECTED`,
+    `CONTRACT OK`/`CONTRACT DRIFT`, `SCHEMA OK`/`SCHEMA DRIFT` are all
+    emitted by the engine but absent from the DTD's verdict entities — so the
+    forgery test, which loops over declared `VERDICT.*` only, has never
+    proven a hostile criterion cannot speak them. *Proposed fix: declare them
+    (or rename to declared forms), and the forgery attack then covers them
+    automatically.*
+
+13. **`history.tsv` is an unregistered record.** `gf_history_append()` writes
+    a real 8-field TSV that is not among the `RECORD.*` entities, so
+    `schema --verify` cannot see a column change there — the exact defect
+    class the record schema exists to close. *Proposed fix: declare it in
+    both halves of the contract; the existing cross-check then binds it.*
+
 ## Agents / dispatch
 
 8. **Guard denials during agent fan-out need a look.** Four
