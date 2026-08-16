@@ -63,6 +63,7 @@ question that four rounds of review kept asking: **who checks the checks?**
 | a pass from iteration 1 is reused at iteration 7 | **every criterion is re-run** at the moment completion is on the table |
 | a criterion that is really a coin flip | flake detection scoped by seal *generation*, reporting a regression, with the false-alarm rate **measured** |
 | a criterion's output impersonating the engine | untrusted text is **fenced**, and the verdict vocabulary is declared in a DTD-style trust contract |
+| the gate is out-waited until the harness kills its hook | the gate watches **its own clock** and blocks with the next step — a timeout costs an iteration, never a verdict (LAW.18) |
 | the docs drifting away from the code | every count in this file is **generated**; the suite fails if a number is typed |
 
 ---
@@ -155,7 +156,10 @@ goal.sh set CMD_TIMEOUT <seconds>
 
 Environment knobs: `GF_SNAPSHOT_KEEP` (compaction snapshot ring size),
 `GF_TIMINGS_MAX` (timing rows retained), `GF_EVENT_MIN_INTERVAL` (event rate
-limit), `GF_GATE_MUTATE_OPS` (narrow the operator set for speed).
+limit), `GF_GATE_MUTATE_OPS` (narrow the operator set for speed),
+`GF_GATE_BUDGET` (the gate's own time budget in seconds, default 540 — kept
+below the Stop hook's shipped timeout of 600 so an out-of-time gate blocks
+with the next step instead of being killed into a silent allow; LAW.18).
 
 Two commands print the whole configuration as a *declaration* rather than as
 documentation, and both can fail:
@@ -628,6 +632,13 @@ and requires the check to fail on each. A criterion that survives `corrupt` read
 the filename and not the contents, and is reported as blind. `GATE_MUTATE=strict`
 makes that fatal at the gate.
 
+Since 4.0.0 a survivor is not believed on the first pass: symmetric damage to
+every dependency at once can commute through a comparison-shaped check
+(truncate empties both sides of a diff), so the probe **re-damages one
+dependency at a time** and the mutant dies if any isolated damage kills it —
+with the isolating dependency named in the report, and the extra tree copies
+spent only on survivors.
+
 When a criterion declares no dependencies, the probe **infers** them from the
 command text — a token that is an existing file is a dependency — and says so
 (`deps INFERRED from the command`). When nothing can be named, it reports
@@ -878,33 +889,47 @@ and `test_docs_counts_are_generated` fails the build if one appears.
 
 ---
 
-## ⚖️ What this release does NOT claim
+## ⚖️ What this release does NOT claim — and what it no longer has to disclaim
 
-Stated here so nobody has to discover them by disappointment. Every one of
-these is a real limit, and each is checked in the only honest way available —
-by being written down where a reader will see it.
+Stated here so nobody has to discover them by disappointment. This section
+shrinks release by release, and the shrinkage is itself the record: a limit
+leaves this list only when a mechanism closed it and a test enforces the
+closure.
+
+**Still true, and structural — these do not age out:**
 
 - **A flake seen only as fail-then-pass is not reported, and cannot be.** That
-  history is indistinguishable from work that got finished.
+  history is indistinguishable from work that got finished. Stated as a
+  theorem (`fail_then_pass_is_not_accused`), not a footnote.
 - **A criterion that flips and heals while nobody runs it is undetectable.**
 - **The attestation binds a tree, not an author.** It is not a signature, and
   a hostile publisher can regenerate it at will. It proves the files in front
   of you are the files that were measured; nothing more.
 - **`GATE_MUTATE` is off by default.** It copies your tree and damages the
-  copy. That is a cost decision, not a confidence one.
+  copy. That is a cost decision, not a confidence one — and since 4.0.0 the
+  copies it does make are spent more intelligently, not more often.
 - **The Lean proofs are about the *models*.** The shell is bound to them by
   tests that run the real functions, not by extraction — "proved" means the
   model is proved and the binding is tested, never that bash was verified.
-- **Linux and macOS are verified by CI, not by the author.** There is no Linux
-  runtime on the author's machine, so those suite tails come from the workflow
-  run and not from a machine anyone here can inspect. They are now *measured*
-  — 667/0 on ubuntu, macOS and Windows for the released commit — but the
-  instrument is GitHub's runner, and that is a different kind of evidence from
-  something you watched happen. Six red runs preceded the green one, and every
-  one found a real defect this machine could not see.
 - **The rename is deliberate skin.** The command is still `goal.sh` and the
   state directory is still `.claude/goal/`. Breaking a running goal's state to
   satisfy a label would be exactly the trade this project refuses.
+
+**Retired from this list, with the receipt:**
+
+- ~~"Linux and macOS are verified by CI, not by the author."~~ Retired at
+  4.0.0. All three platforms — ubuntu, macOS, Windows (Git Bash) — are
+  verified by CI on **every** release, and the release job refuses to publish
+  without that agreement. Since 3.0.0 the engine has additionally been
+  exercised **live on Linux** by the bench campaign: real headless sessions
+  with the released plugin installed, driving real goals through the gate —
+  the journals, matrices and gifs in [`EVIDENCE/`](EVIDENCE/) and the
+  [Seen working](#-seen-working--a-real-refusal-on-real-state) section are
+  that runtime, inspectable.
+- ~~"A gate slower than its hook timeout ends the session unverified."~~ It
+  did — measured to the second in bench 2 — and it was never even in this
+  list, because nobody knew. Closed at 4.0.0 by LAW.18: the gate watches its
+  own clock and a timeout now costs an iteration, never a verdict.
 
 ## 🔨 What to try to break
 
@@ -927,7 +952,12 @@ rather than a description.
 7. **The record schema.** Add a column to a `.tsv` that no `RECORD` entity
    numbers, or renumber an existing field. `goal.sh schema --verify` must
    refuse and name the record.
-8. **The attestation.** Change one byte anywhere under `scripts/`, `hooks/`,
+8. **The clock.** Try to out-wait the gate: seal criteria slow enough that
+   the completion pipeline cannot finish inside `GF_GATE_BUDGET`, and the
+   gate must emit `VERIFICATION INCOMPLETE` with a next step — a block, an
+   iteration spent, never an allow. The 3.0.0 gate lost exactly this game,
+   300 seconds to the second; LAW.18 is the answer, and it must hold.
+9. **The attestation.** Change one byte anywhere under `scripts/`, `hooks/`,
    `tests/`, `lean/Proofs/`; it must refuse and name the field.
 
 ---
@@ -973,13 +1003,16 @@ checks the checks?* (v3.3), *when is a pass not evidence?* (v3.4), *what is the
 gate's word worth outside this room?* (v3.5), and — this release — *is the
 evidence even simultaneous, and whose voice is speaking?*
 
-It was first published as **1.0.0** under the name **RoT DTD GOAL**; the
-current release is **2.0.0** — major because 1.0.0's install was itself broken
-(the manifest re-declared the auto-loaded hooks file, and the plugin failed to
-load; CHANGELOG.md has the full account). The internal command remains
-`goal.sh` and the state directory remains `.claude/goal/`: a rename that broke
-a running goal's state to satisfy a label would be exactly the kind of trade
-this project exists to refuse.
+It was first published as **1.0.0** under the name **RoT DTD GOAL**. The
+campaign that followed asked one question per major release: **2.0.0** — *does
+it even install?* (it did not; the manifest re-declared the auto-loaded hooks
+file); **3.0.0** — *can a human send the roster?* (`/goal-agent`,
+`/goal-swarm`, and the first real bench); **4.0.0** — *who gates the gate?*
+(LAW.18 and every code-caused bench finding closed, each with its enforcing
+test; `CHANGELOG.md` has the full account of all three). The internal command
+remains `goal.sh` and the state directory remains `.claude/goal/`: a rename
+that broke a running goal's state to satisfy a label would be exactly the kind
+of trade this project exists to refuse.
 
 ---
 
