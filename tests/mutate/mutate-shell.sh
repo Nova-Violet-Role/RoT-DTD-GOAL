@@ -63,8 +63,16 @@ preflight() {
 # Count LITERAL occurrences of a needle. Not a regex: several needles here
 # contain [ ] * $ \ and | , and a regex read of them would either miss or
 # over-match. awk index() is the only honest counter for this.
+# MEASURED DEFECT, first campaign run: this passed the needle with `awk -v`,
+# and awk PROCESSES ESCAPE SEQUENCES inside a -v value. The needle
+#     | sed -e 's/\]\]>/]]\&gt;/g' \
+# arrived at awk as `]]>` and `&gt;` -- it no longer matched the file, so a
+# real mutation was recorded as DISCARDED. awk even warned about it
+# ("escape sequence `\]' treated as plain `]'") and the warning went to
+# stderr while the harness read stdout. ENVIRON is not escape-processed.
 count_needle() { # file needle -> integer on stdout
-  awk -v needle="$2" '
+  GF_NEEDLE="$2" awk '
+    BEGIN { needle = ENVIRON["GF_NEEDLE"] }
     { line = $0; n = 0
       while ((p = index(line, needle)) > 0) { n++; line = substr(line, p + length(needle)) }
       total += n }
@@ -76,7 +84,8 @@ count_needle() { # file needle -> integer on stdout
 # a backslash in it is exactly what broke the first version of this file.
 apply_needle() { # file needle replacement
   local tmp="$WORK/apply.$$"
-  awk -v needle="$2" -v repl="$3" '
+  GF_NEEDLE="$2" GF_REPL="$3" awk '
+    BEGIN { needle = ENVIRON["GF_NEEDLE"]; repl = ENVIRON["GF_REPL"] }
     done_flag == 0 {
       p = index($0, needle)
       if (p > 0) {
@@ -102,13 +111,25 @@ digest() { # file -> a stable digest, whatever hash tool this machine has
 #   stdout: the failing case names, space separated ("" if the suite is green)
 #   return: 0 if the suite passed, 1 if it failed
 run_suite() { # outfile -> writes full output there
-  local out="$1" rc
-  ( cd "$ROOT" && bash "$SUITE" ) > "$out" 2>&1
+  local out="$1" rc named
+  # The per-case watchdog defaults to 900s. Under a mutation a case can hang,
+  # and one 15-minute wait per mutant makes a 10-mutation campaign unrunnable
+  # -- measured: the first run took over an hour and had to be abandoned. 120s
+  # is ~30x the whole suite's green runtime, so it cannot cut off honest work.
+  ( cd "$ROOT" && GF_CASE_TIMEOUT="${GF_CASE_TIMEOUT:-120}" bash "$SUITE" ) > "$out" 2>&1
   rc=$?
-  awk '
-    /^\[[0-9]+\/[0-9]+\] test_/ { case_name = $2 }
-    /^ *FAIL / { if (case_name != "" && !(case_name in seen)) { seen[case_name]; printf "%s ", case_name } }
-  ' "$out"
+  # Attribution, primary source: the suite's own summary line. The earlier
+  # version scanned "[n/57] test_x" headers and FAIL lines, and reported
+  # "<no case attributed>" for six of nine mutants -- a harness that knows
+  # something broke but not what is only half an instrument.
+  named="$(sed -n 's/^failing tests: //p' "$out" | tr '\n' ' ')"
+  if [ -z "$named" ]; then
+    named="$(awk '
+      /^\[[0-9]+\/[0-9]+\] test_/ { case_name = $2 }
+      /^ *FAIL / { if (case_name != "" && !(case_name in seen)) { seen[case_name]; printf "%s ", case_name } }
+    ' "$out")"
+  fi
+  printf '%s' "$named"
   return $rc
 }
 
@@ -234,6 +255,13 @@ main() {
 
   while IFS= read -r id && IFS= read -r what && IFS= read -r rel \
      && IFS= read -r needle && IFS= read -r repl && IFS= read -r _sep; do
+    # GF_MUTATE_ONLY=M8 runs one mutant. A full campaign is ~40 minutes here
+    # because several cases hang under a broken gate and wait out the watchdog,
+    # and re-running all ten to re-check one fix is how a survivor stops being
+    # re-checked at all.
+    if [ -n "${GF_MUTATE_ONLY:-}" ] && [ "$GF_MUTATE_ONLY" != "$id" ]; then
+      continue
+    fi
     total=$((total + 1))
     file="$ROOT/$rel"
     pristine="$WORK/pristine.$id"
@@ -295,10 +323,15 @@ main() {
   fi
   say "TREE RESTORED -- suite green again (exit 0)"
 
+  if [ "$discarded" -gt 0 ] || [ "$survived" -gt 0 ]; then
+    # Keep every per-mutant suite log. The first run reported six mutants as
+    # "no case attributed" and the evidence had already been deleted, which
+    # made the finding unusable until the whole campaign was re-run.
+    say "per-mutant logs kept in: $WORK"
+    [ "$discarded" -gt 0 ] && exit 2
+    exit 1
+  fi
   rm -rf "$WORK"
-
-  [ "$discarded" -gt 0 ] && exit 2
-  [ "$survived"  -gt 0 ] && exit 1
   exit 0
 }
 

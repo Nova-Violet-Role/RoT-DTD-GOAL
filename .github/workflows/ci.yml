@@ -42,6 +42,29 @@ permissions:
   contents: write        # the release job needs it; nothing else writes
 
 jobs:
+  # The cheapest job in the file, and it runs first for a measured reason: a
+  # blanket rename once rewrote a path inside THIS file into one that has never
+  # existed, and nothing on a developer machine could see it. The workflow is
+  # parsed only by GitHub, so the first instrument able to fail was a push --
+  # and on a tag push, that is a red RELEASE run. Six of this repository's CI
+  # runs were red; one class of them was this.
+  workflow-lint:
+    name: the workflow itself is well formed
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: lint every workflow
+        env:
+          # ubuntu-latest ships ruby, so a real YAML parse MUST happen here.
+          # Locally the linter says it skipped; here a skip is a failure.
+          GF_REQUIRE_YAML_PARSER: "1"
+        run: |
+          bash tests/lint_workflows.sh
+          echo "lint exit=$?"
+
   suite:
     name: suite on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -195,7 +218,7 @@ jobs:
   # ---------------------------------------------------------------- the gate
   green:
     name: every platform agreed (no failure, no skip, no cancel)
-    needs: [suite, pipefail-control, evidence]
+    needs: [workflow-lint, suite, pipefail-control, evidence]
     if: always()          # must RUN even when something upstream failed,
     runs-on: ubuntu-latest #  otherwise it would be skipped and prove nothing
     steps:
@@ -207,7 +230,8 @@ jobs:
           # "did anything fail" treats a SKIPPED job as fine, which is how a
           # release ships without ever having been tested.
           fail=0
-          for jr in "suite=${{ needs.suite.result }}" \
+          for jr in "workflow-lint=${{ needs.workflow-lint.result }}" \
+                    "suite=${{ needs.suite.result }}" \
                     "pipefail-control=${{ needs.pipefail-control.result }}" \
                     "evidence=${{ needs.evidence.result }}"; do
             name="${jr%%=*}"; res="${jr#*=}"
@@ -277,7 +301,15 @@ jobs:
           tail -3 /tmp/manifest.log
           bash scripts/attest.sh --verify ATTESTATION.txt
           bash scripts/goal.sh version
-          bash tests/run_tests.sh | tail -5
+          # PIPESTATUS, not the pipe's status. `shell: bash` gives this step
+          # pipefail so `| tail` would not have masked a failure -- but this
+          # is the cold verification of the artefact about to be PUBLISHED,
+          # and it should not be correct only because of a default declared
+          # 200 lines away. Read the suite's own exit code, explicitly.
+          bash tests/run_tests.sh > /tmp/cold-suite.log 2>&1; rc=${PIPESTATUS[0]}
+          tail -5 /tmp/cold-suite.log
+          echo "cold suite exit=$rc"
+          [ "$rc" -eq 0 ] || exit 1
 
       - name: publish
         uses: softprops/action-gh-release@v2

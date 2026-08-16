@@ -866,6 +866,58 @@ test_flake_scope_is_the_seal() {
   assert_lacks "seal scope: and no native_decide" "$body" "native_decide"
 }
 
+# FOUND BY THE SHELL MUTATION CAMPAIGN, not by review. Mutation M8 flipped the
+# gate's fallback `fpolicy="${fpolicy:-strict}"` to `:-off` and the ENTIRE
+# suite stayed green -- the only mutant of ten that survived.
+#
+# Why it hid: `goal.sh init` always writes GATE_FLAKY=strict into state, so the
+# fallback is unreachable for any goal created by this version. It is reachable
+# for exactly one thing, and it is the thing that matters: a state file written
+# by an OLDER version, before the key existed. On upgrade, that goal would have
+# silently lost its flake gate -- green suite, no alarm, coin-flip completions.
+#
+# The README calls strict-by-default a measured decision (60 goals, 4 refusals,
+# zero false alarms). A default nothing tests is a comment, not a default.
+test_the_flaky_default_survives_an_upgrade() {
+  new_project > /dev/null
+  G init "upgrade" --budget 9 --stall 9 > /dev/null
+  G add C1 "coin flip" 'test -f flip.txt' > /dev/null
+  G activate > /dev/null
+
+  local st="$CLAUDE_PROJECT_DIR/.claude/goal/state.env"
+  local led="$CLAUDE_PROJECT_DIR/.claude/goal/ledger"
+  local tim="$CLAUDE_PROJECT_DIR/.claude/goal/timings.tsv" out gen
+
+  # Simulate the upgrade: delete the key entirely, as a pre-1.0.0 state has it.
+  # Assert the deletion LANDED -- a fixture that silently failed to apply would
+  # leave GATE_FLAKY=strict in place and this case would pass for the wrong
+  # reason, which is the same lie the mutation campaign exists to refuse.
+  grep -v '^GATE_FLAKY=' "$st" > "$st.f" && mv "$st.f" "$st"
+  assert_eq "upgrade: the legacy state carries no GATE_FLAKY at all" \
+    "$(grep -c '^GATE_FLAKY=' "$st")" "0"
+
+  # a genuine flip, recorded inside the current seal generation
+  gen="$(cd "$CLAUDE_PROJECT_DIR" && bash -c '. '"$S"'/lib.sh; gf_seal_gen C1')"
+  printf 'ts\tid\tallowed\tduration\toutcome\tgen\n' > "$tim"
+  printf '%s\tC1\t120\t1\tpass\t%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$gen" >> "$tim"
+  printf '%s\tC1\t120\t1\tfail\t%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$gen" >> "$tim"
+  assert_contains "upgrade: the flip is visible to the detector" \
+    "$(cd "$CLAUDE_PROJECT_DIR" && bash -c '. '"$S"'/lib.sh; gf_flaky_ids')" "C1 1 1"
+
+  # and now the criterion passes, so ONLY the default stands between this goal
+  # and a completion on a coin flip.
+  printf 'ok\n' > "$CLAUDE_PROJECT_DIR/flip.txt"
+  out="$(gate '{}')"
+  assert_contains "upgrade: an unset GATE_FLAKY still refuses a coin flip" \
+    "$out" "COMPLETION REFUSED (flaky, strict)"
+  assert_eq "upgrade: and escalates rather than completing" "$(statev STATUS)" "awaiting_human"
+
+  # The ledger row is untouched by any of this -- the refusal is a decision
+  # about history, not an edit to it.
+  assert_eq "upgrade: the ledger still has one sealed row" \
+    "$(grep -c '^C1	' "$led")" "1"
+}
+
 test_clock_cannot_hide_a_flip() {
   # THE THIRD REVIEW'S FINDING (closed in v3.6): v3.5 scoped the flake window by
   # comparing timestamps, which assumed the machine agrees with itself about
@@ -1352,6 +1404,96 @@ test_the_contract_binds_the_engine() {
 gf_json_str() { # file key -> the string value of a top-level-ish "key": "value"
   grep -o "\"$2\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$1" 2>/dev/null \
     | head -n1 | sed 's/.*"\([^"]*\)"$/\1/'
+}
+
+# The workflow file is the one artefact in this repository that NOTHING on a
+# developer machine parses. It is read only by GitHub, so its first honest
+# instrument is a push -- and on a tag push, a defect there is a red RELEASE
+# run. That happened: a blanket rename rewrote a path inside ci.yml into one
+# that has never existed, and it cost a full red cycle to discover.
+#
+# tests/lint_workflows.sh closes that. This case proves the linter can FAIL,
+# because a linter that only ever passes is decoration, and one guarding a
+# release is decoration in the worst possible place.
+test_the_workflow_lint_can_fail() {
+  local lint="$GF_ROOT/tests/lint_workflows.sh"
+  [ -f "$lint" ] || { bad "lint: tests/lint_workflows.sh ships" "missing"; return 1; }
+
+  # 1. the real workflows must be clean
+  local out rc
+  out="$(bash "$lint" 2>&1)"; rc=$?
+  [ "$rc" -eq 0 ] && ok "lint: the repository's own workflows pass the linter" \
+    || bad "lint: the repository's own workflows pass" "exit $rc: $(printf '%s' "$out" | grep '^FAIL' | head -1)"
+
+  # 2. the controls. A scratch tree, so the real ci.yml is never touched --
+  #    and each control asserts the DEFECT IS PRESENT in the fixture before
+  #    running, because a patch that did not apply looks exactly like a clean
+  #    file and would be recorded as a pass.
+  local s; s="$(mktemp -d "${TMPDIR:-/tmp}/gf-wl.XXXXXX")"
+  mkdir -p "$s/tests" "$s/.github/workflows"
+  cp "$lint" "$s/tests/lint_workflows.sh"
+  cat > "$s/.github/workflows/fx.yml" <<'YML'
+name: fixture
+on: [push]
+jobs:
+  one:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash tests/lint_workflows.sh
+YML
+  cp "$s/.github/workflows/fx.yml" "$s/fx.orig"
+
+  bash "$s/tests/lint_workflows.sh" >/dev/null 2>&1
+  [ $? -eq 0 ] && ok "lint control: the clean fixture passes" \
+                || bad "lint control: the clean fixture passes" "it does not, so every control below is meaningless"
+
+  # control A -- a path that does not exist. THE defect that cost a red run.
+  sed -i 's|tests/lint_workflows.sh|tests/no_such_file.sh|' "$s/.github/workflows/fx.yml"
+  local n; n=$(grep -c 'no_such_file' "$s/.github/workflows/fx.yml")
+  if [ "$n" -lt 1 ]; then
+    bad "lint control A applied" "needle absent -- control DISCARDED, not survived"
+  else
+    bash "$s/tests/lint_workflows.sh" >/dev/null 2>&1
+    [ $? -ne 0 ] && ok "lint control: a nonexistent path is caught" \
+                  || bad "lint control: a nonexistent path is caught" "linter stayed green"
+  fi
+  cp "$s/fx.orig" "$s/.github/workflows/fx.yml"
+
+  # control B -- a tab, which YAML forbids for indentation
+  printf '\t# tab\n' >> "$s/.github/workflows/fx.yml"
+  n=$(awk '/\t/ { n++ } END { print n+0 }' "$s/.github/workflows/fx.yml")
+  if [ "$n" -lt 1 ]; then
+    bad "lint control B applied" "no tab in the fixture -- control DISCARDED"
+  else
+    bash "$s/tests/lint_workflows.sh" >/dev/null 2>&1
+    [ $? -ne 0 ] && ok "lint control: a tab character is caught" \
+                  || bad "lint control: a tab character is caught" "linter stayed green"
+  fi
+  cp "$s/fx.orig" "$s/.github/workflows/fx.yml"
+
+  # control C -- an unpinned action, which is a supply-chain hole
+  sed -i 's|actions/checkout@v4|actions/checkout|' "$s/.github/workflows/fx.yml"
+  n=$(grep -c 'checkout@' "$s/.github/workflows/fx.yml")
+  if [ "$n" -ne 0 ]; then
+    bad "lint control C applied" "the version is still pinned -- control DISCARDED"
+  else
+    bash "$s/tests/lint_workflows.sh" >/dev/null 2>&1
+    [ $? -ne 0 ] && ok "lint control: an unpinned action is caught" \
+                  || bad "lint control: an unpinned action is caught" "linter stayed green"
+  fi
+  cp "$s/fx.orig" "$s/.github/workflows/fx.yml"
+
+  # control D -- the skip that must not be silent. With no YAML parser on PATH
+  # the linter says it skipped the parse; CI sets GF_REQUIRE_YAML_PARSER=1, and
+  # then that skip has to be a failure. Otherwise the parse could quietly stop
+  # happening on the only machine where it matters.
+  ( PATH=/nonexistent GF_REQUIRE_YAML_PARSER=1 \
+    /usr/bin/env bash "$s/tests/lint_workflows.sh" ) >/dev/null 2>&1
+  [ $? -ne 0 ] && ok "lint control: a skipped YAML parse fails when CI requires it" \
+                || bad "lint control: a skipped parse fails under GF_REQUIRE_YAML_PARSER" "it passed"
+
+  rm -rf "$s"
 }
 
 test_the_plugin_installs_as_declared() {
@@ -3076,6 +3218,8 @@ test_the_plugin_installs_as_declared
 test_records_are_append_only
 test_the_contract_binds_the_engine
 test_a_refusal_always_carries_a_way_forward
+test_the_flaky_default_survives_an_upgrade
+test_the_workflow_lint_can_fail
 "
 
 case "${1:-}" in

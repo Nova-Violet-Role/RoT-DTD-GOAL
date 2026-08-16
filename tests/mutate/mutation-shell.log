@@ -1,13 +1,10 @@
-SHELL MUTATION LOG -- RoT DTD GOAL
-produced by: bash tests/mutate/mutate-shell.sh   (re-runnable; this file is its output)
-date: 2026-08-16 10:25:33
+SHELL MUTATION CAMPAIGN -- RoT DTD GOAL
+date: 2026-08-16 08:38:35
+mode: campaign
+rule: the needle is counted BEFORE (must be 1) and AFTER (must be 0).
+      A patch that did not apply is DISCARDED, never reported as survived.
 
-rule: the needle is COUNTED in the file before the edit (must be 1) and
-      after it (must be 0). A patch that did not apply is DISCARDED,
-      never reported as survived.
-attribution: read from the suite's own 'failing tests:' line, not declared
-      in advance. The 1.0.0 log named a killer per mutation by hand; two
-      of those attributions were guesses nobody could check.
+baseline: suite green (exit 0)
 
 M1 KILLED     by test_flaky_detection test_flake_scope_is_the_seal test_clock_cannot_hide_a_flip 
     flaky detector: the generation filter is inverted, so rows from a retired seal come back
@@ -35,20 +32,5 @@ KILLED:    9
 SURVIVED:  1 M8
 DISCARDED: 0  (patch did not apply -- NOT counted as survived)
 total records: 10
-
-M8 was the one SURVIVOR of that run, and it was a real finding:
-  goal.sh init always writes GATE_FLAKY=strict, so the gate's fallback
-  ${fpolicy:-strict} is unreachable for goals created by this version.
-  It IS reachable for a state file written by an older one -- on upgrade,
-  that goal would silently lose its flake gate. Nothing tested it.
-  Closed by test_the_flaky_default_survives_an_upgrade; re-run of M8 alone:
-
-M8 KILLED     by test_the_flaky_default_survives_an_upgrade 
-    the flaky gate's default flips from strict back to off
-
-applied and verified present: 1
-KILLED:    1
-SURVIVED:  0
-DISCARDED: 0  (patch did not apply -- NOT counted as survived)
-total records: 1
 TREE RESTORED -- suite green again (exit 0)
+per-mutant logs kept in: /tmp/gf-mutate-shell.596942

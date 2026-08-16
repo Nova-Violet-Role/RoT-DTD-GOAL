@@ -24,6 +24,7 @@ settles.**
 | [`Proofs/GoalQueue.lean`](Proofs/GoalQueue.lean) | *Does the queue always finish?* The scheduler only starts eligible rows, respects dependencies, and strictly decreases a termination measure — so a cycle can never run. | 11 |
 | [`Proofs/TimingsRotation.lean`](Proofs/TimingsRotation.lean) | *Can pruning history change a verdict?* Rotating the timings file must not shrink a learned budget — the oldest row can be the determining one. | 10 |
 | [`Proofs/LearnedTimeout.lean`](Proofs/LearnedTimeout.lean) | *Is the learned timeout safe?* It never drops below the base, never exceeds the cap, and grows monotonically in both. | 7 |
+| [`Proofs/FenceQuarantine.lean`](Proofs/FenceQuarantine.lean) | *Can a criterion's own output forge a verdict?* Every quarantined line carries the fence, so a line whose first character differs from the fence's can never be produced — for **any** output, not just the strings someone thought to test. | 6 |
 
 Two of these carry theorems whose whole job is to state what is **not** true,
 which is the honest half of a specification:
@@ -65,7 +66,7 @@ theorems are load-bearing: a theorem that no broken definition can falsify is
 then fails.**
 
 Latest run — [`mutate/mutation-lean.log`](mutate/mutation-lean.log),
-**8 applied, 8 killed, 0 survived, 0 discarded**:
+**9 applied, 9 killed, 0 survived, 0 discarded**:
 
 | # | what was broken | theorems that died |
 |---|-----------------|--------------------|
@@ -77,6 +78,7 @@ Latest run — [`mutate/mutation-lean.log`](mutate/mutation-lean.log),
 | **L6** | the **scheduler ignores eligibility** (`find? (eligible q)` → `head?`) | `next_is_eligible`, `none_means_nothing_eligible`, `cycle_never_runs`, `longer_cycle_never_runs` |
 | **L7** | the **progress measure flattened** to zero | `advance_decreases_pending`, `dependent_waits_for_done` |
 | **L8** | **starting a goal does not advance it** (`active` → `pending`) | `start_pending_le`, `advance_decreases_pending`, `dependent_waits_for_done` |
+| **L9** | the **fence begins with the engine's own initial character** | `quarantined_never_equals_engine_line`, `quarantine_is_injective` |
 
 Attribution is by **dependency** — the declaration enclosing each error Lean
 reported — not by which line happened to be edited.

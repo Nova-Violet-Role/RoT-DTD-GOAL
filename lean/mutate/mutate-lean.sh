@@ -133,6 +133,11 @@ GoalQueue.lean
 if r.name = n then { r with status := Status.active } else r
 if r.name = n then { r with status := Status.pending } else r
 starting a goal does not advance it
+L9
+FenceQuarantine.lean
+def fence : List Char := [' ', ' ', '|', ' ']
+def fence : List Char := ['R', ' ', '|', ' ']
+the fence starts with the engine's own initial character
 TABLE
 }
 

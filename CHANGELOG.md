@@ -15,6 +15,48 @@ by a review that tried to break the previous answer.
 
 ---
 
+## [Unreleased]
+
+*The question: **which of our guarantees is only a comment?***
+
+Answered by making the shell mutation campaign re-runnable and then running it.
+The 1.0.0 evidence log listed ten mutations and their killers **by hand** — a
+claim nobody could re-check, and two of its attributions turned out to be
+guesses. `tests/mutate/mutate-shell.sh` now applies the same ten to the real
+tree, counts the needle before (must be 1) and after (must be 0), reads the
+killer from the suite's own output, and restores the tree.
+
+It found one. **M8 — the flaky gate's default flipping from `strict` to `off` —
+survived the entire suite**, the only survivor of ten.
+
+The default was not decoration; the *test coverage* was. `goal.sh init` always
+writes `GATE_FLAKY=strict`, so `stop_gate.sh`'s `${fpolicy:-strict}` fallback is
+unreachable for any goal this version creates. It is reachable for exactly one
+thing, and it is the one that matters: **a state file written by an older
+version, before the key existed.** On upgrade, that goal would have lost its
+flake gate in silence — green suite, no alarm, completions decided by a coin
+flip. Closed by `test_the_flaky_default_survives_an_upgrade`, which deletes the
+key, asserts the deletion *landed*, and requires the refusal anyway. Re-running
+M8 alone against it: **KILLED**.
+
+* **`tests/lint_workflows.sh` + a `workflow-lint` CI job** — seven checks over
+  `.github/workflows/`, run *before* the matrix: tabs, CR bytes, unpinned
+  `uses:`, jobs without `runs-on`, verdict-bearing pipes, a real YAML parse, and
+  **every repo-relative path named in a workflow must exist** — the defect that
+  cost a red release run. Five controls prove each check can fail.
+* **The release job no longer verifies through a pipe.** `run_tests.sh | tail -5`
+  reported `tail`'s status; it now captures the exit code directly and refuses to
+  publish on non-zero. The artefact about to be published must not be verified
+  correctly only because of a default declared 200 lines away.
+* **`lean/Proofs/FenceQuarantine.lean`** — the untrusted-output fence, proved
+  rather than sampled. `quarantined_never_equals_engine_line` holds for **every**
+  output a criterion can emit, not the strings someone thought to test.
+  Mutation **L9** kills it. The `]]>` escaping remains **MEASURED** (shell M4),
+  not proved — stated in the module header, because the honest half of a
+  specification is what it does *not* cover.
+* Lean: 4 modules → **5**, 65 theorems → **73**, mutations 8/8 → **9/9 killed**.
+* Suite: 58 cases / 677 assertions → **59 / 683**.
+
 ## [1.0.0] — 2026-08-16
 
 **The first public release.** Two questions, answered in one version because

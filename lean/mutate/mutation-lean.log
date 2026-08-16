@@ -1,5 +1,5 @@
 LEAN MUTATION SUITE -- RoT DTD GOAL
-date: 2026-08-16 05:29:42
+date: 2026-08-16 10:22:13
 workspace: D:/Lean/proofs   modules: Proofs.GoalForge.*
 
 rule: the needle is COUNTED before the build; the stale .olean is DELETED
@@ -17,10 +17,11 @@ L5   the dependency check is removed    KILLED -- broke: next_respects_dependenc
 L6   the scheduler ignores eligibility  KILLED -- broke: next_is_eligible none_means_nothing_eligible cycle_never_runs longer_cycle_never_runs
 L7   the progress measure is flattened  KILLED -- broke: advance_decreases_pending dependent_waits_for_done
 L8   starting a goal does not advance i KILLED -- broke: start_pending_le advance_decreases_pending dependent_waits_for_done
+L9   the fence starts with the engine's KILLED -- broke: quarantined_never_equals_engine_line quarantine_is_injective
 
 restoring and rebuilding the clean tree ...
   baseline restored: exit 0
 
-killed: 8   survived: 0   discarded: 0
+killed: 9   survived: 0   discarded: 0
 
 VERDICT: every mutation was applied and killed.
