@@ -107,7 +107,8 @@ Verify it landed — `/goal-status` answers even with no goal running, so a
 reply at all means the plugin is wired:
 
 ```
-/goal-status
+/rot-dtd-goal:goal-status     # the canonical name, works everywhere
+/goal-status                  # the short form most interactive sessions resolve
 ```
 
 > **Headless sessions** (`claude -p`) resolve plugin commands only by their
@@ -246,19 +247,25 @@ inside Claude Code. The shell script exists underneath, and the raw form is
 shown further down for people who want it — but the normal way to drive this
 plugin is here.
 
-### The seven commands
+### The nine commands
 
-| command | what it does | when you reach for it |
-|---|---|---|
-| **`/goal <what you want>`** | The only one you need to start. Turns your sentence into acceptance criteria — real shell commands — seals them, and switches the gate on. | Beginning of any piece of work you want *verified*, not just attempted. |
-| **`/goal-status`** | Shows the goal, every criterion pass/fail, the iteration budget, and the journal tail. | "Where are we?" Also the fastest way to confirm the plugin is installed. |
-| **`/goal-verify`** | Runs every acceptance criterion right now and reports. **Does not consume an iteration.** | "Would it pass if I stopped now?" — check without spending budget. |
-| **`/goal-audit`** | Attacks the criteria themselves: ledger integrity, the empty-directory negative control, and the mutation probe. **Does not consume an iteration.** | "Are these checks any good?" Use it when a criterion looks too easy. |
-| **`/goal-pause`** | The Stop gate goes dormant. You can end the session normally. | Interruption, meeting, end of day, or you need to ship something unrelated. |
-| **`/goal-resume`** | Wakes a paused *or* human-escalated goal, and resets the iteration budget and stall detector. | After a pause, or after the gate escalated to you and you have given guidance. |
-| **`/goal-abort`** | Ends the goal. State stays on disk for post-mortem. Asks for confirmation if there was real progress. | The goal was wrong, or the world changed. |
-| **`/goal-agent`** | Dispatches ONE declared agent on a task — the name is validated against the trust contract's roster, and `model=` / `effort=` are selectable per call. | "Let the red team at this criterion", "have the critic look at my plan" — one perspective, on demand. |
-| **`/goal-swarm`** | Fans out ALL the agents (or an `agents=` subset) on one thing at once — a workflow when the harness has one, parallel dispatches otherwise — and synthesizes without flattening disagreements. `model=` / `effort=` apply to the whole swarm. | Before sealing a big goal, or when a plan deserves every perspective the contract declares, in one pass. |
+**The canonical name of every command is the namespaced form** —
+`/rot-dtd-goal:<name>` — and it works everywhere: interactive sessions,
+headless `claude -p` runs, scripts. Interactive sessions *usually* also
+resolve the short forms below when nothing else claims them; if a short form
+ever answers "Unknown command", the full form is the one to reach for.
+
+| command | full (always-works) name | what it does | when you reach for it |
+|---|---|---|---|
+| **`/goal <what you want>`** | `/rot-dtd-goal:goal` | The only one you need to start. Turns your sentence into acceptance criteria — real shell commands — seals them, and switches the gate on. | Beginning of any piece of work you want *verified*, not just attempted. |
+| **`/goal-status`** | `/rot-dtd-goal:goal-status` | Shows the goal, every criterion pass/fail, the iteration budget, and the journal tail. | "Where are we?" Also the fastest way to confirm the plugin is installed. |
+| **`/goal-verify`** | `/rot-dtd-goal:goal-verify` | Runs every acceptance criterion right now and reports. **Does not consume an iteration.** | "Would it pass if I stopped now?" — check without spending budget. |
+| **`/goal-audit`** | `/rot-dtd-goal:goal-audit` | Attacks the criteria themselves: ledger integrity, the empty-directory negative control, and the mutation probe. **Does not consume an iteration.** | "Are these checks any good?" Use it when a criterion looks too easy. |
+| **`/goal-pause`** | `/rot-dtd-goal:goal-pause` | The Stop gate goes dormant. You can end the session normally. | Interruption, meeting, end of day, or you need to ship something unrelated. |
+| **`/goal-resume`** | `/rot-dtd-goal:goal-resume` | Wakes a paused *or* human-escalated goal, and resets the iteration budget and stall detector. | After a pause, or after the gate escalated to you and you have given guidance. |
+| **`/goal-abort`** | `/rot-dtd-goal:goal-abort` | Ends the goal. State stays on disk for post-mortem. Asks for confirmation if there was real progress. | The goal was wrong, or the world changed. |
+| **`/goal-agent`** | `/rot-dtd-goal:goal-agent` | Dispatches ONE declared agent on a task — the name is validated against the trust contract's roster, and `model=` / `effort=` are selectable per call. | "Let the red team at this criterion", "have the critic look at my plan" — one perspective, on demand. |
+| **`/goal-swarm`** | `/rot-dtd-goal:goal-swarm` | Fans out ALL the agents (or an `agents=` subset) on one thing at once — a workflow when the harness has one and it is pre-approved, parallel dispatches otherwise — and synthesizes without flattening disagreements. `model=` / `effort=` apply to the whole swarm. | Before sealing a big goal, or when a plan deserves every perspective the contract declares, in one pass. |
 
 ### Your first goal, start to finish
 
@@ -801,6 +808,79 @@ because a claim this tree cannot counter would not belong in it:
   people who leave a name in history may well be the persistent ones — but
   the *checks* that leave a name are the falsifiable ones, and a goal worth
   not deviating from is one that can prove it was reached.
+
+---
+
+## 🪝 The hooks — every wire, what it feeds, and what your plugin can steal
+
+The plugin wires **31** lifecycle events in `hooks/hooks.json`, and every one
+of them declares a consumer in
+[`hooks/event_consumers.tsv`](hooks/event_consumers.tsv) **or the build
+fails** — an event that only writes lines nobody reads is decoration, and
+that file is the single record of who reads what (this README deliberately
+does not restate all 31 rows; two copies of one truth is a disagreement
+waiting to happen). The architecture is two tiers:
+
+**The eleven decision-bearing wires** — events where a script *acts*:
+
+| event(s) | script | what it decides |
+|---|---|---|
+| `Stop` | `stop_gate.sh` | the whole point: re-runs every criterion, audits the ledger, runs the red team / mutation / flake gates, watches its own clock (LAW.18), and only exit-0 evidence ends the session |
+| `PreToolUse` (Write/Edit/Bash…) | `guard.sh` | the tamper boundary: denies writes into `.claude/goal/*` — passes are earned, never written — while reads (including `2>/dev/null` plumbing) stay free |
+| `PostToolUse`, `FileChanged` | `post_tool.sh` | dependency-scoped freshness: an edit invalidates exactly the criteria that declared the touched file |
+| `PreCompact` | `snapshot.sh` | writes `snapshot.md` (+ a ring of `GF_SNAPSHOT_KEEP` predecessors) so a goal survives losing its transcript |
+| `SessionStart`, `PostCompact` | `context.sh` | re-injects the persisted goal into a fresh or compacted context — the reason a goal survives a restart |
+| `UserPromptSubmit` | `context.sh` | keeps the active goal visible at every human turn |
+| `PermissionDenied`, `PostToolUseFailure`, `Elicitation` | `gf_friction_since_last_cycle` | friction telemetry that reaches the gate's stall reasoning — repeated tool pain counts as evidence of a stuck loop |
+
+**The twenty forensic wires** (`SubagentStart/Stop`, `TaskCreated/Completed`,
+`SessionEnd`, `Notification`, `WorktreeCreate/Remove`, …) all feed
+`journal_event.sh`: one rate-limited line each into the journal, the single
+record. None of them *decides* anything, and the consumers file states **why
+acting on each would be wrong**, per event — that column is the part reviews
+kept asking for.
+
+### Tips & tricks for your own plugin — whatever its lineage
+
+Community notes from Nova-Violet Role, paid for in the bench campaign; steal
+freely, the licence means it:
+
+1. **Never re-declare `hooks/hooks.json` in your manifest.** Claude Code
+   auto-loads the standard path, and a manifest `"hooks"` key pointing at it
+   is rejected as a duplicate — the whole plugin fails to load. Our 1.0.0
+   shipped exactly this defect; 2.0.0 exists because of it.
+2. **Hook timeouts fail OPEN.** When the harness kills your hook at its
+   `timeout`, the action you meant to gate simply proceeds. If your hook
+   *decides* anything, watch your own clock and emit your refusal **before**
+   the harness can kill you (our `GF_GATE_BUDGET` sits 60s under the hook
+   timeout). Measured the hard way: a gate killed at 300s let a session end
+   unverified.
+3. **A `PreToolUse` matcher must deny writes, never reads.** The `>` inside
+   `2>/dev/null` and `2>&1` is stderr plumbing, not a write — scrub those
+   forms before testing for redirection, or you will deny `cat`. Seven false
+   denials in one measured bench, all reads.
+4. **Quote the root:** `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/x.sh` — the
+   unquoted form breaks on the first path with a space.
+5. **Wire nothing you do not consume.** Keep a consumers file mapping every
+   event to the script that reads it and make your CI fail on drift —
+   otherwise your hook list rots into decoration nobody can trust.
+6. **Rate-limit the chatty events.** `MessageDisplay` and `PostToolBatch`
+   fire constantly; journal them through a minimum-interval gate (ours:
+   `GF_EVENT_MIN_INTERVAL`, default 30s) or your own record drowns you.
+7. **Fence what you echo.** Anything a hook feeds back into the model's
+   context that originated outside your code — command output, file
+   contents — can impersonate you. Prefix every line, neutralize your own
+   fence terminator inside the data, and declare your verdict vocabulary
+   somewhere a test can attack it.
+8. **Decide with JSON, not with silence.** A deciding hook should exit 0
+   with an explicit `{"decision":"block","reason":…}` or
+   `permissionDecision` payload; reserve silent exits for "not my
+   business". Every refusal should carry the next step — a wall teaches the
+   model to stop trying, which is the failure you wired the hook to prevent.
+9. **Hooks are stateless; the disk is the state.** Each invocation is a
+   fresh process — read everything from your state directory, write
+   atomically (`tmp` + `mv`), and let plain text win: our whole engine is
+   `cat`-readable on purpose.
 
 ---
 
