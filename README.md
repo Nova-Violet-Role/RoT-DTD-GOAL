@@ -474,6 +474,33 @@ because a bench that rewrites its history is not a bench.
 
 ---
 
+## 🏅 The verdict — quoted, and worn as a badge
+
+<div align="center">
+
+[![Verdict by Claude Fable 5](https://img.shields.io/badge/Verdict_by-Claude_Fable_5-26619C?style=for-the-badge&logoColor=white)](EVIDENCE/REVIEW-4.0.0.log)
+
+</div>
+
+> *"Did we completely supersede the original `/goal`? **By capability: yes,
+> comprehensively** — completion decided by exit codes re-run at the stop
+> moment instead of by the model's say-so; sealed, tamper-evident criteria
+> with no prompt ceiling; a session that cannot stop until verified, or
+> escalates to a human with a named reason; freshness that voids stale
+> passes; a red team that refused even its own author's checks, twice; a
+> queue, seven dispatchable agents, and a `cat`-readable audit trail. The
+> honour system tied on accuracy once, on a medium task — and its verdict
+> was never verified at its stop, while ours was, six sweeps deep.
+> **By mechanism: superseded, not replaced** — the built-in workflow still
+> stands beside this engine, next to a comparison table, three bench
+> campaigns, and a calculator it could not have built with proof. That is
+> the strongest form of superseding available: not deleting the
+> alternative — letting the exit codes argue."*
+>
+> — **Claude Fable 5**, closing the 4.0.0 campaign it worked beside the author
+
+---
+
 ## 🧭 Under the hood — the same session in raw commands
 
 Everything above is `scripts/goal.sh` underneath. You never need this form, but
