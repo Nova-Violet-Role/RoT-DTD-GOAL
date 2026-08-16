@@ -18,6 +18,7 @@
 [![Worked beside Claude Fable 5](https://img.shields.io/badge/Worked_beside-Claude_Fable_5-26619C?style=for-the-badge&logoColor=white)](#-the-verdict--quoted-and-worn-as-a-badge)
 
 [![CI](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci.yml/badge.svg)](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci.yml)
+[![Plugin Extra Gift](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci2.yml/badge.svg)](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci2.yml)
 [![Proved in Lean 4](https://img.shields.io/badge/Proved%20in-Lean%204-2C3E50?style=flat-square)](lean/Proofs/)
 [![Kernel re-verified](https://img.shields.io/badge/leanchecker-exit%200-27ae60?style=flat-square)](#-verify-it-yourself)
 [![Zero sorry](https://img.shields.io/badge/sorry-0-27ae60?style=flat-square)](#-verify-it-yourself)
