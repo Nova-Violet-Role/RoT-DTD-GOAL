@@ -32,9 +32,9 @@ result is typed anywhere in this repository — see [the thing that rotted](#the
 bash tests/run_tests.sh ; echo "exit=$?"
 
 # this tree against its own attestation, then the same after a tamper
-bash scripts/attest.sh --verify EVIDENCE/ATTESTATION.txt ; echo "exit=$?"
+bash scripts/attest.sh --verify ATTESTATION.txt ; echo "exit=$?"
 printf '\n# tamper\n' >> scripts/lib.sh
-bash scripts/attest.sh --verify EVIDENCE/ATTESTATION.txt ; echo "exit=$?"   # 1, naming the field
+bash scripts/attest.sh --verify ATTESTATION.txt ; echo "exit=$?"   # 1, naming the field
 
 # the trust contract: is every declared verdict really emitted?
 bash scripts/goal.sh contract --verify ; echo "exit=$?"

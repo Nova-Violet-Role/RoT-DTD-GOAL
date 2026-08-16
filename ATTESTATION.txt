@@ -10,12 +10,12 @@ GF_HOOK_EVENTS=31
 GF_CONSUMER_ROWS=31
 GF_LEAN_MODULES=5
 GF_LEAN_THEOREMS=73
-tree.sha256=20de16fda04b908d44262fb22931149d66b2c289d2cc6069c1172fdd50b417e2
+tree.sha256=274b176013a4917dcb888d530a9c1518b1f8153f19e251babe92e300fc7d62fd
 
 # environment measured at generation time -- expected to differ on
 # your machine, and not compared by --verify
-bash=5.2.37(1)-release
-uname=MINGW64_NT-10.0-19045
+bash=5.2.21(1)-release
+uname=Linux
 tool.awk=present
 tool.sed=present
 tool.grep=present

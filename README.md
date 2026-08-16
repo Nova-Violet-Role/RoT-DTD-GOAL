@@ -628,11 +628,11 @@ Nothing here asks for trust. Every claim below has a command.
 bash tests/run_tests.sh ; echo "exit=$?"
 
 # 2. the attestation: does this tree match what it says about itself?
-bash scripts/attest.sh --verify EVIDENCE/ATTESTATION.txt ; echo "exit=$?"
+bash scripts/attest.sh --verify ATTESTATION.txt ; echo "exit=$?"
 
 # 3. break something on purpose and watch it refuse
 printf '\n# tamper\n' >> scripts/lib.sh
-bash scripts/attest.sh --verify EVIDENCE/ATTESTATION.txt ; echo "exit=$?"   # -> 1, naming the drift
+bash scripts/attest.sh --verify ATTESTATION.txt ; echo "exit=$?"   # -> 1, naming the drift
 git checkout scripts/lib.sh
 
 # 4. the trust contract: is every declared verdict really emitted?
