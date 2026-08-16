@@ -946,14 +946,42 @@ Greek** (`͵θϡϟθ`), and **Egyptian hieroglyphic** (`𓆼𓍢𓎆𓏺`) — w
 auto-detecting parser, mixed-system expression evaluation, a CLI, and a
 **Slint** graphical UI. It exists for one reason: to show the plugin doing a
 real, multi-file, compiled-language build end to end.
-`/rot-dtd-goal:goal` drove the whole thing against ten sealed criteria —
-planner first, forty-two engine tests, the red team at green, a contract
-audit at the close — and
-[`extra/trinum-calc/BUILD.md`](extra/trinum-calc/BUILD.md) tells that story
-straight from the journal shipped in [`EVIDENCE/extra/`](EVIDENCE/extra/).
 The three-OS claim is measured by its own workflow, **Plugin Extra Gift**
-(`.github/workflows/ci2.yml`) — deliberately separate from the plugin's CI,
-so a gift can never redden the gate.
+(`.github/workflows/ci2.yml`) — all three legs green: build, the engine's
+test families, and the CLI's answers byte-for-byte — deliberately separate
+from the plugin's CI, so a gift can never redden the gate.
+
+### The documented run — how `/rot-dtd-goal:goal` carried the build
+
+Every claim below comes from the journal shipped in
+[`EVIDENCE/extra/`](EVIDENCE/extra/), and the same story travels with the
+crate in [`extra/trinum-calc/BUILD.md`](extra/trinum-calc/BUILD.md).
+
+**The goal, as sealed.** One sentence — *build trinum per SPEC.md* — became
+**ten sealed criteria**: the workspace build, four `cargo test` families
+(roman, greek, egyptian, mixed-system eval), three CLI answers checked
+byte-for-byte (`XIV + VI` in Roman is `XX`, `X * X` in Greek is `ρ`,
+`V + V` in Egyptian is `𓎆`), the error path (`XIIII` refused **by name**),
+and `cargo check` on the Slint UI. Each was hashed into the integrity ledger
+before any code existed — and the Slint criterion was sealed only after a
+probe proved Slint compiles in the build environment, because a criterion
+the environment cannot satisfy is a wall, not a check.
+
+**The build, as the journal tells it:**
+
+- `goal-planner` was summoned on SPEC.md **before a line of Rust existed**
+  (`SubagentStart` 18:31:16).
+- Nine seconds later the gate refused the empty start: `BLOCK iter=1/10
+  fail=10` — all ten failures, targeted feedback, the next step.
+- The engine grew test-first — forty-two tests across the three numeral
+  systems and the evaluator — then the CLI, then the Slint window, a thin
+  shell over an engine that holds all logic.
+- At all-green the roster attacked it: `goal-redteam` re-ran every sealed
+  criterion against an empty directory (`REDTEAM manual weak=0`), and
+  `goal-contract-auditor` closed the session with a records audit.
+- `COMPLETE all 10 criteria passed` at 18:47:58 — and per the engine's law,
+  every criterion was re-run **at that exact moment**. The gate let the
+  session end only then. Done was proven, not promised.
 
 <details>
 <summary><b>🎞️ The build, gate by gate — open to watch the plugin work</b></summary>
