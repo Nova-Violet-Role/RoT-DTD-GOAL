@@ -9,6 +9,5 @@
   },
   "homepage": "https://github.com/Nova-Violet-Role/RoT-DTD-GOAL",
   "license": "AGPL-3.0-or-later OR EUPL-1.2",
-  "keywords": ["goal", "orchestration", "verification", "stop-hook", "autonomy", "bash", "no-dependencies", "tamper-evident", "adversarial-verification", "mutation-testing", "lean4", "formal-verification", "prompt-injection", "dtd"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["goal", "orchestration", "verification", "stop-hook", "autonomy", "bash", "no-dependencies", "tamper-evident", "adversarial-verification", "mutation-testing", "lean4", "formal-verification", "prompt-injection", "dtd"]
 }

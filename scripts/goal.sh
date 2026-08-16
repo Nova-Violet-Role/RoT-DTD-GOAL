@@ -181,7 +181,7 @@ cmd_mutate() {
   if [ "$rc" -ne 0 ]; then
     echo "A criterion kept passing after the files it claims to depend on were damaged."
     echo "Either its --deps are wrong, or the check does not test what its description says."
-    echo "A partial score (e.g. 2/3 -- survived: corrupt) means the check notices the file"
+    echo "A partial score (e.g. SURVIVED 1/3 -- survived: corrupt) means the check notices the file"
     echo "disappearing but not the file LYING. Read the content, not the inode."
     return 1
   fi

@@ -386,9 +386,9 @@ test_mutation_probe() {
   out="$(G mutate)"; rc=$?
   assert_ne "mutate: exits nonzero when any operator is survived" "$rc" "0"
   assert_contains "mutate: content check killed by all three operators" "$out" "STRONG KILLED   3/3"
-  assert_contains "mutate: existence check survives corruption (v3.1 finding)" "$out" "MEDIUM SURVIVED 2/3"
+  assert_contains "mutate: existence check survives corruption (v3.1 finding)" "$out" "MEDIUM SURVIVED 1/3"
   assert_contains "mutate: and names which operator it survived" "$out" "survived: corrupt"
-  assert_contains "mutate: blind criterion survives everything" "$out" "BLIND SURVIVED 0/3"
+  assert_contains "mutate: blind criterion survives everything" "$out" "BLIND SURVIVED 3/3"
   # v3.5: undeclared deps are now INFERRED and probed, and the label says so.
   # The old expectation (SKIPPED) was the confessed blind spot, not a feature.
   assert_contains "mutate: undeclared deps are probed by inference" \
@@ -413,7 +413,7 @@ test_mutation_probe() {
   # decoration. A content check dies under it; an existence check does not.
   out="$(G mutate --ops corrupt)"; rc=$?
   assert_contains "mutate: corrupt alone kills a content check" "$out" "STRONG KILLED   1/1"
-  assert_contains "mutate: corrupt alone is survived by an existence check" "$out" "MEDIUM SURVIVED 0/1"
+  assert_contains "mutate: corrupt alone is survived by an existence check" "$out" "MEDIUM SURVIVED 1/1"
   out="$(G mutate --nonsense 2>&1)"; rc=$?
   assert_ne "mutate: an unknown flag is refused, not ignored" "$rc" "0"
   assert_contains "mutate: and says which flag" "$out" "--nonsense"
@@ -1597,14 +1597,19 @@ test_the_plugin_installs_as_declared() {
     *) bad "plugin: marketplace.json names the same plugin" "marketplace names: [$mname]" ;;
   esac
 
-  # 2. the hooks entrypoint the manifest declares must exist
+  # 2. hooks/hooks.json is loaded AUTOMATICALLY by Claude Code, and a manifest
+  #    that declares it AGAIN is rejected as a duplicate -- the whole plugin
+  #    fails to load ("Duplicate hooks file detected", observed on 2.1.233).
+  #    So the assertion is the OPPOSITE of what it was through 1.0.0: the
+  #    standard file must ship, and plugin.json must not name it a second time.
   local hooks_rel hooks_abs
   hooks_rel="$(gf_json_str "$pj" hooks)"
-  hooks_abs="$root/${hooks_rel#./}"
-  [ -n "$hooks_rel" ] && ok "plugin: plugin.json declares a hooks file" \
-    || bad "plugin: plugin.json declares a hooks file" "no hooks key"
-  [ -f "$hooks_abs" ] && ok "plugin: the declared hooks file exists ($hooks_rel)" \
-    || bad "plugin: the declared hooks file exists" "no such file: $hooks_abs"
+  hooks_abs="$root/hooks/hooks.json"
+  [ -z "$hooks_rel" ] && ok "plugin: plugin.json does not re-declare the auto-loaded hooks file" \
+    || bad "plugin: plugin.json does not re-declare the auto-loaded hooks file" \
+           "hooks key present ($hooks_rel) -- Claude Code rejects the duplicate and the plugin fails to load"
+  [ -f "$hooks_abs" ] && ok "plugin: the standard hooks file ships (hooks/hooks.json)" \
+    || bad "plugin: the standard hooks file ships" "no such file: $hooks_abs"
 
   # 3. every script a hook invokes must actually ship. This is the assertion
   #    that would have caught a rename that missed one wiring.
@@ -2964,26 +2969,26 @@ test_semantic_mutation_operators() {
   local out
   out="$(G mutate --ops constflip)"
   assert_contains "semantic: constflip kills a constant check" "$out" "CONST KILLED   1/1"
-  assert_contains "semantic: constflip is survived by a shape check" "$out" "SHAPE SURVIVED 0/1"
+  assert_contains "semantic: constflip is survived by a shape check" "$out" "SHAPE SURVIVED 1/1"
   out="$(G mutate --ops negate)"
   assert_contains "semantic: negate kills a decision check" "$out" "LOGIC KILLED   1/1"
-  assert_contains "semantic: negate leaves the constant intact" "$out" "CONST SURVIVED 0/1"
+  assert_contains "semantic: negate leaves the constant intact" "$out" "CONST SURVIVED 1/1"
   out="$(G mutate --ops hunk)"
   assert_contains "semantic: hunk removal kills a middle-line check" "$out" "LOGIC KILLED   1/1"
-  assert_contains "semantic: hunk leaves the file present and non-empty" "$out" "SHAPE SURVIVED 0/1"
+  assert_contains "semantic: hunk leaves the file present and non-empty" "$out" "SHAPE SURVIVED 1/1"
   # aliases expand, and `all` is strictly stronger than `structural`
   out="$(G mutate --ops all)"
   assert_contains "semantic: --ops all expands to six operators" "$out" "operators: delete truncate corrupt constflip negate hunk"
   # measured, not assumed: `test -s` also survives corrupt (rot13 keeps the file
-  # non-empty), so the score is 2/6 -- only delete and truncate reach it
-  assert_contains "semantic: a shape check survives 4 of 6 operators" "$out" "SHAPE SURVIVED 2/6"
+  # non-empty), so the survivor score is 4/6 -- only delete and truncate reach it
+  assert_contains "semantic: a shape check survives 4 of 6 operators" "$out" "SHAPE SURVIVED 4/6"
   assert_contains "semantic: names every operator it survived" "$out" "survived: corrupt,constflip,negate,hunk"
-  assert_contains "semantic: a constant check survives the decision operators" "$out" "CONST SURVIVED 4/6 operators (declared deps) -- survived: negate,hunk"
+  assert_contains "semantic: a constant check survives the decision operators" "$out" "CONST SURVIVED 2/6 operators (declared deps) -- survived: negate,hunk"
   out="$(G mutate --ops semantic)"
   assert_contains "semantic: --ops semantic alias" "$out" "operators: constflip negate hunk"
   out="$(G mutate --ops structural)"
   assert_contains "semantic: --ops structural alias" "$out" "operators: delete truncate corrupt"
-  assert_contains "semantic: structural alone rates a shape check 2/3" "$out" "SHAPE SURVIVED 2/3 operators (declared deps) -- survived: corrupt"
+  assert_contains "semantic: structural alone rates a shape check 1/3 survived" "$out" "SHAPE SURVIVED 1/3 operators (declared deps) -- survived: corrupt"
   assert_contains "semantic: structural alone rates a constant check 3/3" "$out" "CONST KILLED   3/3"
   # the real tree is never touched by any operator
   assert_contains "semantic: the real config is unchanged" "$(cat "$CLAUDE_PROJECT_DIR/cfg.sh")" "TIMEOUT=30"

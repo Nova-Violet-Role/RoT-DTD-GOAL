@@ -1019,14 +1019,14 @@ gf_mutate_all() {
   local id survived=0 rc op killed total lived skip ops src
   ops="$(gf_expand_ops "$GF_MUTATE_OPS")"
   for id in $(crit_ids); do
-    killed=0; total=0; lived=""; skip=""
+    killed=0; total=0; lived=""; lived_n=0; skip=""
     # An inferred probe must never be mistaken for a declared one: the reader
     # has to know whether the criterion made the claim or the engine guessed it.
     if [ -n "$(crit_field "$id" deps)" ]; then src="declared deps"; else src="deps INFERRED from the command"; fi
     for op in $ops; do
       gf_mutation_probe "$id" "$op"; rc=$?
       case "$rc" in
-        0) total=$((total + 1)); lived="${lived}${lived:+,}$op" ;;
+        0) total=$((total + 1)); lived_n=$((lived_n + 1)); lived="${lived}${lived:+,}$op" ;;
         1) total=$((total + 1)); killed=$((killed + 1)) ;;
         2) skip="no-files-nameable: nothing was declared in --deps and the command names no file that exists, so there is nothing to damage. Checks in this class are covered from the other side by the empty-dir control (goal.sh redteam)." ;;
         3) skip="project-too-large (>$GF_MUTATE_MAX_FILES files)" ;;
@@ -1040,7 +1040,11 @@ gf_mutate_all() {
     elif [ -z "$lived" ]; then
       echo "$id KILLED   $killed/$total operators ($src; every mutation made it fail)"
     else
-      echo "$id SURVIVED $killed/$total operators ($src) -- survived: $lived"
+      # The number is the SURVIVOR count -- the same thing the list names.
+      # Through 1.0.0 this printed the KILL count after the word SURVIVED, so
+      # "SURVIVED 1/6 -- survived: truncate,corrupt,constflip,negate,hunk"
+      # showed five survivors labelled as one.
+      echo "$id SURVIVED $lived_n/$total operators ($src) -- survived: $lived"
       survived=1
     fi
   done

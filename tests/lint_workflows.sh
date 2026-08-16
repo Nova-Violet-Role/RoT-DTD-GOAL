@@ -132,7 +132,12 @@ done
 #    only a parser can. yq first, then ruby's built-in psych. Not python.
 count
 parser=""
-if   command -v yq   >/dev/null 2>&1; then parser="yq"
+if   command -v yq   >/dev/null 2>&1; then
+  # Two unrelated tools ship under the name `yq`: mikefarah's Go yq, which
+  # wants `yq eval '.' FILE`, and kislyuk's Python jq-wrapper, which reads
+  # `eval` as the FILTER and `.` as a FILENAME -- so the Go invocation
+  # "fails" on YAML that is fine. Found on a machine with the Python one.
+  if yq --version 2>&1 | grep -qi mikefarah; then parser="yq-go"; else parser="yq-py"; fi
 elif command -v ruby >/dev/null 2>&1; then parser="ruby"
 fi
 printf '\n== parse ==\n'
@@ -141,7 +146,8 @@ if [ -n "$parser" ]; then
   for wf in "$WFDIR"/*.yml "$WFDIR"/*.yaml; do
     [ -f "$wf" ] || continue
     case "$parser" in
-      yq)   yq eval '.' "$wf" >/dev/null 2>&1 || { bad "yq cannot parse ${wf#$ROOT/}"; perr=1; } ;;
+      yq-go) yq eval '.' "$wf" >/dev/null 2>&1 || { bad "yq cannot parse ${wf#$ROOT/}"; perr=1; } ;;
+      yq-py) yq '.' "$wf" >/dev/null 2>&1 || { bad "yq cannot parse ${wf#$ROOT/}"; perr=1; } ;;
       ruby) ruby -ryaml -e 'YAML.unsafe_load_file(ARGV[0]) rescue YAML.load_file(ARGV[0])' "$wf" >/dev/null 2>&1 \
               || { bad "ruby/psych cannot parse ${wf#$ROOT/}"; perr=1; } ;;
     esac
