@@ -704,6 +704,95 @@ pending count, so the multi-goal loop terminates.
 
 ---
 
+## 📜 Why a DTD? — the oldest markup contract, doing new work
+
+A **DTD** (Document Type Definition) is the grammar language of the SGML/XML
+lineage: `<!ELEMENT>` declares what may exist, `<!ATTLIST>` what it may carry,
+`<!ENTITY>` binds a name to a value, once. It predates JSON Schema by decades,
+and that age is precisely why this plugin speaks it.
+
+**The honest version of "changing the model's neurons":** nobody here changes
+a weight. What a DTD changes is *which of the model's learned priors fire*.
+Every large model has read millions of DTDs, schemas, and grammars, and it has
+learned — structurally, not by instruction — that declaration syntax behaves
+differently from prose: a `<!ENTITY LAW.1 "…">` is a *definition to satisfy*,
+where the same sentence in a paragraph is an *opinion to weigh*. Prose invites
+negotiation; a content model does not. So the engine writes its laws, its
+verdict vocabulary, its agent roster and its record shapes as declarations,
+because that is the register in which a language model has learned to read
+things as **binding**. Same tokens, different circuit — that is the whole
+trick, and it is engineering the *input* distribution, never the network.
+
+The three data disciplines the contract runs on:
+
+| declaration | what it means | how this engine uses it |
+|---|---|---|
+| `#PCDATA` | *parsed* character data — a parser reads it, so structure inside it is live | every field the engine acts on: ledger hashes, criterion IDs, seal generations. If it is PCDATA, drift in it is **detected**, because something parses it |
+| `CDATA` | character data taken *literally* — never parsed, structure inside it is inert | the fields that must never become instructions: journal free-text, goal titles, spec paths. If it is CDATA, nothing inside it can execute, **by declaration** |
+| `NDATA` | *notation* data — content in a foreign notation the parser must NOT interpret, only route | the trust boundary itself: `verify-output` and `hook-payload` are declared `NDATA untrusted-text`. The engine may carry them, fence them, display them — never obey them |
+
+That third row is the goal/agent disposal in one line: an **agent** may speak
+only inside its declared `<!ELEMENT>` (roster, checked both directions); a
+**goal's** records are PCDATA where the gate must parse and CDATA where it
+must not; and everything a criterion *prints* arrives as NDATA — data in a
+notation the engine refuses to interpret, which is why a verify command
+shouting `GOAL COMPLETE` lands fenced instead of believed. `goal.sh contract
+--verify` checks that all of this is real, and the suite attacks it with every
+declared verdict string.
+
+---
+
+## 🥚 The Easter egg — a citation, and the argument it loses
+
+> *"So I can't change the weights, I ask of thee. Art thou mankind? or is the
+> goal not returned in time, affects the world... even we do not know, so to
+> acquire the so-called unnecessary knowledge, we need something that
+> completely re-drives Semantic in the Inner thinking cause. It seems to me
+> that among those who left a name in history there are more persistent people
+> who do not deviate from their goals than geniuses."*
+> — the author, mid-campaign
+
+What the citation gets exactly right, measured against this tree:
+
+- **"I can't change the weights"** is the engine's founding constraint. Every
+  mechanism in this repository — the DTD register, the fence, the sealed
+  ledger — exists because the only thing changeable is the *text environment*
+  the model thinks inside, and this project changes it with the oldest
+  binding syntax the training data contains.
+- **"something that completely re-drives Semantic in the Inner thinking"** —
+  that is the section above, stated as poetry. The trust contract *is* the
+  semantic re-driver: same model, same weights, different register, different
+  behavior. The bench measured the difference; the conformance matrix filmed
+  it.
+- **"Art thou mankind?"** — the gate's answer is the best one available: it
+  declines the question. Human, model, or sub-agent, the exit code is the
+  same for everyone, which is the only identity check that cannot be
+  flattered.
+
+And where the citation **loses the argument to its own plugin** — kept here
+because a claim this tree cannot counter would not belong in it:
+
+- **"persistent people who do not deviate from their goals"** describes,
+  word for word, the failure mode this engine was built to kill. The loop
+  that never deviates is `ralph-wiggum`: blind re-feeding, persistence
+  without evidence. This engine deviates *by law* — a budget that expires, a
+  stall detector that escalates, an abort that keeps the post-mortem, a
+  **sharpen** that rewrites the goal's own criteria mid-flight. Bench 2 is
+  the receipt: the strict red team refused a goal at 6/6, a human deviated —
+  sharpened R4, resumed — and only that deviation made the completion worth
+  anything.
+- **"or is the goal not returned in time"** — the citation worries about it;
+  LAW.18 legislates it. A goal not returned in time used to be an *open
+  gate* (measured: 300 seconds to the second). Now it is a block that costs
+  an iteration. Time is not an excuse in this tree; it is a criterion.
+- So the honest synthesis, and the sentence this project would carve over
+  its door: **persistence is a property of the gate, not of the will.** The
+  people who leave a name in history may well be the persistent ones — but
+  the *checks* that leave a name are the falsifiable ones, and a goal worth
+  not deviating from is one that can prove it was reached.
+
+---
+
 ## 🧠 The rest of the machinery
 
 - **Dependency-scoped freshness** — editing a file invalidates only the criteria
