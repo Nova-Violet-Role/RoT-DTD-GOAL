@@ -1727,6 +1727,29 @@ test_portable_to_a_stranger_machine() {
     bad "portable control: the scanner stays silent once the apostrophe is gone" "false alarm on a clean file"
   fi
 
+  # 4d. every repository path the CI workflow NAMES must exist. CI is the one
+  #     file whose mistakes are invisible until a push, and a blanket
+  #     search-and-replace is how they get in: renaming `EVIDENCE/lean` to
+  #     `lean/Proofs` across the tree also rewrote `EVIDENCE/lean-instruments.log`
+  #     into `lean/Proofs-instruments.log`, which no local run could notice and
+  #     which failed the evidence job on the next push. Globs and workflow
+  #     expressions are skipped -- they are not claims about a path on disk.
+  local ci_path ci_missing=0 ci_seen=0
+  if [ -f "$ci" ]; then
+    for ci_path in $(grep -oE '(EVIDENCE|lean|docs|scripts|tests|hooks|agents|commands)/[A-Za-z0-9_./-]+' "$ci" | sort -u); do
+      case "$ci_path" in *'*'*|*'{'*|*'$'*) continue ;; esac
+      ci_seen=$((ci_seen + 1))
+      if [ ! -e "$root/$ci_path" ]; then
+        ci_missing=$((ci_missing + 1))
+        bad "repo: CI names an existing path ($ci_path)" "no such file or directory"
+      fi
+    done
+    [ "$ci_seen" -ge 5 ] \
+      && ok "repo: $ci_seen repository paths named by CI were checked" \
+      || bad "repo: CI names repository paths" "only $ci_seen found -- needle may have rotted"
+    [ "$ci_missing" -eq 0 ] && ok "repo: every path the CI workflow names exists on disk"
+  fi
+
   # 5b. the community health files. A stranger arriving at a published
   #     repository looks for these in a fixed place; GitHub only recognises
   #     them at the root, in `.github/`, or in `docs/`. Presence is the weak

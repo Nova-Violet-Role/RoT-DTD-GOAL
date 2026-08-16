@@ -181,7 +181,7 @@ jobs:
           rc=0
           for f in EVIDENCE/differential.log EVIDENCE/mutation-shell.log \
                    lean/mutate/mutation-lean.log EVIDENCE/flaky-policy-experiment.log \
-                   lean/Proofs-instruments.log EVIDENCE/bench.log \
+                   EVIDENCE/lean-instruments.log EVIDENCE/bench.log \
                    EVIDENCE/suite-tail.log EVIDENCE/dogfood/journal.log \
                    EVIDENCE/dogfood/ledger; do
             if [ ! -s "$f" ]; then echo "MISSING OR EMPTY: $f"; rc=1

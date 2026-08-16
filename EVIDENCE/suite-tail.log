@@ -3,7 +3,7 @@
   ok   evidence: every published artefact ships and is non-empty
   ok   evidence: 4 Lean sources are published, not just their transcript
   ok   plugin: the name check can detect a mismatch (negative control)
-      0s
+      1s
 [55/57] test_records_are_append_only
   ok   schema: the declaration verifies against the tree
   ok   schema: every record is checked
@@ -56,5 +56,5 @@
   ok   refusals: the gate never tells the reader to stop trying
       4s
 
-passed: 665   failed: 0
+passed: 667   failed: 0
 ALL GREEN
