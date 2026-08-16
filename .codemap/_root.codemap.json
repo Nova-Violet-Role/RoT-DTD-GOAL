@@ -1,0 +1,357 @@
+{
+  "directory": "",
+  "files": {
+    "CHANGELOG.md": {
+      "hash": "88a735f31b4a",
+      "indexed_at": "2026-08-16T01:23:54.104351+00:00",
+      "language": "markdown",
+      "lines": 196,
+      "mtime_ns": 1786843432248756400,
+      "size": 11882,
+      "symbols": [
+        {
+          "children": [
+            {
+              "docstring": "- **`test_every_law_is_enforced` crashed on Linux and macOS.** It read `$TMP`, a MINGW-only variable; with `set -u` the case died. Now `${TMPDIR:-/tmp",
+              "lines": [
+                29,
+                44
+              ],
+              "name": "Fixed \u2014 the fourth review's blockers",
+              "type": "subsection"
+            },
+            {
+              "docstring": "- **`.gitattributes` with `* text=auto eol=lf`.** Every archive this project ever shipped measured **zero** carriage returns \u2014 re-measured across v3.3",
+              "lines": [
+                45,
+                72
+              ],
+              "name": "Added",
+              "type": "subsection"
+            },
+            {
+              "docstring": "The three markup shapes were being used as *instruments*; now they are the engine's grammar, and each is machine-checked.",
+              "lines": [
+                73,
+                113
+              ],
+              "name": "Added \u2014 the declaration layer earns its name",
+              "type": "subsection"
+            },
+            {
+              "docstring": "- Version labels in shipped artefacts say `1.0.0`; the `v2 \u2192 v3.6` lineage is mapped below. - **`REVIEW.md` moved to `docs/`; `AMPLIFY.md` removed.**",
+              "lines": [
+                114,
+                127
+              ],
+              "name": "Changed",
+              "type": "subsection"
+            },
+            {
+              "docstring": "Renamed from `goal-forge` to **RoT DTD GOAL**; published under the Nova-Violet Role organisation with a `marketplace.json`.",
+              "lines": [
+                128,
+                167
+              ],
+              "name": "Added \u2014 the engine (question: how many goals, and who may speak?)",
+              "type": "subsection"
+            },
+            {
+              "docstring": "- **No Linux or macOS suite tail from the author's machine.** There is no Linux runtime reachable here: the only WSL distro is Docker Desktop's LinuxK",
+              "lines": [
+                168,
+                182
+              ],
+              "name": "Not done, and why",
+              "type": "subsection"
+            }
+          ],
+          "docstring": "**The first public release.** Two questions, answered in one version because nothing before this was ever published: *how many goals, and who may spea",
+          "lines": [
+            18,
+            182
+          ],
+          "name": "[1.0.0] \u2014 2026-08-16",
+          "type": "section"
+        },
+        {
+          "docstring": "The questions, in order, each raised by a review of the previous answer:",
+          "lines": [
+            183,
+            197
+          ],
+          "name": "v2 \u2192 v3.6 (development line, unpublished)",
+          "type": "section"
+        }
+      ]
+    },
+    "README.md": {
+      "hash": "e460255d9ddd",
+      "indexed_at": "2026-08-16T01:39:57.800905+00:00",
+      "language": "markdown",
+      "lines": 706,
+      "mtime_ns": 1786844278356145600,
+      "size": 35546,
+      "symbols": [
+        {
+          "docstring": "**You are welcome here, whatever you came for.** If you want your agent to stop saying \"done\" when it is not done, [start with Install](#-install) \u2014 i",
+          "lines": [
+            30,
+            44
+          ],
+          "name": "\ud83d\udc4b Welcome",
+          "type": "section"
+        },
+        {
+          "docstring": "**RoT DTD GOAL replaces the loop plugin's honour system with an exit code.**",
+          "lines": [
+            45,
+            69
+          ],
+          "name": "\ud83d\udcdc About",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "**`bash` and the standard Unix text tools.** No Python, no `jq`, no Node, no compiler, no network, no API key.",
+              "lines": [
+                90,
+                109
+              ],
+              "name": "\ud83d\udd27 Requirements",
+              "type": "subsection"
+            },
+            {
+              "lines": [
+                110,
+                138
+              ],
+              "name": "\u2699\ufe0f Configuration",
+              "type": "subsection"
+            },
+            {
+              "docstring": "Seven agents ship. Each is declared in the trust contract with the element it may speak in and the one thing it may never do, and `contract --verify`",
+              "lines": [
+                139,
+                198
+              ],
+              "name": "\ud83e\udd16 The agents, and how to configure them",
+              "type": "subsection"
+            }
+          ],
+          "lines": [
+            70,
+            198
+          ],
+          "name": "\ud83d\ude80 Install",
+          "type": "section"
+        },
+        {
+          "lines": [
+            199,
+            233
+          ],
+          "name": "\ud83e\udded A session, end to end",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "Two things about the built-in `/goal` loop are worth saying plainly, because they are not matters of polish \u2014 they are structural, and this engine is",
+              "lines": [
+                262,
+                346
+              ],
+              "name": "\ud83e\udde8 The part that is genuinely absurd",
+              "type": "subsection"
+            },
+            {
+              "docstring": "Reproduce with `bash tests/experiments/bench.sh`; the full run is in [`EVIDENCE/bench.log`](EVIDENCE/bench.log). Medians of 5, Windows/MINGW, bash 5.2",
+              "lines": [
+                347,
+                389
+              ],
+              "name": "\ud83c\udfc1 What it costs \u2014 measured, not asserted",
+              "type": "subsection"
+            }
+          ],
+          "docstring": "Claude Code ships a `/goal`-shaped workflow: state a goal, let the model work, let the model tell you when it is done. It is genuinely useful and it h",
+          "lines": [
+            234,
+            389
+          ],
+          "name": "\u26a1 Why this and not the `/goal` you already have",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "`activate` hashes every criterion and writes `ID  hash  epoch  iso  generation` to `.claude/goal/ledger`. Before the gate trusts any status, it re-has",
+              "lines": [
+                392,
+                399
+              ],
+              "name": "1. The integrity ledger \u2014 tamper *evidence*, not tamper *friction*",
+              "type": "subsection"
+            },
+            {
+              "docstring": "Every criterion is re-run inside an **EMPTY directory**. One that still passes never measured your project; `GATE_REDTEAM=strict` refuses to complete",
+              "lines": [
+                400,
+                406
+              ],
+              "name": "2. The negative control \u2014 a check that cannot fail is not a check",
+              "type": "subsection"
+            },
+            {
+              "docstring": "`--deps` says which files a criterion claims to cover. The probe copies the tree, damages those files with six operators (`--ops delete,truncate,corru",
+              "lines": [
+                407,
+                420
+              ],
+              "name": "3. The mutation probe \u2014 kill the mutant, or admit the check is blind",
+              "type": "subsection"
+            },
+            {
+              "docstring": "Each criterion learns its own verify timeout from measured history. The clamp **may only ever** grow: `EVIDENCE/lean/LearnedTimeout.lean` proves `lear",
+              "lines": [
+                421,
+                429
+              ],
+              "name": "4. Learned timeouts, and a clamp that can only ever grow",
+              "type": "subsection"
+            },
+            {
+              "docstring": "A criterion's history is scoped to **its own seal generation** \u2014 an integer that only counts up \u2014 not to a timestamp. A machine whose clock jumps back",
+              "lines": [
+                430,
+                457
+              ],
+              "name": "5. Flake detection with no clock in it",
+              "type": "subsection"
+            },
+            {
+              "docstring": "A verify command is arbitrary code. Its output used to be pasted into the feedback block indented and nothing else, so a criterion printing `GOAL COMP",
+              "lines": [
+                458,
+                472
+              ],
+              "name": "6. The engine's voice is not forgeable",
+              "type": "subsection"
+            },
+            {
+              "lines": [
+                473,
+                490
+              ],
+              "name": "7. More than one goal",
+              "type": "subsection"
+            }
+          ],
+          "lines": [
+            390,
+            490
+          ],
+          "name": "\ud83d\udd2c The seven arguments",
+          "type": "section"
+        },
+        {
+          "docstring": "- **Dependency-scoped freshness** \u2014 editing a file invalidates only the criteria that declared it, so one typo fix does not re-run the world. - **Comp",
+          "lines": [
+            491,
+            513
+          ],
+          "name": "\ud83e\udde0 The rest of the machinery",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "| claim | instrument | |---|---| | the criteria pass | their exit codes, re-run by the gate | | the criteria are the ones you sealed | the ledger's ha",
+              "lines": [
+                546,
+                575
+              ],
+              "name": "What is checked, and by what",
+              "type": "subsection"
+            }
+          ],
+          "docstring": "Nothing here asks for trust. Every claim below has a command.",
+          "lines": [
+            514,
+            575
+          ],
+          "name": "\ud83c\udf93 Verify it yourself",
+          "type": "section"
+        },
+        {
+          "docstring": "Stated here so nobody has to discover them by disappointment. Every one of these is a real limit, and each is checked in the only honest way available",
+          "lines": [
+            576,
+            599
+          ],
+          "name": "\u2696\ufe0f What this release does NOT claim",
+          "type": "section"
+        },
+        {
+          "docstring": "In rough order of how likely you are to find something. If something here survives you, say which; if something breaks, it comes back as a failing cas",
+          "lines": [
+            600,
+            625
+          ],
+          "name": "\ud83d\udd28 What to try to break",
+          "type": "section"
+        },
+        {
+          "lines": [
+            626,
+            646
+          ],
+          "name": "\ud83d\udcc1 What is in the box",
+          "type": "section"
+        },
+        {
+          "docstring": "**AGPL-3.0-or-later OR EUPL-1.2**, at your option. One licence story throughout, enforced by test: every script header, the plugin manifest and the LI",
+          "lines": [
+            647,
+            654
+          ],
+          "name": "\ud83d\udcdc License",
+          "type": "section"
+        },
+        {
+          "docstring": "This engine was built as `goal-forge` and reviewed four times by an author who did not write it. Its versions asked, in order: *who decides done?* (v2",
+          "lines": [
+            655,
+            669
+          ],
+          "name": "\ud83c\udf31 Lineage",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "*Done is proven, not promised. The exit code has the last word.*",
+              "lines": [
+                694,
+                707
+              ],
+              "name": "\ud83d\udf0f RoT DTD GOAL",
+              "type": "subsection"
+            }
+          ],
+          "docstring": "| document | what it is for | |----------|----------------| | [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) | how to send a change that will be",
+          "lines": [
+            670,
+            707
+          ],
+          "name": "Contributing, security, conduct",
+          "type": "section"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T01:39:57.800997+00:00",
+  "version": "1.0"
+}

@@ -1,0 +1,16 @@
+LEAN MUTATION LOG -- RoT DTD GOAL 1.0.0
+date: 2026-08-16 00:38:41
+rule: the stale .olean is DELETED before each rebuild -- Lake is
+      incremental and would otherwise not rebuild the mutant at all.
+
+L1 legacy rows hidden            KILLED
+L2 regression check removed      KILLED
+L3 generation compare flipped    KILLED
+L4 window dropped entirely       KILLED
+L5 dependency check removed      KILLED
+L6 scheduler ignores eligibility KILLED
+L7 progress measure flattened    KILLED
+L8 start does not advance        KILLED
+
+RESTORED_BUILD_EXIT=0
+FILES RESTORED IDENTICAL

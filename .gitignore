@@ -1,0 +1,55 @@
+# RoT DTD GOAL -- what must never enter the repository.
+#
+# The first entry is the important one. `.claude/goal/` is LIVE STATE: the
+# criteria of whatever goal is running, the ledger, the timings, the journal,
+# the output of every verify command. It is per-session and per-machine. A
+# release once swept a stale copy of it into an archive; a stranger cloning
+# that would inherit someone else's half-finished goal and a ledger sealed
+# against files they do not have.
+.claude/goal/
+.claude/goal
+**/.claude/goal/
+
+# Working scratch produced by the engine and its tests.
+*.tmp
+*.gfnew
+*.pre-*.bak
+queue-advance.err
+
+# Release staging. The archive is built by CI from `git archive`, never by hand
+# and never committed.
+/dist/
+*.zip
+
+# EVIDENCE/ IS COMMITTED, DELIBERATELY, and is NOT listed here.
+# It carries the differential runs, both mutation logs, the flake-policy
+# experiment, the bench, the dogfood journal and ledger, the Lean instrument
+# transcript and the Lean sources themselves. A plugin that asks to be trusted
+# with the Stop hook owes the reader the material it was judged on -- including
+# the runs that went badly. Nothing about how this was verified is withheld.
+
+# The Lean working directory is NOT shipped from here: the modules live in the
+# author's Mathlib workspace, and the copies that a reader can check are under
+# EVIDENCE/lean/. Ignoring this path keeps a stray local build from shipping
+# twice under two names.
+/lean/
+
+# Tool caches, session state and agent scratch -- none of it is the plugin.
+.claude/
+.codemap/
+.rot-moe/
+__pycache__/
+.DS_Store
+Thumbs.db
+
+# Editors.
+.idea/
+.vscode/
+*.swp
+*~
+
+# Lean build output (the sources ship; the artefacts do not).
+.lake/
+build/
+*.olean
+*.ilean

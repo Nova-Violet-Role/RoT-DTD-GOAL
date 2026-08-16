@@ -1,0 +1,32 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "rot-dtd-goal",
+  "description": "RoT DTD GOAL - a /goal engine where completion is earned by re-running real acceptance criteria, not declared by the model. Simultaneous verification, clock-free flake scoping, a fenced trust boundary, a dependency-ordered goal queue, and a Lean 4 specification the kernel re-verifies.",
+  "owner": {
+    "name": "Saimonokuma",
+    "url": "https://github.com/Nova-Violet-Role"
+  },
+  "plugins": [
+    {
+      "name": "rot-dtd-goal",
+      "source": "./",
+      "description": "Pure bash + coreutils. A Stop hook re-runs every acceptance criterion and refuses to let the session end until each one exits 0 -- and refuses again if the evidence is stale, if a check cannot fail, if a check kept passing while its files were damaged, or if a criterion passed and then failed against the same seal. No network, no API key, no Lean toolchain required to run it.",
+      "author": {
+        "name": "Saimonokuma",
+        "url": "https://github.com/Nova-Violet-Role"
+      },
+      "homepage": "https://github.com/Nova-Violet-Role/RoT-DTD-GOAL",
+      "category": "productivity",
+      "keywords": [
+        "goal",
+        "verification",
+        "stop-hook",
+        "lean4",
+        "formal-verification",
+        "mutation-testing",
+        "prompt-injection",
+        "bash"
+      ]
+    }
+  ]
+}

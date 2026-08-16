@@ -1,0 +1,26 @@
+goal-forge — dual-licensed
+
+SPDX-License-Identifier: AGPL-3.0-or-later OR EUPL-1.2
+
+Copyright 2026 Saimonokuma.
+
+You may use, modify and redistribute this work under EITHER:
+
+  * the GNU Affero General Public License, version 3 or (at your option) any
+    later version — https://www.gnu.org/licenses/agpl-3.0.txt
+  * the European Union Public Licence, version 1.2 —
+    https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
+pick one, or comply with both. The choice is yours; the obligation to keep
+derivatives open under the same terms is not.
+
+WHY THIS FILE EXISTS
+--------------------
+v3.3.0 shipped a license schism: `.claude-plugin/plugin.json` declared MIT
+while `lean/LearnedTimeout.lean` carried AGPL/EUPL. The v2 author's review
+caught it. One artifact, one license story — and `tests/run_tests.sh`
+(`test_license_is_one_story`) now fails the build if any shipped file
+disagrees with this one, so the schism cannot silently return.
+
+Every source file carries the SPDX identifier above. The identifier is the
+authority; this file is the human-readable copy.

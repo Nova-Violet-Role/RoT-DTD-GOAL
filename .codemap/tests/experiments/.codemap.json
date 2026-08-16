@@ -1,0 +1,70 @@
+{
+  "directory": "tests\\experiments",
+  "files": {
+    "bench.sh": {
+      "hash": "ede0bc3606c6",
+      "indexed_at": "2026-08-15T23:19:33.039181+00:00",
+      "language": "shell",
+      "lines": 172,
+      "mtime_ns": 1786835970976676600,
+      "size": 7222,
+      "symbols": [
+        {
+          "docstring": "median of the samples in $SAMPLES (space separated), integer ms",
+          "lines": [
+            35,
+            37
+          ],
+          "name": "median",
+          "type": "function"
+        },
+        {
+          "lines": [
+            39,
+            48
+          ],
+          "name": "bench",
+          "type": "function"
+        },
+        {
+          "docstring": "A GATE CYCLE NEEDS A FRESH GOAL PER SAMPLE, and this is not a detail.  The first draft of this file timed the gate R times against one goal. The first",
+          "lines": [
+            61,
+            72
+          ],
+          "name": "bench_fresh",
+          "type": "function"
+        },
+        {
+          "docstring": "---- fixtures --------------------------------------------------------------",
+          "lines": [
+            75,
+            85
+          ],
+          "name": "make_goal",
+          "type": "function"
+        }
+      ]
+    },
+    "flaky_policy.sh": {
+      "hash": "4c7b15b1930c",
+      "indexed_at": "2026-08-15T22:53:42.400498+00:00",
+      "language": "shell",
+      "lines": 102,
+      "mtime_ns": 1786834420113133800,
+      "size": 4482,
+      "symbols": [
+        {
+          "lines": [
+            28,
+            81
+          ],
+          "name": "run_goal",
+          "type": "function"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-15T23:19:33.039252+00:00",
+  "version": "1.0"
+}

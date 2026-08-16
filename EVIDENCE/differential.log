@@ -1,0 +1,22 @@
+DIFFERENTIAL LOG -- RoT DTD GOAL 1.0.0 vs goal-forge 3.5.0
+date: 2026-08-16 00:32:37
+method: the SAME case file is run against both trees via GF_ROOT=
+        exit codes read directly, never through a pipe.
+
+case                                           v1.0.0       v3.5.0      
+test_clock_cannot_hide_a_flip                  exit=0 F=0    exit=1 F=16
+test_completion_is_simultaneous                exit=0 F=0    exit=1 F=16
+test_untrusted_output_cannot_forge_a_verdict   exit=0 F=0    exit=1 F=14
+test_many_goals_run_in_order                   exit=0 F=0    exit=1 F=31
+test_every_law_is_enforced                     exit=0 F=0    exit=1 F=4
+test_forensic_events_surface                   exit=0 F=0    exit=1 F=4
+
+NOT a differential, and labelled as such in REVIEW.md:
+test_ships_no_tooling_artifacts                exit=0      exit=0   (regression guard, passes on both)
+
+v2's five original outcomes -- must still pass on BOTH:
+test_gate_block                                exit=0      exit=0
+test_gate_complete                             exit=0      exit=0
+test_gate_stall_escalate                       exit=0      exit=0
+test_gate_budget_escalate                      exit=0      exit=0
+test_guard_tamper_deny                         exit=0      exit=0

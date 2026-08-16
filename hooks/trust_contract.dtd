@@ -1,0 +1,252 @@
+<!-- RoT DTD GOAL trust contract (1.0.0)
+     SPDX-License-Identifier: AGPL-3.0-or-later OR EUPL-1.2
+     Copyright 2026 Saimonokuma.
+
+     A DTD-style declaration of the ONE thing this engine cannot afford to be
+     ambiguous about: WHO IS SPEAKING. Every string below is a verdict -- a
+     sentence only RoT DTD GOAL itself may utter. Everything a criterion, a hook
+     payload or any other command prints is data, and data goes inside a fence.
+
+     This file is not parsed by an XML processor. It is a machine-checked
+     contract: `goal.sh contract --verify` (and, in the suite,
+     test_untrusted_output_cannot_forge_a_verdict) enforces BOTH directions --
+
+       1. every VERDICT declared here is really emitted by a script, so the
+          contract cannot fill up with vocabulary nobody uses;
+       2. every declared VERDICT is provably quarantined when it arrives from
+          an untrusted channel, so a criterion printing "GOAL COMPLETE" cannot
+          put that sentence into the reader's context in the engine's voice.
+
+     Direction 1 is what keeps this file honest as the engine grows: add a new
+     banner to stop_gate.sh and forget to declare it, and the contract check
+     fails with the banner named. A contract nobody can violate is decoration.
+-->
+<!DOCTYPE rot-dtd-goal-trust [
+
+  <!-- ================= WHO MAY SPEAK ================= -->
+  <!ELEMENT verdict    (#PCDATA)>   <!-- source: scripts/stop_gate.sh, scripts/goal.sh -->
+  <!ELEMENT untrusted  (CDATA)>     <!-- source: any verify command, any hook payload -->
+  <!ATTLIST untrusted  fence CDATA #FIXED "<![GF-UNTRUSTED[ ... ]]>">
+
+  <!-- ================= THE VERDICT VOCABULARY =================
+       Each entity is a literal string. If it appears at the start of a line in
+       the engine's own voice, RoT DTD GOAL said it. If it appears inside a
+       fence, something else did, and it means nothing.
+  -->
+  <!ENTITY VERDICT.complete     "GOAL COMPLETE">
+  <!ENTITY VERDICT.refused      "COMPLETION REFUSED">
+  <!ENTITY VERDICT.ledger       "LEDGER OK">
+  <!ENTITY VERDICT.drift        "INTEGRITY DRIFT">
+  <!ENTITY VERDICT.escalate     "ESCALATE">
+  <!ENTITY VERDICT.flaky        "FLAKY WARNING">
+  <!ENTITY VERDICT.redteam      "RED TEAM WARNING">
+  <!ENTITY VERDICT.mutation     "MUTATION WARNING">
+  <!ENTITY VERDICT.attestation  "ATTESTATION OK">
+
+  <!-- ================= THE QUEUE SPEC GRAMMAR =================
+       A queued goal is a two-verb TSV file. The grammar is DECLARED here and
+       READ by scripts/goal.sh:gf_spec_validate -- it is not hardcoded in the
+       validator. Edit the content model below and the validator's behaviour
+       changes with it; test_many_goals_run_in_order proves that binding by
+       narrowing the model and watching a previously-legal spec be refused.
+
+       Cardinality is the usual one: a bare name means exactly one row, `+`
+       means one or more, `*` means any number.
+  -->
+  <!ELEMENT spec  (GOAL, CRIT+)>
+  <!ELEMENT GOAL  (#PCDATA)>   <!-- goal text <TAB> init options            -->
+  <!ELEMENT CRIT  (#PCDATA)>   <!-- id <TAB> description <TAB> verify command -->
+
+  <!-- ================= THE INSTRUCTION CHANNEL =================
+       When the queue advances, the gate is no longer reporting a result: it is
+       issuing an instruction to whoever is working the loop. That is a
+       different speech act from a verdict and it is tagged as one, so an agent
+       reading the transcript can tell "this is what happened" from "this is
+       what to do next" without inferring it from prose.
+  -->
+  <!ELEMENT gf:instruction (#PCDATA)>
+  <!ATTLIST gf:instruction
+            goal  CDATA #REQUIRED
+            step  CDATA #REQUIRED>
+
+  <!-- ================= THE IMMUTABLE LAWS =================
+       Stated as declarations because they are not preferences. Each is
+       enforced by a named case in tests/run_tests.sh; INVARIANTS.tsv maps
+       every one of them to the test that can falsify it.
+  -->
+  <!ENTITY LAW.1  "Done is proven, not promised -- completion is computed from exit codes, never from text.">
+  <!ENTITY LAW.2  "The checks are checked -- seals, negative controls, mutation.">
+  <!ENTITY LAW.3  "Feedback is targeted, never a blind re-feed.">
+  <!ENTITY LAW.4  "Every loop has an exit -- budget, stall, human.">
+  <!ENTITY LAW.5  "State stays inspectable -- a human with cat must understand it.">
+  <!ENTITY LAW.6  "The floor stays bash + coreutils.">
+  <!ENTITY LAW.7  "Instruments must be able to fail, survive hostile ground, and never lie in the reassuring direction.">
+  <!ENTITY LAW.8  "Every measurement is consumed, and every classification re-earns its place.">
+  <!ENTITY LAW.9  "A pass is evidence only if reproducible.">
+  <!ENTITY LAW.10 "Nothing on the label may be typed -- counts and claims are generated or bounded.">
+  <!ENTITY LAW.11 "No decision is made from a clock -- ordering comes from a counter that only counts up.">
+  <!ENTITY LAW.12 "Untrusted output is fenced; the engine's voice is not forgeable by the code it runs.">
+  <!ENTITY LAW.13 "A queued goal starts only after its predecessor was verified, never on a promise.">
+  <!ENTITY LAW.14 "A grammar is declared once and read by the code that enforces it.">
+  <!ENTITY LAW.15 "An on-disk record is append-only: field numbers are dense, never reused, never reordered.">
+  <!ENTITY LAW.16 "An agent may only speak in a declared element, and every declared agent exists.">
+  <!ENTITY LAW.17 "A refusal always carries a task -- the gate blocks with the next step, never with a wall.">
+
+  <!-- ================= THE RECORD SCHEMA =================
+       WHY THIS EXISTS, and it is the most-earned section in this file.
+
+       The recurring defect of this project has not been logic. It has been
+       COLUMN DRIFT. The ledger grew a fifth field (seal generation); the
+       timings file grew a sixth (gen); each time, code that read `$4` or
+       assumed "four columns" kept running and quietly meant something else,
+       and a test that asserted "a ledger row carries four columns" turned
+       from a specification into an expired snapshot that had to be deleted.
+
+       Protobuf solved this decades ago and the solution is not a serialiser:
+       it is a DISCIPLINE. Fields are NUMBERED, numbers are NEVER reused, and
+       new fields are only ever APPENDED -- so an old reader and a new writer
+       still agree about what field 3 means. That discipline is what is
+       declared here, in DTD form, over plain TSV files a human can still cat.
+
+       Each field is `<number>=<name>:<content-model>@<since>`:
+         PCDATA -- structured text the engine parses (ids, integers, statuses)
+         CDATA  -- raw text that may contain anything, never interpreted as
+                   markup or instruction (descriptions, commands, goal text)
+         @since -- the version the field first appeared in
+
+       `goal.sh schema --verify` enforces, mechanically:
+         1. numbers are dense from 1, with no gaps and no duplicates;
+         2. `since` never DECREASES as the number grows -- which is exactly
+            "append-only", because inserting a field in the middle or
+            renumbering an old one makes an older version appear later;
+         3. a live goal directory's files carry exactly as many columns as
+            the highest declared field number.
+
+       Rule 2 is the one that would have caught every drift this project had.
+  -->
+  <!ELEMENT records (record+)>
+  <!ELEMENT record  (field+)>
+  <!ATTLIST record  name CDATA #REQUIRED  file CDATA #REQUIRED>
+  <!ELEMENT field   (#PCDATA)>
+
+  <!-- Each record is ALSO declared the ordinary DTD way -- a sequence content
+       model, exactly like <!ELEMENT note (to,from,heading,body)>. That is not
+       duplication for its own sake: it is a SECOND, INDEPENDENT statement of
+       the same fact, written in a different shape.
+
+       `goal.sh schema --verify` cross-checks the two. The sequence below must
+       name exactly the fields of the numbered declaration, in exactly the
+       numbered order. A typo in either one is then caught by the other, which
+       is the only reason a redundant declaration earns its place. Where they
+       disagree, neither is trusted and the check fails naming the record.
+
+       Protobuf-style numbering answers "which field is this, forever".
+       DTD-style sequence answers "what does a whole record look like".
+       Both are true here, and the tree refuses to let them drift apart. -->
+  <!ELEMENT ledger     (id, hash, sealed_epoch, sealed_iso, seal_gen)>
+  <!ELEMENT timings    (ts, id, allowed, duration, outcome, gen)>
+  <!ELEMENT queue      (name, status, after, spec)>
+  <!ELEMENT consumers  (event, class, consumer, effect, why_not_decisional)>
+  <!ELEMENT invariants (law, statement, enforcing_case, breaking_looks_like)>
+
+  <!ENTITY RECORD.ledger
+    "ledger|.claude/goal/ledger|1=id:PCDATA@v2|2=hash:PCDATA@v2|3=sealed_epoch:PCDATA@v2|4=sealed_iso:PCDATA@v2|5=seal_gen:PCDATA@1.0.0">
+
+  <!ENTITY RECORD.timings
+    "timings|.claude/goal/timings.tsv|1=ts:PCDATA@v3.3|2=id:PCDATA@v3.3|3=allowed:PCDATA@v3.3|4=duration:PCDATA@v3.3|5=outcome:PCDATA@v3.3|6=gen:PCDATA@1.0.0">
+
+  <!ENTITY RECORD.queue
+    "queue|.claude/goal/queue.tsv|1=name:PCDATA@1.0.0|2=status:PCDATA@1.0.0|3=after:PCDATA@1.0.0|4=spec:CDATA@1.0.0">
+
+  <!ENTITY RECORD.consumers
+    "consumers|hooks/event_consumers.tsv|1=event:PCDATA@v3.4|2=class:PCDATA@v3.4|3=consumer:PCDATA@v3.4|4=effect:CDATA@v3.4|5=why_not_decisional:CDATA@1.0.0">
+
+  <!ENTITY RECORD.invariants
+    "invariants|hooks/INVARIANTS.tsv|1=law:PCDATA@1.0.0|2=statement:CDATA@1.0.0|3=enforcing_case:PCDATA@1.0.0|4=breaking_looks_like:CDATA@1.0.0">
+
+  <!-- ================= THE POLICY ATTRIBUTES =================
+       A parameter entity, because the same enumeration is used three times and
+       a copied enumeration is a future disagreement.
+  -->
+  <!ENTITY % policy "(off|warn|strict)">
+
+  <!-- The gate's three policies, declared with their ENUMERATION and their
+       DEFAULT -- the ATTLIST form, used for exactly what it is for.
+
+       This is not documentation. `goal.sh contract --verify` checks that the
+       default declared here is the default `cmd_init` actually writes into
+       state, and that `cmd_set` accepts exactly these values and no others. A
+       README that says "default warn" while the code writes "off" is the
+       classic drift; here the two are bound and the build fails on drift.
+
+       GATE_FLAKY's default is `strict` because it was MEASURED
+       (tests/experiments/flaky_policy.sh: 0 false refusals in 40 goals), not
+       because strict sounds safer. GATE_MUTATE's default is `off` because it
+       damages a copy of your files to prove a check can fail, and that is a
+       cost a user must opt into.
+  -->
+  <!ELEMENT gate EMPTY>
+  <!ATTLIST gate
+            redteam  %policy;  "warn"
+            mutate   %policy;  "off"
+            flaky    %policy;  "strict">
+
+  <!-- ================= THE UNPARSED CHANNELS =================
+       NOTATION is the DTD construct for data the processor must NOT parse: it
+       says "here is the format, here is how to handle it", and nothing more.
+       That is precisely the boundary this engine cares about most.
+
+       Every stream below enters the engine from outside its own voice. Each is
+       declared with the notation that says how it must be handled, and each
+       untrusted one must provably pass through gf_quarantine before a reader
+       ever sees it -- checked by `contract --verify`, so a THIRD call site
+       added later cannot quietly skip the fence.
+
+       The last entry is a soft edge the fourth review named, and it is
+       declared here rather than left in a review note: the verify command TEXT
+       is authored by a planner, not by the engine, and it is rendered without
+       a fence (never at line start). It is trusted by PROVENANCE, not by
+       inspection. Writing that down is the difference between a known boundary
+       and an unexamined one.
+  -->
+  <!NOTATION untrusted-text  SYSTEM "text/plain; must-be-fenced">
+  <!NOTATION parsed-tsv      SYSTEM "text/tab-separated-values; validated-before-use">
+  <!NOTATION append-only-log SYSTEM "text/plain; never-rewritten">
+  <!NOTATION trusted-by-provenance SYSTEM "text/plain; author=planner; not-fenced">
+
+  <!ENTITY verify-output SYSTEM ".claude/goal/out/ID.log"   NDATA untrusted-text>
+  <!ENTITY hook-payload  SYSTEM "hook-stdin"                  NDATA untrusted-text>
+  <!ENTITY queue-spec    SYSTEM "specs/NAME.tsv"             NDATA parsed-tsv>
+  <!ENTITY journal       SYSTEM ".claude/goal/journal.log"   NDATA append-only-log>
+  <!ENTITY verify-text   SYSTEM ".claude/goal/criteria/ID"   NDATA trusted-by-provenance>
+
+  <!-- ================= THE AGENT ROSTER =================
+       An agent is a sub-model this engine may summon. It is the one component
+       whose output is PROSE, which makes it the one component that could
+       smuggle a verdict into the reader's context by sounding official.
+
+       So each agent is declared with the ELEMENT it is permitted to speak in,
+       and nothing it produces is a decision -- the gate still decides by exit
+       code, always. `goal.sh contract --verify` checks BOTH directions: every
+       declared agent has a file, and every file in agents/ is declared. A
+       roster nobody checks is a directory listing.
+
+       Format: `name|element|content|what it may never do`
+  -->
+  <!ELEMENT gf:spec      (CDATA)>    <!-- planner: a queue spec, validated before use -->
+  <!ELEMENT gf:criterion (CDATA)>    <!-- verifier: a proposed criterion command      -->
+  <!ELEMENT gf:strategy  (#PCDATA)>  <!-- critic: a different approach, not a verdict -->
+  <!ELEMENT gf:attack    (CDATA)>    <!-- red team: how to make a check fail          -->
+  <!ELEMENT gf:finding   (#PCDATA)>  <!-- forensic: what the record shows             -->
+  <!ELEMENT gf:queue     (CDATA)>    <!-- architect: rows for `queue add`             -->
+  <!ELEMENT gf:audit     (#PCDATA)>  <!-- contract auditor: undeclared strings found  -->
+
+  <!ENTITY AGENT.1 "goal-planner|gf:spec|a queue spec in the declared TSV grammar|may never mark a criterion passed">
+  <!ENTITY AGENT.2 "goal-verifier|gf:criterion|a verify command and its --deps|may never run the gate or edit the ledger">
+  <!ENTITY AGENT.3 "goal-critic|gf:strategy|two or three genuinely different approaches|may never declare the goal complete">
+  <!ENTITY AGENT.4 "goal-redteam|gf:attack|the input that makes a criterion fail|may never weaken a criterion to make it pass">
+  <!ENTITY AGENT.5 "goal-forensic|gf:finding|what the journal, ledger and timings actually show|may never infer completion from a pattern">
+  <!ENTITY AGENT.6 "goal-queue-architect|gf:queue|a dependency-ordered decomposition|may never create a forward dependency">
+  <!ENTITY AGENT.7 "goal-contract-auditor|gf:audit|engine strings that are not declared here|may never add a verdict without a test">
+
+]>

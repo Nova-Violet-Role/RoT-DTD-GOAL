@@ -1,0 +1,52 @@
+name: A claim in the docs is false
+description: Something the README, CHANGELOG or REVIEW asserts does not hold. The most welcome report there is.
+labels: ["false-claim"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This project's documentation makes **measurable** claims on purpose —
+        counts, timings, "this test has a negative control", "the gate reads the
+        law text from the contract". Any of them can be wrong.
+
+        A report that falsifies one is treated as a defect in the documentation,
+        not as an inconvenience. It is the fastest way to improve this
+        repository.
+
+  - type: input
+    id: where
+    attributes:
+      label: Where the claim is
+      placeholder: "README.md:412 — \"a sub-agent cannot escape the session's gate\""
+    validations:
+      required: true
+
+  - type: textarea
+    id: claim
+    attributes:
+      label: The claim, quoted exactly
+    validations:
+      required: true
+
+  - type: textarea
+    id: contradiction
+    attributes:
+      label: The measurement that contradicts it
+      description: >
+        A command and its real output. If the claim is a number (assertion count,
+        hook events, milliseconds), show how you counted.
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of wrong is it?
+      options:
+        - The claim is simply false
+        - The claim is true but weaker than it sounds (overclaim)
+        - The claim was true and has expired (a snapshot where a property belonged)
+        - The claim cannot be checked at all as written
+    validations:
+      required: true

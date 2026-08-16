@@ -1,0 +1,10 @@
+GATE_FLAKY policy experiment
+goal-forge rot-dtd-goal 1.0.0
+date: 2026-08-16 00:48:02   N per arm: 10
+
+clean     refused=0   completed=10  other=0  
+progress  refused=0   completed=10  other=0  
+coinflip  refused=1   completed=5   other=4  
+
+reading: refusals in 'clean' or 'progress' are FALSE ALARMS.
+         completions in 'coinflip' are MISSES.

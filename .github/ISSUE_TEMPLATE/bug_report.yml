@@ -1,0 +1,80 @@
+name: Bug report
+description: The engine did something other than what it says it does.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The most valuable bug in this project is **the gate allowing a session
+        to end while a criterion was failing**. If that is what you saw, say so
+        in the first line.
+
+        If it is a *security* issue — gate evasion, fence escape, record forgery
+        — please use private vulnerability reporting instead of this form. See
+        [SECURITY.md](../blob/main/.github/SECURITY.md).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what should have happened instead
+      placeholder: |
+        The gate returned "allow" although criterion C2 (`cargo test`) exits 1.
+        It should have blocked and re-emitted the task.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: >
+        The exact commands. A reproduction that starts from `goal.sh init` in an
+        empty directory is worth ten paragraphs of description.
+      render: shell
+      placeholder: |
+        bash scripts/goal.sh init "demo"
+        bash scripts/goal.sh criterion add "it builds" "false"
+        echo '{}' | bash scripts/stop_gate.sh; echo "exit=$?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Actual output, with the exit code
+      description: >
+        Read the exit code **directly**, not through a pipe — `cmd | tail` reports
+        `tail`'s status, not the command's.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: platform
+    attributes:
+      label: Platform
+      description: Paste the output of these three commands.
+      render: shell
+      placeholder: |
+        uname -a
+        bash --version | head -1
+        for t in sha256sum shasum timeout gtimeout jq; do command -v $t || echo "MISSING $t"; done
+    validations:
+      required: true
+
+  - type: textarea
+    id: suite
+    attributes:
+      label: Does the suite pass on your machine?
+      description: "`bash tests/run_tests.sh; echo \"exit=$?\"` — the tail and the exit code."
+      render: shell
+
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have redacted anything private from the pasted logs (they contain my own commands).
+          required: true
+        - label: This is not a report that a criterion I wrote ran as I wrote it — that is the feature.
+          required: true

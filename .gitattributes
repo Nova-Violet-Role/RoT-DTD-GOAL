@@ -1,0 +1,28 @@
+# RoT DTD GOAL -- line endings are a correctness property here, not a style one.
+#
+# WHY THIS FILE EXISTS. Every archive this project shipped measured ZERO
+# carriage returns, and the fourth reviewer still received 77 CRLF lines across
+# 7 files. The tree was clean; the TRANSIT was not. A shell script with CRLF
+# fails in ways that read as nonsense -- `bash\r: no such file`, a `then\r`
+# that never matches -- and the author's platform is the one that introduces
+# them silently. So the rule is pinned in the repository, where it survives a
+# clone onto a machine configured with core.autocrlf=true.
+#
+# Effect: git stores LF, and checks out LF, on every platform, forever.
+* text=auto eol=lf
+
+# Binary, never touched.
+*.zip  binary
+*.png  binary
+*.gif  binary
+*.jpg  binary
+*.ico  binary
+
+# Shell and Lean must be LF even if a future rule tries to be clever.
+*.sh    text eol=lf
+*.lean  text eol=lf
+*.tsv   text eol=lf
+*.dtd   text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf

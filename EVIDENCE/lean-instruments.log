@@ -1,0 +1,24 @@
+LEAN INSTRUMENTS -- re-measured 2026-08-16 02:42:00
+workspace: D:\Lean\proofs   toolchain: leanprover/lean4:v4.33.0-rc1
+
+1. lake build (elaboration) -- exit code read DIRECTLY, not through a pipe
+   lake build Proofs.GoalForge.{LearnedTimeout,TimingsRotation,FlakyScope,GoalQueue}
+   -> exit 0, 'Build completed successfully (8662 jobs)'
+
+2. leanchecker (independent KERNEL re-verification of the proof terms)
+   LearnedTimeout   exit 0, 0 bytes of output
+   TimingsRotation  exit 0, 0 bytes of output
+   FlakyScope       exit 0, 0 bytes of output
+   GoalQueue        exit 0, 0 bytes of output
+   silence IS the pass.
+
+3. NEGATIVE CONTROL -- the instrument must be able to fail
+   lake env leanchecker Proofs.GoalForge.NoSuchModule
+   -> exit 1, 'uncaught exception: Could not find any oleans for: ...'
+
+hygiene: 0 occurrences of sorry, 0 of native_decide, 65 theorems in 4 modules.
+axioms: propext, Quot.sound, Classical.choice. No sorryAx.
+
+NOT CLAIMED: CI does not run any of this. It asserts the sources ship
+and are non-empty. Reproduce with the commands above in a Mathlib
+workspace; see docs/REVIEW.md.

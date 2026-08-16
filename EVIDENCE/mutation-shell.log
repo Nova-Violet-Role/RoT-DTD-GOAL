@@ -1,0 +1,17 @@
+SHELL MUTATION LOG -- RoT DTD GOAL 1.0.0
+date: 2026-08-16 00:35:55
+rule: the mutation is COUNTED in the file before the build. A patch that
+      did not apply is DISCARDED, never reported as survived.
+
+M1 legacy rows hidden           KILLED by test_clock_cannot_hide_a_flip
+M2 generation never read        KILLED by test_clock_cannot_hide_a_flip
+M3 regression never detected    KILLED by test_flaky_detection
+M4 confirmation sweep removed   KILLED by test_completion_is_simultaneous
+M5 seal generation always 0     KILLED by test_clock_cannot_hide_a_flip
+M6 fence terminator unescaped   KILLED by test_untrusted_output_cannot_forge_a_verdict
+M7 line prefix removed          KILLED by test_untrusted_output_cannot_forge_a_verdict
+M8 queue ignores dependencies   KILLED by test_many_goals_run_in_order
+M9 seal does not retire rows   KILLED by test_flaky_detection
+M10 grammar hardcoded again     KILLED by test_many_goals_run_in_order
+
+TREE RESTORED IDENTICAL

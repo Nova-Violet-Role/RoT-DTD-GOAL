@@ -1,0 +1,32 @@
+« law	statement	enforcing test case	what breaking it would look like »
+# RoT DTD GOAL 1.0.0 -- the answer to "you list ten invariants; which of them is
+# actually checked?"
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later OR EUPL-1.2
+# Copyright 2026 Saimonokuma. Part of RoT DTD GOAL.
+#
+# Every LAW.n declared in hooks/trust_contract.dtd must appear here with the
+# name of a test case that CAN FAIL if the law is broken. test_every_law_is
+# _enforced checks both directions: no law without a test, no named test that
+# does not exist in tests/run_tests.sh. A principle nobody can falsify is a
+# slogan, and this file is what stops the SOUL section from becoming one.
+#
+# The third column is a real case name, not a description. Run it:
+#   bash tests/run_tests.sh <case>
+LAW.1	Done is proven, not promised	test_gate_complete	the gate completes on a criterion that never ran, or on text rather than an exit code
+LAW.2	The checks are checked	test_guard_tamper_deny	a criterion is edited under a live goal and the ledger still audits clean
+LAW.3	Feedback is targeted	test_gate_block	the block message re-feeds the whole goal instead of the failing criteria
+LAW.4	Every loop has an exit	test_gate_budget_escalate	the budget is exhausted and the loop keeps going instead of escalating
+LAW.5	State stays inspectable	test_invariant_state_is_inspectable	state becomes a binary blob, or a decision reads something not on disk
+LAW.6	The floor stays bash + coreutils	test_invariant_floor_stays_light	a script reaches for python, jq, or a language runtime
+LAW.7	Instruments can fail and never lie reassuringly	test_redteam_negative_control	an alarm that cannot be tripped on purpose, or one that hides a real finding
+LAW.8	Every measurement is consumed	test_every_event_is_consumed	an event is wired with no consumer and no forensic classification
+LAW.9	A pass is evidence only if reproducible	test_flaky_detection	a criterion that regressed still counts as passing evidence
+LAW.10	Nothing on the label may be typed	test_docs_counts_are_generated	a count is typed into README or REVIEW instead of generated
+LAW.11	No decision is made from a clock	test_clock_cannot_hide_a_flip	a backwards clock changes a verdict, or a decision compares timestamps
+LAW.12	Untrusted output is fenced	test_untrusted_output_cannot_forge_a_verdict	a criterion prints GOAL COMPLETE and it reaches the reader unfenced
+LAW.13	A queued goal starts only after its predecessor was verified	test_many_goals_run_in_order	a dependent goal starts while its predecessor is unfinished
+LAW.14	A grammar is declared once and read by the code that enforces it	test_many_goals_run_in_order	narrowing the declared grammar changes nothing about what is accepted
+LAW.15	An on-disk record is append-only: field numbers are dense, never reused, never reordered.	test_records_are_append_only	A file grows a column, an old reader keeps parsing it, and $4 quietly means something else. The check that asserted "four columns" expires into a snapshot and gets deleted.
+LAW.16	An agent may only speak in a declared element, and every declared agent exists.	test_the_contract_binds_the_engine	An agent file nobody declared, or a declaration with no file. Its prose then reads as official without any test binding it to the contract.
+LAW.17	A refusal always carries a task -- the gate blocks with the next step, never with a wall.	test_a_refusal_always_carries_a_way_forward	A message that says COMPLETION REFUSED and nothing else. The agent stops trying, which is the built-in loop failure this engine exists to replace.

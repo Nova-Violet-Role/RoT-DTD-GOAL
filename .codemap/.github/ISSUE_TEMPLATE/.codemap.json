@@ -1,0 +1,961 @@
+{
+  "directory": ".github\\ISSUE_TEMPLATE",
+  "files": {
+    "bug_report.yml": {
+      "hash": "8b799f09e663",
+      "indexed_at": "2026-08-16T01:26:37.587471+00:00",
+      "language": "yaml",
+      "lines": 80,
+      "mtime_ns": 1786843595133755200,
+      "size": 2611,
+      "symbols": [
+        {
+          "docstring": "Bug report",
+          "lines": [
+            1,
+            1
+          ],
+          "name": "name",
+          "type": "key"
+        },
+        {
+          "docstring": "The engine did something other than what it says it does.",
+          "lines": [
+            2,
+            2
+          ],
+          "name": "description",
+          "type": "key"
+        },
+        {
+          "docstring": "[\"bug\"]",
+          "lines": [
+            3,
+            3
+          ],
+          "name": "labels",
+          "type": "collection"
+        },
+        {
+          "children": [
+            {
+              "docstring": "markdown",
+              "lines": [
+                5,
+                5
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "children": [
+                {
+                  "lines": [
+                    7,
+                    15
+                  ],
+                  "name": "value",
+                  "type": "multiline"
+                }
+              ],
+              "lines": [
+                6,
+                15
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "docstring": "textarea",
+              "lines": [
+                16,
+                16
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "what",
+              "lines": [
+                17,
+                17
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "What happened, and what should have happened instead",
+                  "lines": [
+                    19,
+                    19
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "lines": [
+                    20,
+                    22
+                  ],
+                  "name": "placeholder",
+                  "type": "multiline"
+                }
+              ],
+              "lines": [
+                18,
+                22
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    24,
+                    25
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                23,
+                25
+              ],
+              "name": "validations",
+              "type": "section"
+            },
+            {
+              "docstring": "textarea",
+              "lines": [
+                26,
+                26
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "repro",
+              "lines": [
+                27,
+                27
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "Reproduction",
+                  "lines": [
+                    29,
+                    29
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "lines": [
+                    30,
+                    32
+                  ],
+                  "name": "description",
+                  "type": "multiline"
+                },
+                {
+                  "docstring": "shell",
+                  "lines": [
+                    33,
+                    33
+                  ],
+                  "name": "render",
+                  "type": "key"
+                },
+                {
+                  "lines": [
+                    34,
+                    37
+                  ],
+                  "name": "placeholder",
+                  "type": "multiline"
+                }
+              ],
+              "lines": [
+                28,
+                37
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    39,
+                    40
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                38,
+                40
+              ],
+              "name": "validations",
+              "type": "section"
+            },
+            {
+              "docstring": "textarea",
+              "lines": [
+                41,
+                41
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "output",
+              "lines": [
+                42,
+                42
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "Actual output, with the exit code",
+                  "lines": [
+                    44,
+                    44
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "lines": [
+                    45,
+                    47
+                  ],
+                  "name": "description",
+                  "type": "multiline"
+                },
+                {
+                  "docstring": "shell",
+                  "lines": [
+                    48,
+                    48
+                  ],
+                  "name": "render",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                43,
+                48
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    50,
+                    51
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                49,
+                51
+              ],
+              "name": "validations",
+              "type": "section"
+            },
+            {
+              "docstring": "textarea",
+              "lines": [
+                52,
+                52
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "platform",
+              "lines": [
+                53,
+                53
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "Platform",
+                  "lines": [
+                    55,
+                    55
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "docstring": "Paste the output of these three commands.",
+                  "lines": [
+                    56,
+                    56
+                  ],
+                  "name": "description",
+                  "type": "key"
+                },
+                {
+                  "docstring": "shell",
+                  "lines": [
+                    57,
+                    57
+                  ],
+                  "name": "render",
+                  "type": "key"
+                },
+                {
+                  "lines": [
+                    58,
+                    61
+                  ],
+                  "name": "placeholder",
+                  "type": "multiline"
+                }
+              ],
+              "lines": [
+                54,
+                61
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    63,
+                    64
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                62,
+                64
+              ],
+              "name": "validations",
+              "type": "section"
+            },
+            {
+              "docstring": "textarea",
+              "lines": [
+                65,
+                65
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "suite",
+              "lines": [
+                66,
+                66
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "Does the suite pass on your machine?",
+                  "lines": [
+                    68,
+                    68
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "docstring": "\"`bash tests/run_tests.sh; echo \\\"exit=$?\\\"` \u2014 the tail and the exit code.\"",
+                  "lines": [
+                    69,
+                    69
+                  ],
+                  "name": "description",
+                  "type": "key"
+                },
+                {
+                  "docstring": "shell",
+                  "lines": [
+                    70,
+                    71
+                  ],
+                  "name": "render",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                67,
+                71
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "docstring": "checkboxes",
+              "lines": [
+                72,
+                72
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "hygiene",
+              "lines": [
+                73,
+                73
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "Before submitting",
+                  "lines": [
+                    75,
+                    75
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "children": [
+                    {
+                      "docstring": "I have redacted anything private from the pasted logs (they contain my own commands).",
+                      "lines": [
+                        77,
+                        77
+                      ],
+                      "name": "label",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "true",
+                      "lines": [
+                        78,
+                        78
+                      ],
+                      "name": "required",
+                      "type": "key"
+                    },
+                    {
+                      "docstring": "This is not a report that a criterion I wrote ran as I wrote it \u2014 that is the feature.",
+                      "lines": [
+                        79,
+                        79
+                      ],
+                      "name": "label",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "true",
+                      "lines": [
+                        80,
+                        81
+                      ],
+                      "name": "required",
+                      "type": "key"
+                    }
+                  ],
+                  "lines": [
+                    76,
+                    81
+                  ],
+                  "name": "options",
+                  "type": "list"
+                }
+              ],
+              "lines": [
+                74,
+                81
+              ],
+              "name": "attributes",
+              "type": "section"
+            }
+          ],
+          "lines": [
+            4,
+            81
+          ],
+          "name": "body",
+          "type": "list"
+        }
+      ]
+    },
+    "config.yml": {
+      "hash": "0ab3e1e2a191",
+      "indexed_at": "2026-08-16T01:39:56.851881+00:00",
+      "language": "yaml",
+      "lines": 11,
+      "mtime_ns": 1786843792312144300,
+      "size": 742,
+      "symbols": [
+        {
+          "docstring": "true",
+          "lines": [
+            1,
+            1
+          ],
+          "name": "blank_issues_enabled",
+          "type": "key"
+        },
+        {
+          "children": [
+            {
+              "docstring": "Security vulnerability (private)",
+              "lines": [
+                3,
+                3
+              ],
+              "name": "name",
+              "type": "item"
+            },
+            {
+              "docstring": "https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/security/advisories/new",
+              "lines": [
+                4,
+                4
+              ],
+              "name": "url",
+              "type": "key"
+            },
+            {
+              "docstring": "Gate evasion, fence escape, record forgery, attestation confusion. Do not open a public issue for th...",
+              "lines": [
+                5,
+                5
+              ],
+              "name": "about",
+              "type": "key"
+            },
+            {
+              "docstring": "What this release does NOT claim",
+              "lines": [
+                6,
+                6
+              ],
+              "name": "name",
+              "type": "item"
+            },
+            {
+              "docstring": "https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/blob/main/docs/REVIEW.md",
+              "lines": [
+                7,
+                7
+              ],
+              "name": "url",
+              "type": "key"
+            },
+            {
+              "docstring": "The standing review packet \u2014 known limits, disclosed blind spots, and what to try to break. Read bef...",
+              "lines": [
+                8,
+                8
+              ],
+              "name": "about",
+              "type": "key"
+            },
+            {
+              "docstring": "Code of Conduct",
+              "lines": [
+                9,
+                9
+              ],
+              "name": "name",
+              "type": "item"
+            },
+            {
+              "docstring": "https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/blob/main/.github/CODE_OF_CONDUCT.md",
+              "lines": [
+                10,
+                10
+              ],
+              "name": "url",
+              "type": "key"
+            },
+            {
+              "docstring": "Attacking the claims is the work. Attacking people is not.",
+              "lines": [
+                11,
+                12
+              ],
+              "name": "about",
+              "type": "key"
+            }
+          ],
+          "lines": [
+            2,
+            12
+          ],
+          "name": "contact_links",
+          "type": "list"
+        }
+      ]
+    },
+    "false_claim.yml": {
+      "hash": "7daeeb2139f5",
+      "indexed_at": "2026-08-16T01:26:56.492591+00:00",
+      "language": "yaml",
+      "lines": 52,
+      "mtime_ns": 1786843614359139200,
+      "size": 1665,
+      "symbols": [
+        {
+          "docstring": "A claim in the docs is false",
+          "lines": [
+            1,
+            1
+          ],
+          "name": "name",
+          "type": "key"
+        },
+        {
+          "docstring": "Something the README, CHANGELOG or REVIEW asserts does not hold. The most welcome report there is.",
+          "lines": [
+            2,
+            2
+          ],
+          "name": "description",
+          "type": "key"
+        },
+        {
+          "docstring": "[\"false-claim\"]",
+          "lines": [
+            3,
+            3
+          ],
+          "name": "labels",
+          "type": "collection"
+        },
+        {
+          "children": [
+            {
+              "docstring": "markdown",
+              "lines": [
+                5,
+                5
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "children": [
+                {
+                  "lines": [
+                    7,
+                    15
+                  ],
+                  "name": "value",
+                  "type": "multiline"
+                }
+              ],
+              "lines": [
+                6,
+                15
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "docstring": "input",
+              "lines": [
+                16,
+                16
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "where",
+              "lines": [
+                17,
+                17
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "Where the claim is",
+                  "lines": [
+                    19,
+                    19
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "docstring": "\"README.md:412 \u2014 \\\"a sub-agent cannot escape the session's gate\\\"\"",
+                  "lines": [
+                    20,
+                    20
+                  ],
+                  "name": "placeholder",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                18,
+                20
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    22,
+                    23
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                21,
+                23
+              ],
+              "name": "validations",
+              "type": "section"
+            },
+            {
+              "docstring": "textarea",
+              "lines": [
+                24,
+                24
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "claim",
+              "lines": [
+                25,
+                25
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "The claim, quoted exactly",
+                  "lines": [
+                    27,
+                    27
+                  ],
+                  "name": "label",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                26,
+                27
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    29,
+                    30
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                28,
+                30
+              ],
+              "name": "validations",
+              "type": "section"
+            },
+            {
+              "docstring": "textarea",
+              "lines": [
+                31,
+                31
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "contradiction",
+              "lines": [
+                32,
+                32
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "The measurement that contradicts it",
+                  "lines": [
+                    34,
+                    34
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "lines": [
+                    35,
+                    37
+                  ],
+                  "name": "description",
+                  "type": "multiline"
+                },
+                {
+                  "docstring": "shell",
+                  "lines": [
+                    38,
+                    38
+                  ],
+                  "name": "render",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                33,
+                38
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    40,
+                    41
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                39,
+                41
+              ],
+              "name": "validations",
+              "type": "section"
+            },
+            {
+              "docstring": "dropdown",
+              "lines": [
+                42,
+                42
+              ],
+              "name": "type",
+              "type": "item"
+            },
+            {
+              "docstring": "kind",
+              "lines": [
+                43,
+                43
+              ],
+              "name": "id",
+              "type": "key"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "What kind of wrong is it?",
+                  "lines": [
+                    45,
+                    45
+                  ],
+                  "name": "label",
+                  "type": "key"
+                },
+                {
+                  "lines": [
+                    46,
+                    50
+                  ],
+                  "name": "options",
+                  "type": "list"
+                }
+              ],
+              "lines": [
+                44,
+                50
+              ],
+              "name": "attributes",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "true",
+                  "lines": [
+                    52,
+                    53
+                  ],
+                  "name": "required",
+                  "type": "key"
+                }
+              ],
+              "lines": [
+                51,
+                53
+              ],
+              "name": "validations",
+              "type": "section"
+            }
+          ],
+          "lines": [
+            4,
+            53
+          ],
+          "name": "body",
+          "type": "list"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T01:39:56.851951+00:00",
+  "version": "1.0"
+}

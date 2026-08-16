@@ -1,0 +1,259 @@
+# RoT DTD GOAL -- continuous verification, and the only way a release ships.
+#
+# WHY THIS WORKFLOW EXISTS. The author develops on Windows/MINGW. The fourth
+# review ran the suite on Linux and macOS and found a case that CRASHED there
+# and CANNOT crash here (`$TMP`, a MINGW-only variable, under `set -u`). The
+# author's green was, on that one case, an artefact of the author's platform.
+#
+# So green stops being a memory of one machine. Every push runs the whole suite
+# on ubuntu, macos AND windows (Git Bash -- the author's own floor, now
+# measured rather than assumed), and every run tail is uploaded.
+#
+# AND THE RELEASE IS PUBLISHED BY THIS FILE, NEVER BY HAND. A tag produces a
+# release only after every job above it has succeeded -- not failed, not
+# cancelled, not skipped. The `green` job below asserts that in machine-checked
+# form, because "the CI was green" is exactly the kind of remembered claim this
+# project refuses everywhere else. A human uploading a zip is a claim; a
+# release that cannot exist unless three platforms agreed is evidence.
+#
+# WHAT IT DELIBERATELY DOES NOT DO: verify the Lean modules. Not with the
+# kernel, not by counting theorems, not at all. That is a DECISION, not an
+# omission. The modules were the author's instrument -- they specify the
+# learned-timeout monotonicity, the rotation, the flake scoping and the queue
+# scheduler, and they were re-verified with `lake build`, `#print axioms` and
+# `leanchecker` in a Mathlib workspace. Reproducing that in CI needs a pinned
+# toolchain and a multi-gigabyte cache, and a job the author cannot rehearse
+# would go red on the first push for reasons unrelated to the proofs. So the
+# sources and the instrument transcript are PUBLISHED under EVIDENCE/ for
+# anyone to re-run, CI asserts they are present and non-empty, and CI claims
+# nothing about their contents. A green tick that meant "Lean checked" while
+# no Lean ran would be the exact overclaim this project exists to refuse.
+
+name: verify
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write        # the release job needs it; nothing else writes
+
+jobs:
+  suite:
+    name: suite on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash      # on windows-latest this is Git Bash: the author's floor
+    strategy:
+      fail-fast: false   # a red on one platform must never hide another's result
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: what this machine actually is
+        run: |
+          uname -a
+          bash --version | head -1
+          for t in awk sed grep find sort sha256sum shasum openssl timeout gtimeout; do
+            printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
+          done
+
+      # The exec bit is a property of the git index, and MINGW cannot report it
+      # honestly -- it calls every file 755. On Linux and macOS it can. A script
+      # without it is a stranger's first `permission denied`.
+      - name: every shipped script is executable
+        if: runner.os != 'Windows'
+        run: |
+          rc=0
+          for f in scripts/*.sh tests/*.sh tests/experiments/*.sh; do
+            if [ ! -x "$f" ]; then echo "NOT EXECUTABLE: $f"; rc=1; fi
+          done
+          exit $rc
+
+      # This is the real test of .gitattributes: a checkout on Windows, where
+      # git would otherwise hand out CRLF, must still be LF.
+      - name: no carriage returns survived the checkout
+        run: |
+          bad=$(find scripts tests hooks lean commands agents .claude-plugin -type f \
+                 -exec grep -lU $'\r' {} + 2>/dev/null || true)
+          if [ -n "$bad" ]; then echo "CRLF found in:"; echo "$bad"; exit 1; fi
+          echo "clean: zero carriage returns"
+
+      - name: attestation verifies on this platform
+        run: bash scripts/attest.sh --verify ATTESTATION.txt
+
+      - name: trust contract verifies in both directions
+        run: bash scripts/goal.sh contract --verify
+
+      - name: acceptance suite
+        run: bash tests/run_tests.sh 2>&1 | tee "suite-${{ matrix.os }}.log"
+        # `shell: bash` in Actions runs with -e -o pipefail, so the pipe does
+        # NOT mask the suite's exit code. That is asserted, not assumed, by the
+        # pipefail-control job below.
+
+      - name: upload the tail from this platform
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: suite-${{ matrix.os }}
+          path: suite-${{ matrix.os }}.log
+          if-no-files-found: error
+
+  pipefail-control:
+    name: the CI's own alarm can fire
+    runs-on: ubuntu-latest
+    steps:
+      # An untested alarm is decoration. This proves the `| tee` above does not
+      # swallow a failure: the same shape must exit non-zero, and this step
+      # passes only when it does.
+      - name: a failing command through tee must still fail
+        shell: bash
+        run: |
+          if (exit 3) | tee /dev/null; then
+            echo "PIPELINE MASKED THE FAILURE -- the suite step cannot be trusted"
+            exit 1
+          fi
+          echo "pipefail is in effect: a failure through tee is still a failure"
+
+  evidence:
+    name: the evidence ships and is not empty
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # A plugin that asks for the Stop hook owes the reader the material it
+      # was judged on. This job does NOT verify Lean -- no lake, no kernel, by
+      # decision: the modules were the author's instrument, they are published
+      # as evidence, and CI claiming to have checked them would be the exact
+      # overclaim this project refuses. It checks that the evidence EXISTS and
+      # is non-empty, which is the part a stranger depends on.
+      - name: every evidence artefact is present and non-empty
+        shell: bash
+        run: |
+          rc=0
+          for f in EVIDENCE/differential.log EVIDENCE/mutation-shell.log \
+                   EVIDENCE/mutation-lean.log EVIDENCE/flaky-policy-experiment.log \
+                   EVIDENCE/lean-instruments.log EVIDENCE/bench.log \
+                   EVIDENCE/suite-tail.log EVIDENCE/dogfood/journal.log \
+                   EVIDENCE/dogfood/ledger; do
+            if [ ! -s "$f" ]; then echo "MISSING OR EMPTY: $f"; rc=1
+            else printf '%-42s %s bytes\n' "$f" "$(wc -c < "$f")"; fi
+          done
+          n=$(ls EVIDENCE/lean/*.lean 2>/dev/null | wc -l)
+          echo "lean sources published as evidence: $n"
+          [ "$n" -ge 4 ] || { echo "the Lean sources are not published"; rc=1; }
+          exit $rc
+
+  # ---------------------------------------------------------------- the gate
+  green:
+    name: every platform agreed (no failure, no skip, no cancel)
+    needs: [suite, pipefail-control, evidence]
+    if: always()          # must RUN even when something upstream failed,
+    runs-on: ubuntu-latest #  otherwise it would be skipped and prove nothing
+    steps:
+      - name: assert each upstream job SUCCEEDED
+        shell: bash
+        run: |
+          # `needs.<job>.result` is one of: success, failure, cancelled, skipped.
+          # Anything but success is refused by name. A workflow that only checks
+          # "did anything fail" treats a SKIPPED job as fine, which is how a
+          # release ships without ever having been tested.
+          fail=0
+          for jr in "suite=${{ needs.suite.result }}" \
+                    "pipefail-control=${{ needs.pipefail-control.result }}" \
+                    "evidence=${{ needs.evidence.result }}"; do
+            name="${jr%%=*}"; res="${jr#*=}"
+            printf '%-18s %s\n' "$name" "$res"
+            [ "$res" = "success" ] || fail=1
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "NOT GREEN -- refusing to certify this commit."
+            exit 1
+          fi
+          echo "GREEN: suite passed on ubuntu, macos and windows."
+
+  # ------------------------------------------------------------- the release
+  # Runs only for a v* tag, and only after `green` succeeded. There is no path
+  # from a red run to a published release, and no human hand in between.
+  release:
+    name: publish the release
+    needs: [green]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: the tag must equal the version in plugin.json
+        shell: bash
+        run: |
+          tag="${GITHUB_REF#refs/tags/v}"
+          ver=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' .claude-plugin/plugin.json \
+                | head -n1 | sed 's/.*"\([^"]*\)"$/\1/')
+          echo "tag=$tag plugin.json=$ver"
+          if [ "$tag" != "$ver" ]; then
+            echo "REFUSED: the tag and the shipped version disagree."
+            exit 1
+          fi
+
+      - name: the tree still measures what it attests
+        shell: bash
+        run: bash scripts/attest.sh --verify ATTESTATION.txt
+
+      - name: build the archive and its manifest
+        shell: bash
+        run: |
+          set -e
+          ver=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' .claude-plugin/plugin.json \
+                | head -n1 | sed 's/.*"\([^"]*\)"$/\1/')
+          name="RoT-DTD-GOAL-v$ver"
+          mkdir -p "dist/$name"
+          # Ship exactly what git tracks -- no stray local state can enter.
+          git archive --format=tar HEAD | tar -x -C "dist/$name"
+          ( cd "dist/$name" && find . -type f ! -name MANIFEST.sha256 \
+              | LC_ALL=C sort | xargs sha256sum > MANIFEST.sha256 )
+          ( cd dist && zip -qr "$name.zip" "$name" )
+          ( cd dist && sha256sum "$name.zip" | tee "$name.zip.sha256" )
+          ls -l dist
+
+      - name: the archive verifies from cold
+        shell: bash
+        run: |
+          set -e
+          ver=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' .claude-plugin/plugin.json \
+                | head -n1 | sed 's/.*"\([^"]*\)"$/\1/')
+          name="RoT-DTD-GOAL-v$ver"
+          rm -rf /tmp/cold && mkdir -p /tmp/cold && cd /tmp/cold
+          unzip -q "$GITHUB_WORKSPACE/dist/$name.zip"
+          cd "$name"
+          sha256sum -c MANIFEST.sha256 > /tmp/manifest.log
+          tail -3 /tmp/manifest.log
+          bash scripts/attest.sh --verify ATTESTATION.txt
+          bash scripts/goal.sh version
+          bash tests/run_tests.sh | tail -5
+
+      - name: publish
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.zip
+            dist/*.zip.sha256
+          body: |
+            Published by CI. This release exists only because the acceptance
+            suite passed on **ubuntu, macOS and Windows (Git Bash)**, the
+            attestation re-verified, the trust contract verified in both
+            directions, and the archive was extracted cold and re-run.
+
+            Verify it yourself, without trusting any of the above:
+
+                sha256sum -c MANIFEST.sha256
+                bash scripts/attest.sh --verify ATTESTATION.txt
+                bash tests/run_tests.sh          # exit 0 is the claim
+                bash scripts/goal.sh contract --verify
+
+            The suite tails from all three platforms are attached to the
+            workflow run that produced this release.
+          fail_on_unmatched_files: true

@@ -1,0 +1,52 @@
+« event	kind	consumer	what actually reads it	WHY IT IS NOT DECISIONAL »
+# RoT DTD GOAL v3.4 -- the answer to "31 events wired, how many are READ?"
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later OR EUPL-1.2
+# Copyright 2026 Saimonokuma. Part of RoT DTD GOAL.
+#
+# Defect 4 of the v2 author's review: "an event that only writes journal lines
+# nobody consumes is decoration". v3.3 had 31 wired events and, measured, ZERO
+# code paths reading events.tsv outside the rate limiter itself.
+#
+# Every event wired in hooks.json MUST have a row here, and the kind must be
+# one of:
+#   decision -- changes what the engine DOES (gate output, freshness, guard)
+#   view     -- rendered to a human by a command they actually run
+#   forensic -- journal-only, kept deliberately for after-the-fact diagnosis
+# There is no fourth kind. `test_every_event_is_consumed` fails the build if an
+# event is wired without a row, and the kinds are asserted against the code.
+#
+# Calling something `forensic` is an honest choice, not a loophole: the journal
+# IS read, by `goal.sh status`, by /goal-audit, and by the human debugging a
+# stuck loop. What is forbidden is a measurement nobody can reach at all.
+Stop	decision	scripts/stop_gate.sh	the gate itself: verifies, blocks, completes, escalates	-- decisional: a gate or guard reads it
+PreToolUse	decision	scripts/guard.sh	denies writes to live goal state while a goal is active	-- decisional: a gate or guard reads it
+PostToolUse	decision	scripts/post_tool.sh	dependency-scoped freshness: invalidates affected criteria	-- decisional: a gate or guard reads it
+FileChanged	decision	scripts/post_tool.sh	same, for edits made outside Claude's own tools	-- decisional: a gate or guard reads it
+PreCompact	decision	scripts/snapshot.sh	writes snapshot.md + the snapshots/ ring before context is lost	-- decisional: a gate or guard reads it
+PostCompact	decision	scripts/context.sh	re-injects goal context after compaction	-- decisional: a gate or guard reads it
+SessionStart	decision	scripts/context.sh	full resume awareness after a restart	-- decisional: a gate or guard reads it
+UserPromptSubmit	decision	scripts/context.sh	one-line status pin on every prompt	-- decisional: a gate or guard reads it
+PermissionDenied	decision	scripts/lib.sh:gf_friction_since_last_cycle	counted into the gate's block message	-- decisional: a gate or guard reads it
+PostToolUseFailure	decision	scripts/lib.sh:gf_friction_since_last_cycle	counted into the gate's block message	-- decisional: a gate or guard reads it
+Elicitation	decision	scripts/lib.sh:gf_friction_since_last_cycle	counted into the gate's block message	-- decisional: a gate or guard reads it
+StopFailure	forensic	scripts/journal_event.sh	a gate that itself failed -- the first thing to read when the loop misbehaves	the gate itself failed; nothing inside the gate can be trusted to decide on it
+PermissionRequest	forensic	scripts/journal_event.sh	pairs with PermissionDenied to show what was asked for	a request is not an outcome; PermissionDenied is the decisional half
+SubagentStart	forensic	scripts/journal_event.sh	which agent ran, for attributing work in the journal	attribution only; a subagent starting says nothing about whether work is verified
+SubagentStop	forensic	scripts/journal_event.sh	agent completion, same trail	same: completion of an agent is not completion of a criterion
+TaskCreated	forensic	scripts/journal_event.sh	task fan-out visible next to gate decisions	a task is a plan; RoT DTD GOAL only ever decides on executed checks
+TaskCompleted	forensic	scripts/journal_event.sh	task completion, same trail	self-declared completion is exactly what this engine refuses to trust
+SessionEnd	forensic	scripts/journal_event.sh	how the session ended -- distinguishes crash from clean exit	too late to act; kept so an abandoned goal can be found afterwards
+Notification	forensic	scripts/journal_event.sh	rate-limited; correlates user-visible notices with cycles	advisory text with no verifiable content
+MessageDisplay	forensic	scripts/journal_event.sh	rate-limited liveness trace	display volume, not evidence; rate-limited to keep the journal readable
+PostToolBatch	forensic	scripts/journal_event.sh	rate-limited liveness trace	batch boundary; PostToolUse already carries the decisional signal
+ElicitationResult	forensic	scripts/journal_event.sh	what the human answered, next to the friction count	the answer to a question the human was asked; Elicitation is the decisional half
+TeammateIdle	forensic	scripts/journal_event.sh	multi-agent idleness, for future orchestration work	idleness is not failure, and treating it as one would fabricate stalls
+InstructionsLoaded	forensic	scripts/journal_event.sh	which instruction set was live for a given cycle	context loading; acting on it would couple verification to prompt content
+ConfigChange	forensic	scripts/journal_event.sh	config drift under a running goal	config may change legitimately mid-goal; the ledger already catches criterion drift
+CwdChanged	forensic	scripts/journal_event.sh	a moved working directory explains sudden mass failures	a working directory move is not evidence about the project
+DirectoryAdded	forensic	scripts/journal_event.sh	same, for added roots	same: scope changes are the human step, and the ledger re-seals on activate
+WorktreeCreate	forensic	scripts/journal_event.sh	worktree churn under a live goal	worktrees are a workflow choice; deciding on them would be an opinion, not a measurement
+WorktreeRemove	forensic	scripts/journal_event.sh	worktree churn under a live goal	same, and removal can be routine cleanup
+Setup	forensic	scripts/journal_event.sh	plugin setup, once per install	runs before any goal exists, so there is nothing to decide about
+UserPromptExpansion	forensic	scripts/journal_event.sh	rate-limited; shows what the prompt actually became	prompt text is not project state; the whole engine is built to avoid deciding on it

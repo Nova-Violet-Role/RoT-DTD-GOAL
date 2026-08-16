@@ -1,0 +1,14 @@
+2026-08-15 21:12:13 INIT (draft) goal='ship goal-forge v3.5.0: close the five second-review findings with differentials' budget=6 stall=3
+2026-08-15 21:12:16 ACTIVATE criteria=6 budget=6 sealed=6
+2026-08-15 21:12:51 COMPLETE all 6 criteria passed
+2026-08-16 00:29:32 INIT (draft) goal='v1.0.0 verifies itself' budget=6 stall=3
+2026-08-16 00:29:34 ACTIVATE criteria=5 budget=6 sealed=5
+2026-08-16 00:29:36 QUEUE-ADD proofs after=-
+2026-08-16 00:30:31 CONFIRM re-running all 5 criteria before completion
+2026-08-16 00:31:24 COMPLETE all 5 criteria passed
+2026-08-16 00:31:25 INIT (draft) goal='the proofs and the contract hold' budget=6 stall=3
+2026-08-16 00:31:26 ACTIVATE criteria=2 budget=6 sealed=2
+2026-08-16 00:31:27 REDTEAM activate weak=0
+2026-08-16 00:31:27 QUEUE-ADVANCE from=- to=proofs criteria=2
+2026-08-16 00:31:29 CONFIRM re-running all 2 criteria before completion
+2026-08-16 00:31:31 COMPLETE all 2 criteria passed (WEAK: D1 WEAK control:passes-in-empty-dir)

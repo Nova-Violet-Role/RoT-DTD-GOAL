@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability (private)
+    url: https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/security/advisories/new
+    about: Gate evasion, fence escape, record forgery, attestation confusion. Do not open a public issue for these.
+  - name: What this release does NOT claim
+    url: https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/blob/main/docs/REVIEW.md
+    about: The standing review packet — known limits, disclosed blind spots, and what to try to break. Read before reporting a known bound.
+  - name: Code of Conduct
+    url: https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/blob/main/.github/CODE_OF_CONDUCT.md
+    about: Attacking the claims is the work. Attacking people is not.

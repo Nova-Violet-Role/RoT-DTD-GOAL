@@ -1,0 +1,15 @@
+# The ONE corpus for the learned-timeout clamp. TSV, tab-separated.
+#
+# tests/run_tests.sh drives the REAL shell (gf_criterion_timeout) over these
+# rows; lean/LearnedTimeout.lean drives the Lean model over the same rows as
+# #guard lines. The last column is the exact text of that #guard, and the suite
+# greps for it -- so if the model and the implementation ever drift apart, or
+# if either side is edited without the other, a test goes red.
+#
+# name	base	cap	timings (allowed,duration,outcome;...)  or -	expected	lean guard line
+empty	2	1800	-	2	#guard learned 2 1800 [] = 2
+kill	2	1800	2,2,timeout	4	#guard learned 2 1800 [⟨2, 2, true⟩] = 4
+pass3	2	1800	2,2,timeout;4,3,pass	9	#guard learned 2 1800 [⟨2, 2, true⟩, ⟨4, 3, false⟩] = 9
+capped	2	3	2,2,timeout	3	#guard learned 2 3 [⟨2, 2, true⟩] = 3
+fastpass	2	1800	2,0,pass	2	#guard learned 2 1800 [⟨2, 0, false⟩] = 2
+defect	300	60	-	300	#guard learned 300 60 [] = 300

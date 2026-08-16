@@ -1,0 +1,43 @@
+RoT DTD GOAL -- bench
+build: rot-dtd-goal 1.0.0
+date:  2026-08-16 01:19:46
+host:  MINGW64_NT-10.0-19045 x86_64   bash 5.2.37(1)-release
+reps:  5 per row, median reported
+
+BASELINE -- read every row below as a multiple of this
+bare bash process spawn (does nothing)             24 ms   (median of 5)
+
+THE HOOK THAT RUNS WHEN YOU HAVE NO GOAL
+Stop hook, no goal exists (exits immediately)      85 ms   (median of 5)
+
+A GATE CYCLE -- trivial criteria, so this is ENGINE overhead only
+(fresh goal built untimed before EVERY sample -- see bench_fresh)
+completing gate, 1 criteria (2 sweeps + red team)   1668 ms   (median of 5)
+completing gate, 5 criteria (2 sweeps + red team)   5646 ms   (median of 5)
+completing gate, 10 criteria (2 sweeps + red team)  10428 ms   (median of 5)
+blocking gate, 5 pass + 1 fail (1 sweep, no red team)   4695 ms   (median of 5)
+
+THE PARTS, MEASURED SEPARATELY
+verify all 5 criteria once (gf_verify_all)       1546 ms   (median of 5)
+red team, 5 criteria (empty-directory re-run)    1064 ms   (median of 5)
+flake scan (gf_flaky_ids)                          45 ms   (median of 5)
+ledger audit, 5 criteria                          750 ms   (median of 5)
+mutation probe, 1 criterion, all six operators   1128 ms   (median of 5)
+
+THE QUEUE
+queue advance (archive + init + add + activate)    307 ms   (median of 5)
+
+THE INSTRUMENTS A REVIEWER RUNS
+attestation --facts                               274 ms   (median of 5)
+trust contract --verify                           395 ms   (median of 5)
+
+SELF-CHECK -- an alarm that has fired for real
+A completing gate verifies EVERY criterion twice and then red-teams
+them, so it cannot cost less than one sweep. When this bench was first
+written it did, because the fixture was reused across samples and four
+of five samples measured the dormant hook. That bug is now an assertion:
+  CONSISTENT   completing gate 5646 ms >= one sweep 1546 ms
+
+NOT MEASURED HERE: your verify commands. In real use they dominate
+everything above -- the engine's own overhead is a rounding error next
+to a test suite, and that is the intended trade.

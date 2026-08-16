@@ -1,0 +1,843 @@
+{
+  "directory": ".github\\workflows",
+  "files": {
+    "ci.yml": {
+      "hash": "b5c5f54bb3c0",
+      "indexed_at": "2026-08-16T00:24:24.320855+00:00",
+      "language": "yaml",
+      "lines": 259,
+      "mtime_ns": 1786839861781210800,
+      "size": 11360,
+      "symbols": [
+        {
+          "docstring": "verify",
+          "lines": [
+            32,
+            33
+          ],
+          "name": "name",
+          "type": "key"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "docstring": "[\"**\"]",
+                  "lines": [
+                    36,
+                    36
+                  ],
+                  "name": "branches",
+                  "type": "collection"
+                },
+                {
+                  "docstring": "[\"v*\"]",
+                  "lines": [
+                    37,
+                    37
+                  ],
+                  "name": "tags",
+                  "type": "collection"
+                }
+              ],
+              "lines": [
+                35,
+                37
+              ],
+              "name": "push",
+              "type": "section"
+            },
+            {
+              "lines": [
+                38,
+                38
+              ],
+              "name": "pull_request",
+              "type": "section"
+            },
+            {
+              "lines": [
+                39,
+                40
+              ],
+              "name": "workflow_dispatch",
+              "type": "section"
+            }
+          ],
+          "lines": [
+            34,
+            40
+          ],
+          "name": "on",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "write        # the release job needs it; nothing else writes",
+              "lines": [
+                42,
+                43
+              ],
+              "name": "contents",
+              "type": "key"
+            }
+          ],
+          "lines": [
+            41,
+            43
+          ],
+          "name": "permissions",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "docstring": "suite on ${{ matrix.os }}",
+                  "lines": [
+                    46,
+                    46
+                  ],
+                  "name": "name",
+                  "type": "key"
+                },
+                {
+                  "docstring": "${{ matrix.os }}",
+                  "lines": [
+                    47,
+                    47
+                  ],
+                  "name": "runs-on",
+                  "type": "key"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "docstring": "bash      # on windows-latest this is Git Bash: the author's floor",
+                          "lines": [
+                            50,
+                            50
+                          ],
+                          "name": "shell",
+                          "type": "key"
+                        }
+                      ],
+                      "lines": [
+                        49,
+                        50
+                      ],
+                      "name": "run",
+                      "type": "section"
+                    }
+                  ],
+                  "lines": [
+                    48,
+                    50
+                  ],
+                  "name": "defaults",
+                  "type": "section"
+                },
+                {
+                  "children": [
+                    {
+                      "docstring": "false   # a red on one platform must never hide another's result",
+                      "lines": [
+                        52,
+                        52
+                      ],
+                      "name": "fail-fast",
+                      "type": "key"
+                    },
+                    {
+                      "children": [
+                        {
+                          "docstring": "[ubuntu-latest, macos-latest, windows-latest]",
+                          "lines": [
+                            54,
+                            54
+                          ],
+                          "name": "os",
+                          "type": "collection"
+                        }
+                      ],
+                      "lines": [
+                        53,
+                        54
+                      ],
+                      "name": "matrix",
+                      "type": "section"
+                    }
+                  ],
+                  "lines": [
+                    51,
+                    54
+                  ],
+                  "name": "strategy",
+                  "type": "section"
+                },
+                {
+                  "children": [
+                    {
+                      "docstring": "actions/checkout@v4",
+                      "lines": [
+                        56,
+                        57
+                      ],
+                      "name": "uses",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "what this machine actually is",
+                      "lines": [
+                        58,
+                        58
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "lines": [
+                        59,
+                        68
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    },
+                    {
+                      "docstring": "every shipped script is executable",
+                      "lines": [
+                        69,
+                        69
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "runner.os != 'Windows'",
+                      "lines": [
+                        70,
+                        70
+                      ],
+                      "name": "if",
+                      "type": "key"
+                    },
+                    {
+                      "lines": [
+                        71,
+                        79
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    },
+                    {
+                      "docstring": "no carriage returns survived the checkout",
+                      "lines": [
+                        80,
+                        80
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "lines": [
+                        81,
+                        86
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    },
+                    {
+                      "docstring": "attestation verifies on this platform",
+                      "lines": [
+                        87,
+                        87
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash scripts/attest.sh --verify ATTESTATION.txt",
+                      "lines": [
+                        88,
+                        89
+                      ],
+                      "name": "run",
+                      "type": "key"
+                    },
+                    {
+                      "docstring": "trust contract verifies in both directions",
+                      "lines": [
+                        90,
+                        90
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash scripts/goal.sh contract --verify",
+                      "lines": [
+                        91,
+                        92
+                      ],
+                      "name": "run",
+                      "type": "key"
+                    },
+                    {
+                      "docstring": "acceptance suite",
+                      "lines": [
+                        93,
+                        93
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash tests/run_tests.sh 2>&1 | tee \"suite-${{ matrix.os }}.log\"",
+                      "lines": [
+                        94,
+                        98
+                      ],
+                      "name": "run",
+                      "type": "key"
+                    },
+                    {
+                      "docstring": "upload the tail from this platform",
+                      "lines": [
+                        99,
+                        99
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "always()",
+                      "lines": [
+                        100,
+                        100
+                      ],
+                      "name": "if",
+                      "type": "key"
+                    },
+                    {
+                      "docstring": "actions/upload-artifact@v4",
+                      "lines": [
+                        101,
+                        101
+                      ],
+                      "name": "uses",
+                      "type": "key"
+                    },
+                    {
+                      "children": [
+                        {
+                          "docstring": "suite-${{ matrix.os }}",
+                          "lines": [
+                            103,
+                            103
+                          ],
+                          "name": "name",
+                          "type": "key"
+                        },
+                        {
+                          "docstring": "suite-${{ matrix.os }}.log",
+                          "lines": [
+                            104,
+                            104
+                          ],
+                          "name": "path",
+                          "type": "key"
+                        },
+                        {
+                          "docstring": "error",
+                          "lines": [
+                            105,
+                            106
+                          ],
+                          "name": "if-no-files-found",
+                          "type": "key"
+                        }
+                      ],
+                      "lines": [
+                        102,
+                        106
+                      ],
+                      "name": "with",
+                      "type": "section"
+                    }
+                  ],
+                  "lines": [
+                    55,
+                    106
+                  ],
+                  "name": "steps",
+                  "type": "list"
+                }
+              ],
+              "lines": [
+                45,
+                106
+              ],
+              "name": "suite",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "the CI's own alarm can fire",
+                  "lines": [
+                    108,
+                    108
+                  ],
+                  "name": "name",
+                  "type": "key"
+                },
+                {
+                  "docstring": "ubuntu-latest",
+                  "lines": [
+                    109,
+                    109
+                  ],
+                  "name": "runs-on",
+                  "type": "key"
+                },
+                {
+                  "children": [
+                    {
+                      "docstring": "a failing command through tee must still fail",
+                      "lines": [
+                        114,
+                        114
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash",
+                      "lines": [
+                        115,
+                        115
+                      ],
+                      "name": "shell",
+                      "type": "key"
+                    },
+                    {
+                      "lines": [
+                        116,
+                        122
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    }
+                  ],
+                  "lines": [
+                    110,
+                    122
+                  ],
+                  "name": "steps",
+                  "type": "section"
+                }
+              ],
+              "lines": [
+                107,
+                122
+              ],
+              "name": "pipefail-control",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "the evidence ships and is not empty",
+                  "lines": [
+                    124,
+                    124
+                  ],
+                  "name": "name",
+                  "type": "key"
+                },
+                {
+                  "docstring": "ubuntu-latest",
+                  "lines": [
+                    125,
+                    125
+                  ],
+                  "name": "runs-on",
+                  "type": "key"
+                },
+                {
+                  "children": [
+                    {
+                      "docstring": "actions/checkout@v4",
+                      "lines": [
+                        127,
+                        133
+                      ],
+                      "name": "uses",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "every evidence artefact is present and non-empty",
+                      "lines": [
+                        134,
+                        134
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash",
+                      "lines": [
+                        135,
+                        135
+                      ],
+                      "name": "shell",
+                      "type": "key"
+                    },
+                    {
+                      "lines": [
+                        136,
+                        151
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    }
+                  ],
+                  "lines": [
+                    126,
+                    151
+                  ],
+                  "name": "steps",
+                  "type": "list"
+                }
+              ],
+              "lines": [
+                123,
+                151
+              ],
+              "name": "evidence",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "every platform agreed (no failure, no skip, no cancel)",
+                  "lines": [
+                    153,
+                    153
+                  ],
+                  "name": "name",
+                  "type": "key"
+                },
+                {
+                  "docstring": "[suite, pipefail-control, evidence]",
+                  "lines": [
+                    154,
+                    154
+                  ],
+                  "name": "needs",
+                  "type": "collection"
+                },
+                {
+                  "docstring": "always()          # must RUN even when something upstream failed,",
+                  "lines": [
+                    155,
+                    155
+                  ],
+                  "name": "if",
+                  "type": "key"
+                },
+                {
+                  "docstring": "ubuntu-latest #  otherwise it would be skipped and prove nothing",
+                  "lines": [
+                    156,
+                    156
+                  ],
+                  "name": "runs-on",
+                  "type": "key"
+                },
+                {
+                  "children": [
+                    {
+                      "docstring": "assert each upstream job SUCCEEDED",
+                      "lines": [
+                        158,
+                        158
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash",
+                      "lines": [
+                        159,
+                        159
+                      ],
+                      "name": "shell",
+                      "type": "key"
+                    },
+                    {
+                      "lines": [
+                        160,
+                        181
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    }
+                  ],
+                  "lines": [
+                    157,
+                    181
+                  ],
+                  "name": "steps",
+                  "type": "list"
+                }
+              ],
+              "lines": [
+                152,
+                181
+              ],
+              "name": "green",
+              "type": "section"
+            },
+            {
+              "children": [
+                {
+                  "docstring": "publish the release",
+                  "lines": [
+                    183,
+                    183
+                  ],
+                  "name": "name",
+                  "type": "key"
+                },
+                {
+                  "docstring": "[green]",
+                  "lines": [
+                    184,
+                    184
+                  ],
+                  "name": "needs",
+                  "type": "collection"
+                },
+                {
+                  "docstring": "startsWith(github.ref, 'refs/tags/v')",
+                  "lines": [
+                    185,
+                    185
+                  ],
+                  "name": "if",
+                  "type": "key"
+                },
+                {
+                  "docstring": "ubuntu-latest",
+                  "lines": [
+                    186,
+                    186
+                  ],
+                  "name": "runs-on",
+                  "type": "key"
+                },
+                {
+                  "children": [
+                    {
+                      "docstring": "actions/checkout@v4",
+                      "lines": [
+                        188,
+                        189
+                      ],
+                      "name": "uses",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "the tag must equal the version in plugin.json",
+                      "lines": [
+                        190,
+                        190
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash",
+                      "lines": [
+                        191,
+                        191
+                      ],
+                      "name": "shell",
+                      "type": "key"
+                    },
+                    {
+                      "lines": [
+                        192,
+                        201
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    },
+                    {
+                      "docstring": "the tree still measures what it attests",
+                      "lines": [
+                        202,
+                        202
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash",
+                      "lines": [
+                        203,
+                        203
+                      ],
+                      "name": "shell",
+                      "type": "key"
+                    },
+                    {
+                      "docstring": "bash scripts/attest.sh --verify ATTESTATION.txt",
+                      "lines": [
+                        204,
+                        205
+                      ],
+                      "name": "run",
+                      "type": "key"
+                    },
+                    {
+                      "docstring": "build the archive and its manifest",
+                      "lines": [
+                        206,
+                        206
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash",
+                      "lines": [
+                        207,
+                        207
+                      ],
+                      "name": "shell",
+                      "type": "key"
+                    },
+                    {
+                      "lines": [
+                        208,
+                        221
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    },
+                    {
+                      "docstring": "the archive verifies from cold",
+                      "lines": [
+                        222,
+                        222
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "bash",
+                      "lines": [
+                        223,
+                        223
+                      ],
+                      "name": "shell",
+                      "type": "key"
+                    },
+                    {
+                      "lines": [
+                        224,
+                        237
+                      ],
+                      "name": "run",
+                      "type": "multiline"
+                    },
+                    {
+                      "docstring": "publish",
+                      "lines": [
+                        238,
+                        238
+                      ],
+                      "name": "name",
+                      "type": "item"
+                    },
+                    {
+                      "docstring": "softprops/action-gh-release@v2",
+                      "lines": [
+                        239,
+                        239
+                      ],
+                      "name": "uses",
+                      "type": "key"
+                    },
+                    {
+                      "children": [
+                        {
+                          "lines": [
+                            241,
+                            243
+                          ],
+                          "name": "files",
+                          "type": "multiline"
+                        },
+                        {
+                          "lines": [
+                            244,
+                            258
+                          ],
+                          "name": "body",
+                          "type": "multiline"
+                        },
+                        {
+                          "docstring": "true",
+                          "lines": [
+                            259,
+                            260
+                          ],
+                          "name": "fail_on_unmatched_files",
+                          "type": "key"
+                        }
+                      ],
+                      "lines": [
+                        240,
+                        260
+                      ],
+                      "name": "with",
+                      "type": "section"
+                    }
+                  ],
+                  "lines": [
+                    187,
+                    260
+                  ],
+                  "name": "steps",
+                  "type": "list"
+                }
+              ],
+              "lines": [
+                182,
+                260
+              ],
+              "name": "release",
+              "type": "section"
+            }
+          ],
+          "lines": [
+            44,
+            260
+          ],
+          "name": "jobs",
+          "type": "section"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T00:24:24.426847+00:00",
+  "version": "1.0"
+}

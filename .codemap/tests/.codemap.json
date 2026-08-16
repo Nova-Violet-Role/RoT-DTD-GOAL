@@ -1,0 +1,550 @@
+{
+  "directory": "tests",
+  "files": {
+    "run_tests.sh": {
+      "hash": "539466e45f56",
+      "indexed_at": "2026-08-16T01:29:25.970570+00:00",
+      "language": "shell",
+      "lines": 2891,
+      "mtime_ns": 1786843764113144000,
+      "size": 166553,
+      "symbols": [
+        {
+          "docstring": "------------------------------------------------------- pure-bash JSON check Structural well-formedness: balanced braces/brackets outside strings, no",
+          "lines": [
+            53,
+            2892
+          ],
+          "name": "json_wellformed",
+          "type": "function"
+        },
+        {
+          "docstring": "------------------------------------------------------------------- fixtures",
+          "lines": [
+            84,
+            90
+          ],
+          "name": "new_project",
+          "type": "function"
+        },
+        {
+          "lines": [
+            102,
+            109
+          ],
+          "name": "test_syntax_all_scripts",
+          "type": "function"
+        },
+        {
+          "lines": [
+            111,
+            123
+          ],
+          "name": "test_hooks_json_wellformed",
+          "type": "function"
+        },
+        {
+          "lines": [
+            125,
+            136
+          ],
+          "name": "test_hook_event_coverage",
+          "type": "function"
+        },
+        {
+          "lines": [
+            138,
+            152
+          ],
+          "name": "test_gate_block",
+          "type": "function"
+        },
+        {
+          "lines": [
+            154,
+            168
+          ],
+          "name": "test_gate_complete",
+          "type": "function"
+        },
+        {
+          "lines": [
+            170,
+            181
+          ],
+          "name": "test_gate_stall_escalate",
+          "type": "function"
+        },
+        {
+          "lines": [
+            183,
+            196
+          ],
+          "name": "test_gate_budget_escalate",
+          "type": "function"
+        },
+        {
+          "lines": [
+            198,
+            207
+          ],
+          "name": "test_gate_recursion_guard",
+          "type": "function"
+        },
+        {
+          "lines": [
+            209,
+            2892
+          ],
+          "name": "test_guard_tamper_deny",
+          "type": "function"
+        },
+        {
+          "lines": [
+            225,
+            240
+          ],
+          "name": "test_guard_allows_reads_and_other_projects",
+          "type": "function"
+        },
+        {
+          "lines": [
+            242,
+            259
+          ],
+          "name": "test_ledger_detects_tampering",
+          "type": "function"
+        },
+        {
+          "lines": [
+            261,
+            274
+          ],
+          "name": "test_seal_never_grants_a_pass",
+          "type": "function"
+        },
+        {
+          "lines": [
+            276,
+            290
+          ],
+          "name": "test_redteam_rejects_vacuous_criteria",
+          "type": "function"
+        },
+        {
+          "lines": [
+            292,
+            305
+          ],
+          "name": "test_redteam_negative_control",
+          "type": "function"
+        },
+        {
+          "lines": [
+            307,
+            326
+          ],
+          "name": "test_gate_redteam_strict_refuses_completion",
+          "type": "function"
+        },
+        {
+          "lines": [
+            328,
+            365
+          ],
+          "name": "test_sharpen",
+          "type": "function"
+        },
+        {
+          "lines": [
+            367,
+            431
+          ],
+          "name": "test_mutation_probe",
+          "type": "function"
+        },
+        {
+          "lines": [
+            433,
+            453
+          ],
+          "name": "test_deps_scoped_freshness",
+          "type": "function"
+        },
+        {
+          "lines": [
+            455,
+            477
+          ],
+          "name": "test_progress_resets_stall",
+          "type": "function"
+        },
+        {
+          "lines": [
+            479,
+            497
+          ],
+          "name": "test_learning",
+          "type": "function"
+        },
+        {
+          "lines": [
+            499,
+            510
+          ],
+          "name": "test_history_is_recorded",
+          "type": "function"
+        },
+        {
+          "lines": [
+            512,
+            537
+          ],
+          "name": "test_event_rate_limit",
+          "type": "function"
+        },
+        {
+          "docstring": "--------------------------------------------------- suite self-check cases These two are NOT in ALL. They exist to be run explicitly, by test_suite_su",
+          "lines": [
+            543,
+            554
+          ],
+          "name": "test__selfcheck_stdin",
+          "type": "function"
+        },
+        {
+          "lines": [
+            556,
+            559
+          ],
+          "name": "test__selfcheck_empty",
+          "type": "function"
+        },
+        {
+          "lines": [
+            561,
+            565
+          ],
+          "name": "test__selfcheck_hang",
+          "type": "function"
+        },
+        {
+          "lines": [
+            567,
+            615
+          ],
+          "name": "test_suite_survives_hostile_environment",
+          "type": "function"
+        },
+        {
+          "lines": [
+            617,
+            743
+          ],
+          "name": "test_flaky_detection",
+          "type": "function"
+        },
+        {
+          "lines": [
+            745,
+            851
+          ],
+          "name": "test_flake_scope_is_the_seal",
+          "type": "function"
+        },
+        {
+          "lines": [
+            853,
+            952
+          ],
+          "name": "test_clock_cannot_hide_a_flip",
+          "type": "function"
+        },
+        {
+          "lines": [
+            954,
+            1022
+          ],
+          "name": "test_every_law_is_enforced",
+          "type": "function"
+        },
+        {
+          "docstring": "---- portability: the machine the author does not own ---------------------- Shared scanners. The negative controls below run THESE functions against",
+          "lines": [
+            1028,
+            1040
+          ],
+          "name": "gf_scan_winvar",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1041,
+            1043
+          ],
+          "name": "gf_scan_cr",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1045,
+            1128
+          ],
+          "name": "test_a_refusal_always_carries_a_way_forward",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1130,
+            1195
+          ],
+          "name": "test_records_are_append_only",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1197,
+            1285
+          ],
+          "name": "test_the_contract_binds_the_engine",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1287,
+            1290
+          ],
+          "name": "gf_json_str",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1292,
+            1394
+          ],
+          "name": "test_the_plugin_installs_as_declared",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1396,
+            1561
+          ],
+          "name": "test_portable_to_a_stranger_machine",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1563,
+            1648
+          ],
+          "name": "test_completion_is_simultaneous",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1650,
+            1765
+          ],
+          "name": "test_many_goals_run_in_order",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1767,
+            1870
+          ],
+          "name": "test_untrusted_output_cannot_forge_a_verdict",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1872,
+            1910
+          ],
+          "name": "test_every_event_is_consumed",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1912,
+            1942
+          ],
+          "name": "test_ships_no_tooling_artifacts",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1944,
+            1984
+          ],
+          "name": "test_docs_counts_are_generated",
+          "type": "function"
+        },
+        {
+          "lines": [
+            1986,
+            2036
+          ],
+          "name": "test_attestation_survives_a_stranger",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2038,
+            2085
+          ],
+          "name": "test_mutation_reaches_undeclared_deps",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2087,
+            2130
+          ],
+          "name": "test_one_source_of_record",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2132,
+            2179
+          ],
+          "name": "test_forensic_events_surface",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2181,
+            2205
+          ],
+          "name": "test_friction_reaches_the_gate",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2207,
+            2250
+          ],
+          "name": "test_timings_rotation",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2252,
+            2279
+          ],
+          "name": "test_snapshot_ring",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2281,
+            2319
+          ],
+          "name": "test_license_is_one_story",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2321,
+            2393
+          ],
+          "name": "test_learned_timeouts",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2395,
+            2432
+          ],
+          "name": "test_timeout_corpus_binds_lean",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2434,
+            2472
+          ],
+          "name": "test_semantic_mutation_operators",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2474,
+            2519
+          ],
+          "name": "test_gate_mutation_policy",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2521,
+            2568
+          ],
+          "name": "test_precompact_snapshot",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2570,
+            2592
+          ],
+          "name": "test_hooks_survive_garbage_stdin",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2594,
+            2610
+          ],
+          "name": "test_invariant_completion_is_never_declarable",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2612,
+            2629
+          ],
+          "name": "test_invariant_state_is_inspectable",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2631,
+            2642
+          ],
+          "name": "test_invariant_floor_stays_light",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2644,
+            2679
+          ],
+          "name": "test_version_is_honest",
+          "type": "function"
+        },
+        {
+          "lines": [
+            2681,
+            2743
+          ],
+          "name": "test_docs_carry_the_argument",
+          "type": "function"
+        },
+        {
+          "docstring": "One case, one process, one watchdog. Returns the child's exit code; its output (including the GF_CASE_RESULT line) goes to stdout.",
+          "lines": [
+            2835,
+            2843
+          ],
+          "name": "run_isolated",
+          "type": "function"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T01:29:25.970717+00:00",
+  "version": "1.0"
+}

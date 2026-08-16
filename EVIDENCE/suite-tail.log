@@ -1,0 +1,60 @@
+  ok   plugin: a version is declared (1.0.0)
+  ok   plugin: the shipped version has a CHANGELOG entry
+  ok   evidence: every published artefact ships and is non-empty
+  ok   evidence: 4 Lean sources are published, not just their transcript
+  ok   plugin: the name check can detect a mismatch (negative control)
+      1s
+[55/57] test_records_are_append_only
+  ok   schema: the declaration verifies against the tree
+  ok   schema: every record is checked
+  ok   schema: append-only is asserted, not assumed
+  ok   schema: the two declarations are cross-checked
+  ok   schema: a legacy narrow row is tolerated, not called drift
+  ok   schema: and it is NAMED as legacy rather than ignored
+  ok   schema control: an undeclared column FAILS the check
+  ok   schema control: and it says which record
+  ok   schema control: the append-only mutation applied to the fixture
+  ok   schema control: an inserted field FAILS the check
+  ok   schema control: named as append-only
+  ok   schema control: the disagreement mutation applied to the fixture
+  ok   schema control: disagreeing declarations FAIL the check
+  ok   schema control: both sides are printed
+  ok   schema control: a numbering gap FAILS the check
+  ok   schema control: named as numbering
+      11s
+[56/57] test_the_contract_binds_the_engine
+  ok   contract: verifies against the tree
+  ok   contract: the agent roster is checked
+  ok   contract: the gate policies are bound to the code
+  ok   contract: the untrusted channels are named
+  ok   contract: every agent file is declared and vice versa
+  ok   contract: 7 agents are declared
+  ok   agents: every agent declares its model
+  ok   agents: every agent declares a tool boundary
+  ok   contract control: the ghost-agent mutation applied
+  ok   contract control: a declared agent with no file FAILS
+  ok   contract control: named as absent
+  ok   contract control: the policy mutation applied
+  ok   contract control: a drifted policy default FAILS
+  ok   contract control: named as policy drift
+  ok   law control: the sentinel mutation applied
+  ok   gate: the refusal carries a DOCTYPE declaration block
+  ok   gate: the law text comes FROM the contract, not from the script
+  ok   gate: the task is tagged as an instruction
+  ok   gate: the sentinel exists only in the contract (negative control)
+      7s
+[57/57] test_a_refusal_always_carries_a_way_forward
+  ok   refusals: found the gate's outbound messages
+  ok   refusals: 12 outbound messages inspected
+  ok   refusals: every gate message names a next step, none is a wall
+  ok   refusals: the scanner can spot a wall (negative control)
+  ok   refusals: the block keeps the session going, it does not end it
+  ok   refusals: it names the failing criterion
+  ok   refusals: it shows the command that failed
+  ok   refusals: it issues a task, tagged as one
+  ok   refusals: and tells the reader what ends the loop
+  ok   refusals: the gate never tells the reader to stop trying
+      4s
+
+passed: 650   failed: 0
+ALL GREEN
