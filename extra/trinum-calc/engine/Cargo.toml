@@ -1,0 +1,12 @@
+[package]
+name = "trinum-engine"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "trinum_engine"
+path = "src/lib.rs"
+
+[[bin]]
+name = "trinum"
+path = "src/bin/trinum.rs"

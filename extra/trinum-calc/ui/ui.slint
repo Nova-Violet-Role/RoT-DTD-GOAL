@@ -1,0 +1,76 @@
+import { LineEdit, Button, VerticalBox, GridBox } from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    title: "trinum";
+    min-width: 420px;
+    min-height: 480px;
+
+    in-out property <string> expression: "";
+    in property <string> roman-output: "";
+    in property <string> greek-output: "";
+    in property <string> egyptian-output: "";
+    in property <string> error-output: "";
+
+    callback evaluate();
+    callback key-pressed(string);
+
+    VerticalBox {
+        padding: 12px;
+        spacing: 8px;
+
+        input := LineEdit {
+            text <=> expression;
+            placeholder-text: "e.g. XIV + VI";
+            accepted => { evaluate(); }
+        }
+
+        Button {
+            text: "=";
+            clicked => { evaluate(); }
+        }
+
+        Text { text: "Roman:    " + roman-output; }
+        Text { text: "Greek:    " + greek-output; }
+        Text { text: "Egyptian: " + egyptian-output; }
+        Text {
+            text: error-output;
+            color: red;
+        }
+
+        GridBox {
+            Row {
+                Button { text: "I"; clicked => { key-pressed("I"); } }
+                Button { text: "V"; clicked => { key-pressed("V"); } }
+                Button { text: "X"; clicked => { key-pressed("X"); } }
+                Button { text: "L"; clicked => { key-pressed("L"); } }
+                Button { text: "C"; clicked => { key-pressed("C"); } }
+                Button { text: "D"; clicked => { key-pressed("D"); } }
+                Button { text: "M"; clicked => { key-pressed("M"); } }
+            }
+            Row {
+                Button { text: "α"; clicked => { key-pressed("α"); } }
+                Button { text: "ι"; clicked => { key-pressed("ι"); } }
+                Button { text: "ρ"; clicked => { key-pressed("ρ"); } }
+                Button { text: "͵"; clicked => { key-pressed("͵"); } }
+                Button { text: "𓏺"; clicked => { key-pressed("𓏺"); } }
+                Button { text: "𓎆"; clicked => { key-pressed("𓎆"); } }
+                Button { text: "𓍢"; clicked => { key-pressed("𓍢"); } }
+            }
+            Row {
+                Button { text: "𓆼"; clicked => { key-pressed("𓆼"); } }
+                Button { text: "𓂭"; clicked => { key-pressed("𓂭"); } }
+                Button { text: "+"; clicked => { key-pressed("+"); } }
+                Button { text: "-"; clicked => { key-pressed("-"); } }
+                Button { text: "*"; clicked => { key-pressed("*"); } }
+                Button { text: "/"; clicked => { key-pressed("/"); } }
+                Button { text: "( )"; clicked => { key-pressed("()"); } }
+            }
+            Row {
+                Button {
+                    text: "Clear";
+                    clicked => { key-pressed("CLR"); }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,54 @@
+# RoT DTD GOAL -- CI2: the Plugin Extra Gift.
+#
+# This workflow verifies the EXTRA that ships beside the plugin: trinum, an
+# advanced calculator across Greek, Egyptian and Roman numerals with a Slint
+# GUI, built end-to-end BY the plugin's own /goal engine (the sealed criteria,
+# the journal and the gifs of that build live in extra/trinum-calc/BUILD.md
+# and EVIDENCE/). The three-OS claim of the Extra is measured here, the same
+# way the plugin's own claim is measured in ci.yml -- by a matrix, not a
+# sentence.
+#
+# Deliberately separate from ci.yml: the plugin's release gate must never
+# wait on, or go red because of, a gift. CI2 has no release job and no tag
+# trigger -- it is verification only.
+
+name: plugin-extra-gift
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["extra/**", ".github/workflows/ci2.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extra:
+    name: trinum on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: build the workspace (engine + Slint UI)
+        run: cargo build --locked --workspace
+        working-directory: extra/trinum-calc
+      - name: the engine's tests
+        run: cargo test --locked -p trinum-engine
+        working-directory: extra/trinum-calc
+      - name: the CLI answers in all three systems
+        run: |
+          out="$(echo 'XIV + VI' | ./target/debug/trinum --out roman)"
+          test "$out" = "XX"
+          out="$(echo 'X * X' | ./target/debug/trinum --out greek)"
+          test "$out" = "ρ"
+          out="$(echo 'V + V' | ./target/debug/trinum --out egyptian)"
+          test "$out" = "𓎆"
+        working-directory: extra/trinum-calc
