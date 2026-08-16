@@ -42,6 +42,19 @@
   <!ENTITY VERDICT.redteam      "RED TEAM WARNING">
   <!ENTITY VERDICT.mutation     "MUTATION WARNING">
   <!ENTITY VERDICT.attestation  "ATTESTATION OK">
+  <!-- 4.0.0: the contract-auditor's bench finding -- these seven were spoken
+       by the engine but never declared, so the forgery attack never covered
+       them. Declared now; the attack covers every one automatically. -->
+  <!ENTITY VERDICT.ledgerdrift  "LEDGER DRIFT">
+  <!ENTITY VERDICT.attestfail   "ATTESTATION FAILED">
+  <!ENTITY VERDICT.stall        "STALL DETECTED">
+  <!ENTITY VERDICT.contractok   "CONTRACT OK">
+  <!ENTITY VERDICT.contractbad  "CONTRACT DRIFT">
+  <!ENTITY VERDICT.schemaok     "SCHEMA OK">
+  <!ENTITY VERDICT.schemabad    "SCHEMA DRIFT">
+  <!-- 4.0.0: emitted when the gate's own time budget expires mid-pipeline --
+       a slow gate must cost an iteration, never a verdict (LAW.18). -->
+  <!ENTITY VERDICT.incomplete   "VERIFICATION INCOMPLETE">
 
   <!-- ================= THE QUEUE SPEC GRAMMAR =================
        A queued goal is a two-verb TSV file. The grammar is DECLARED here and
@@ -55,7 +68,7 @@
   -->
   <!ELEMENT spec  (GOAL, CRIT+)>
   <!ELEMENT GOAL  (#PCDATA)>   <!-- goal text <TAB> init options            -->
-  <!ELEMENT CRIT  (#PCDATA)>   <!-- id <TAB> description <TAB> verify command -->
+  <!ELEMENT CRIT  (#PCDATA)>   <!-- id <TAB> description <TAB> verify command [<TAB> deps ;-joined globs, since 4.0.0] -->
 
   <!-- ================= THE INSTRUCTION CHANNEL =================
        When the queue advances, the gate is no longer reporting a result: it is
@@ -91,6 +104,7 @@
   <!ENTITY LAW.15 "An on-disk record is append-only: field numbers are dense, never reused, never reordered.">
   <!ENTITY LAW.16 "An agent may only speak in a declared element, and every declared agent exists.">
   <!ENTITY LAW.17 "A refusal always carries a task -- the gate blocks with the next step, never with a wall.">
+  <!ENTITY LAW.18 "A gate that runs out of time blocks and says so -- a slow pipeline costs an iteration, never a verdict.">
 
   <!-- ================= THE RECORD SCHEMA =================
        WHY THIS EXISTS, and it is the most-earned section in this file.
@@ -148,6 +162,7 @@
   <!ELEMENT queue      (name, status, after, spec)>
   <!ELEMENT consumers  (event, class, consumer, effect, why_not_decisional)>
   <!ELEMENT invariants (law, statement, enforcing_case, breaking_looks_like)>
+  <!ELEMENT history    (ts, outcome, iteration, max_iterations, total, passed, duration_s, goal)>
 
   <!ENTITY RECORD.ledger
     "ledger|.claude/goal/ledger|1=id:PCDATA@v2|2=hash:PCDATA@v2|3=sealed_epoch:PCDATA@v2|4=sealed_iso:PCDATA@v2|5=seal_gen:PCDATA@1.0.0">
@@ -163,6 +178,9 @@
 
   <!ENTITY RECORD.invariants
     "invariants|hooks/INVARIANTS.tsv|1=law:PCDATA@1.0.0|2=statement:CDATA@1.0.0|3=enforcing_case:PCDATA@1.0.0|4=breaking_looks_like:CDATA@1.0.0">
+
+  <!ENTITY RECORD.history
+    "history|.claude/goal/history.tsv|1=ts:PCDATA@1.0.0|2=outcome:PCDATA@1.0.0|3=iteration:PCDATA@1.0.0|4=max_iterations:PCDATA@1.0.0|5=total:PCDATA@1.0.0|6=passed:PCDATA@1.0.0|7=duration_s:PCDATA@1.0.0|8=goal:CDATA@1.0.0">
 
   <!-- ================= THE POLICY ATTRIBUTES =================
        A parameter entity, because the same enumeration is used three times and

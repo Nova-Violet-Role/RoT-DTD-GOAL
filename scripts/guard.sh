@@ -49,7 +49,14 @@ references_live_state() {
 # because the quote, not a space, preceded the verb. Caught by the suite.
 GF_WB='(^|[^[:alnum:]_./-])'
 mutating_bash() {
-  printf '%s' "$NORM" | grep -Eq '>' && return 0
+  # The bare '>' test used to run first on the raw command, so the '>' inside
+  # `2>/dev/null` and `2>&1` -- read-posture stderr plumbing, not a write into
+  # anything a goal owns -- denied read-only commands. Measured in the 3.0.0
+  # bench: seven denials, every one a cat/ls/find/status with a scrubbed
+  # redirect. Strip those forms first; every other '>' still denies.
+  local scrub
+  scrub="$(printf '%s' "$NORM" | sed -E 's/[0-9]*>&[0-9]+//g; s/[0-9]*>[[:space:]]*\/dev\/null//g')"
+  printf '%s' "$scrub" | grep -Eq '>' && return 0
   printf '%s' "$NORM" | grep -Eq "${GF_WB}(rm|rmdir|mv|cp|tee|truncate|chmod|chown|touch|dd|ln|shred|unlink|install)[[:space:]]" && return 0
   printf '%s' "$NORM" | grep -Eq "${GF_WB}sed[[:space:]]+-i" && return 0
   return 1

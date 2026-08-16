@@ -27,6 +27,22 @@ block_msg() { # reason, then exit 0 with a block decision (keep the loop going)
   exit 0
 }
 
+# ---- the gate's own clock (4.0.0, LAW.18) ---------------------------------
+# Claude Code kills a hook at its configured timeout and treats the death as
+# an ALLOW -- measured in the 3.0.0 bench: a completion pipeline that needed
+# ~7 minutes was killed at 300s and the session ended with no verdict at all.
+# So the gate watches its own elapsed time against a budget BELOW the hook
+# timeout, and when the pipeline cannot finish in budget it blocks with the
+# next step instead of dying silently. A slow gate costs an iteration, never
+# a verdict. hooks.json ships timeout 600; the default budget leaves 60s of
+# headroom for the block itself to be written.
+GF_GATE_BUDGET="${GF_GATE_BUDGET:-540}"
+gate_time_check() { # <next-stage name>
+  [ "$SECONDS" -lt "$GF_GATE_BUDGET" ] && return 0
+  gf_journal "GATE-TIMEOUT before=$1 elapsed=${SECONDS}s budget=${GF_GATE_BUDGET}s"
+  block_msg "RoT DTD GOAL: VERIFICATION INCOMPLETE -- the gate spent its time budget (${GF_GATE_BUDGET}s) before the [$1] stage could run. Nothing was skipped and no stale pass is trusted: stop again and verification resumes with a fresh sweep. If this recurs, the completion pipeline is genuinely slower than the budget -- raise GF_GATE_BUDGET and the Stop hook timeout together, or narrow GF_GATE_MUTATE_OPS."
+}
+
 # No goal / not active -> never interfere with stopping.
 [ "$(gf_status || true)" = "active" ] || exit 0
 
@@ -54,6 +70,7 @@ fail="${res#* }"
 
 if [ "$fail" -eq 0 ]; then
   counts="$(crit_counts)"
+  gate_time_check "red team"
   # ---- completion red team (v3) -------------------------------------------
   # All checks pass. Before calling that a win, attack the checks themselves:
   # any criterion that also passes inside an EMPTY directory did not measure
@@ -77,6 +94,7 @@ if [ "$fail" -eq 0 ]; then
   # default and that is a cost decision, not a confidence one -- it copies the
   # tree once per operator per criterion. GATE_MUTATE=warn reports, strict
   # refuses. GF_GATE_MUTATE_OPS narrows the operator set for speed.
+  gate_time_check "mutation probe"
   mpolicy="$(state_get GATE_MUTATE)"; mpolicy="${mpolicy:-off}"
   blind=""
   if [ "$mpolicy" != "off" ]; then
@@ -101,6 +119,7 @@ if [ "$fail" -eq 0 ]; then
   # plus 6 escalations out of 20 goals carrying a genuinely random check. Zero
   # measured cost, real measured benefit -- so it is on by default, and the
   # number is written beside it in README rather than the word "conservative".
+  gate_time_check "flake scan"
   fpolicy="$(state_get GATE_FLAKY)"; fpolicy="${fpolicy:-strict}"
   flaky=""
   if [ "$fpolicy" != "off" ]; then

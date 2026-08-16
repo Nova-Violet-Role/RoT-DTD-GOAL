@@ -24,9 +24,13 @@ being examined. An unknown name in `agents=` refuses the whole swarm with the
 roster printed — a swarm that silently drops an agent looks complete and is
 not.
 
-**3 — fan out, genuinely in parallel.** If this harness has a Workflow tool,
-orchestrate one phase that launches every selected agent concurrently and a
-final synthesis step. Otherwise issue ALL the Task calls in a SINGLE message
+**3 — fan out, genuinely in parallel.** Parallel Task calls are the default
+posture; a Workflow is an upgrade, never a wall. Use the Workflow tool ONLY
+when it is present AND already approved for this session — in a headless or
+non-interactive run, or whenever a permission prompt would be needed, do NOT
+reach for it: a workflow waiting on an approval nobody can give produces no
+agent reports at all (measured in the 3.0.0 bench). In every other case issue
+ALL the Task calls in a SINGLE message
 (one call per agent, `subagent_type: "rot-dtd-goal:<agent>"`) so they run
 concurrently — never one-at-a-time in sequence, which is just `/goal-agent`
 seven slow times. Each agent receives the same subject, framed for its

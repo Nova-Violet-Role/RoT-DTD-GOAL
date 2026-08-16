@@ -986,9 +986,14 @@ gf_project_file_count() {
   find "$GF_PROJECT" -type f 2>/dev/null | head -n $((GF_MUTATE_MAX_FILES + 1)) | wc -l | tr -d ' '
 }
 
-gf_mutation_probe() { # id op -> 0 if the MUTANT SURVIVED (blind), 1 if killed
-  local id="$1" op="${2:-delete}" cmd deps sandbox proj secs rc killed=1 f n
+gf_mutation_probe() { # id op [only-glob] -> 0 if the MUTANT SURVIVED (blind), 1 if killed
+  # The optional third argument narrows the damage to ONE dependency. It exists
+  # for the isolation escalation below: symmetric damage to every dependency at
+  # once can commute through a diff-shaped check (empty diff empty passes), so
+  # a survivor is re-probed one dependency at a time before being believed.
+  local id="$1" op="${2:-delete}" only="${3:-}" cmd deps sandbox proj secs rc killed=1 f n
   cmd="$(crit_field "$id" verify)"; deps="$(gf_deps_effective "$id")"
+  [ -n "$only" ] && deps="$only"
   [ -n "$cmd" ] && [ -n "$deps" ] || return 2      # not probeable, even by inference
   n="$(gf_project_file_count)"
   [ "$n" -gt "$GF_MUTATE_MAX_FILES" ] && return 3  # too big, refuse rather than crawl
@@ -1019,12 +1024,36 @@ gf_mutate_all() {
   local id survived=0 rc op killed total lived skip ops src
   ops="$(gf_expand_ops "$GF_MUTATE_OPS")"
   for id in $(crit_ids); do
-    killed=0; total=0; lived=""; lived_n=0; skip=""
+    killed=0; total=0; lived=""; lived_n=0; skip=""; iso=""
     # An inferred probe must never be mistaken for a declared one: the reader
     # has to know whether the criterion made the claim or the engine guessed it.
     if [ -n "$(crit_field "$id" deps)" ]; then src="declared deps"; else src="deps INFERRED from the command"; fi
     for op in $ops; do
       gf_mutation_probe "$id" "$op"; rc=$?
+      # Isolation escalation (bench finding 1): damaging every dependency at
+      # once can commute through a comparison-shaped check -- truncate empties
+      # both sides of a diff and the empty tool exits 0. A survivor with more
+      # than one dependency is therefore re-probed one dependency at a time,
+      # and dies if ANY isolated damage kills it. The extra copies are spent
+      # only on survivors, so a healthy criterion costs exactly what it did.
+      if [ "$rc" -eq 0 ]; then
+        depset="$(gf_deps_effective "$id")"
+        case "$depset" in
+          *';'*)
+            oldifs="$IFS"; IFS=';'
+            for onedep in $depset; do
+              IFS="$oldifs"
+              [ -n "$onedep" ] || { IFS=';'; continue; }
+              gf_mutation_probe "$id" "$op" "$onedep"; rc2=$?
+              if [ "$rc2" -eq 1 ]; then
+                rc=1; iso="${iso}${iso:+,}$op@$onedep"; break
+              fi
+              IFS=';'
+            done
+            IFS="$oldifs"
+            ;;
+        esac
+      fi
       case "$rc" in
         0) total=$((total + 1)); lived_n=$((lived_n + 1)); lived="${lived}${lived:+,}$op" ;;
         1) total=$((total + 1)); killed=$((killed + 1)) ;;
@@ -1038,7 +1067,10 @@ gf_mutate_all() {
     if [ -n "$skip" ]; then
       echo "$id SKIPPED  $skip"
     elif [ -z "$lived" ]; then
-      echo "$id KILLED   $killed/$total operators ($src; every mutation made it fail)"
+      # An isolation note names the operators that only died when a single
+      # dependency was damaged alone -- the check is sound; symmetric damage
+      # was the blind instrument, and the reader deserves to know which.
+      echo "$id KILLED   $killed/$total operators ($src; every mutation made it fail${iso:+; via single-dep isolation: $iso})"
     else
       # The number is the SURVIVOR count -- the same thing the list names.
       # Through 1.0.0 this printed the KILL count after the word SURVIVED, so

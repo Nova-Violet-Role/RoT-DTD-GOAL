@@ -38,6 +38,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 die() { echo "ERROR: $*" >&2; exit 1; }
 
 cmd_init() {
+  # --help must never become a goal's text. It did: a bench session probing
+  # the CLI ran `init --help` and got a draft goal literally named "--help",
+  # which it then had to abort.
+  case "${1:-}" in
+    -h|--help)
+      echo 'usage: goal.sh init "<goal text>" [--budget N|auto] [--stall N] [--timeout SECS]'
+      exit 0 ;;
+  esac
   [ $# -ge 1 ] || die "usage: goal.sh init \"<goal>\" [--budget N] [--stall N] [--timeout S]"
   local goal="$1"; shift
   local budget=8 stall=2 tmo=120 learned=""
@@ -106,6 +114,25 @@ cmd_add() {
   if gf_vacuous_cmd "$verify"; then
     gf_journal "REJECT vacuous criterion $id verify='$(printf '%s' "$verify" | head -c 60)'"
     die "criterion $id rejected: that verify command can never fail (it exits 0 by construction). A criterion must be able to FAIL. Try a real check (test/grep -q/build/test-suite)."
+  fi
+  # 4.0.0, from two benches in a row: a diff whose every real file lives
+  # inside a process substitution is vacuously EQUAL in a directory where the
+  # tool is absent -- both sides expand to empty. The red team catches it at
+  # completion (it did, twice, once at the price of a strict escalation); this
+  # names it at the moment it is still cheap. A warning, not a refusal: the
+  # empty-dir control stays the enforcer.
+  if printf '%s' "$verify" | grep -q 'diff ' && printf '%s' "$verify" | grep -q '<('; then
+    local _residue _tok _anyfile=0
+    _residue="$(printf '%s' "$verify" | sed 's/<([^)]*)//g')"
+    for _tok in $(printf '%s' "$_residue" | tr -c 'A-Za-z0-9_./-' ' '); do
+      _tok="${_tok#./}"
+      case "$_tok" in -*|/*|diff) continue ;; esac
+      [ -f "$GF_PROJECT/$_tok" ] && _anyfile=1
+    done
+    if [ "$_anyfile" -eq 0 ]; then
+      gf_journal "WARN possibly-vacuous-diff $id"
+      echo "WARNING: $id compares only process substitutions -- in an empty directory both sides can be vacuously equal, and the red team will refuse it at completion. Cheaper now: anchor it, e.g. test -x <tool> && <check>."
+    fi
   fi
   {
     printf 'status=pending\n'
@@ -176,7 +203,10 @@ cmd_mutate() {
   echo "operators: $GF_MUTATE_OPS"
   out="$(gf_mutate_all)" || rc=1
   printf '%s\n' "$out"
-  gf_journal "MUTATE ops=$(printf '%s' "$GF_MUTATE_OPS" | tr ' ' ',') survived=$(printf '%s' "$out" | grep -c ' SURVIVED ' || true) killed=$(printf '%s' "$out" | grep -c ' KILLED ' || true)"
+  # The keys name what is counted: CRITERIA with at least one survivor vs
+  # criteria every operator killed. The old keys (survived=/killed=) read as
+  # operator tallies and were misread exactly that way during the 3.0.0 bench.
+  gf_journal "MUTATE ops=$(printf '%s' "$GF_MUTATE_OPS" | tr ' ' ',') criteria_with_survivors=$(printf '%s' "$out" | grep -c ' SURVIVED ' || true) criteria_all_killed=$(printf '%s' "$out" | grep -c ' KILLED ' || true)"
   echo
   if [ "$rc" -ne 0 ]; then
     echo "A criterion kept passing after the files it claims to depend on were damaged."
@@ -410,7 +440,12 @@ EOF
 # Exit 0 = a new goal is now active (its name on stdout); exit 1 = nothing to
 # start, and the caller should complete the session as it always did.
 cmd_queue_advance() {
-  local prev nxt spec verb a b c archdir
+  local prev nxt spec verb a b c d archdir g_red g_flk g_mut
+  # Gate policies are session posture, not goal content. Through 3.0.0 an
+  # advance re-inited them to defaults, so a strict run silently went soft on
+  # every queued goal unless someone re-set all three -- measured in bench 2,
+  # where the working session had to do exactly that after each advance.
+  g_red="$(state_get GATE_REDTEAM)"; g_flk="$(state_get GATE_FLAKY)"; g_mut="$(state_get GATE_MUTATE)"
   prev="$(gf_queue_active || true)"
   [ -n "$prev" ] && gf_queue_set_status "$prev" done
   nxt="$(gf_queue_next || true)"
@@ -427,14 +462,20 @@ cmd_queue_advance() {
     [ -f "$GF_LEDGER" ] && cp "$GF_LEDGER" "$archdir/ledger" || true
     [ -d "$GF_CRIT" ]   && cp -r "$GF_CRIT" "$archdir/criteria" || true
   fi
-  while IFS="$(printf '\t')" read -r verb a b c; do
+  while IFS="$(printf '\t')" read -r verb a b c d; do
     case "$verb" in
       GOAL) # shellcheck disable=SC2086
             cmd_init "$a" $b > /dev/null ;;
-      CRIT) cmd_add "$a" "$b" "$c" > /dev/null ;;
+      # Field 4 of a CRIT row is optional deps globs (';'-joined), declared in
+      # the contract's spec grammar. Absent keeps the old three-field shape.
+      CRIT) if [ -n "$d" ]; then cmd_add "$a" "$b" "$c" --deps "$d" > /dev/null
+            else cmd_add "$a" "$b" "$c" > /dev/null; fi ;;
       *) continue ;;
     esac
   done < "$spec"
+  [ -n "$g_red" ] && state_set GATE_REDTEAM "$g_red"
+  [ -n "$g_flk" ] && state_set GATE_FLAKY  "$g_flk"
+  [ -n "$g_mut" ] && state_set GATE_MUTATE "$g_mut"
   cmd_activate > /dev/null
   gf_queue_set_status "$nxt" active
   gf_journal "QUEUE-ADVANCE from=${prev:--} to=$nxt criteria=$(crit_ids | wc -l | tr -d ' ')"

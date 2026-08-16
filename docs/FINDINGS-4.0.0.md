@@ -9,7 +9,8 @@
 Everything flagged during the 3.0.0 bench campaign (two real-work bench runs,
 headless sessions, strict gates) that is **not yet fixed**. Each entry says
 what was observed, why it matters, and the proposed fix. Items get struck out
-only by a commit that closes them with a test.
+only by a commit that closes them with a test. 4.0.0 closes 1–12 and 14;
+13 (effort= pass-through) stays open until the harness grows the parameter.
 
 ## Engine
 
@@ -24,6 +25,7 @@ only by a commit that closes them with a test.
    root-caused on a replay copy. *Proposed fix: mutate one dependency at a
    time (per-dep rounds), falling back to all-at-once only above a size
    budget; at minimum, name the symmetric case in the report.*
+    **→ CLOSED in 4.0.0: survivors are re-probed one dependency at a time (`gf_mutation_probe` third argument); extra copies are spent only on survivors, so a healthy criterion costs what it did. Enforced by the PAIR case in `test_mutation_probe`.**
 
 2. **Dependency inference misses process-substitution tokens.** Inference
    tokenizes the verify command and keeps tokens that are existing files —
@@ -33,6 +35,7 @@ only by a commit that closes them with a test.
    strip leading `<(`, `$(`, `(`, and quotes from tokens before the
    file-existence test; a test with a process-substitution criterion must see
    the tool in the inferred set.*
+    **→ RETRACTED as written, and the correction is the record: the tokenizer's `tr` already strips `<(`, so the tool WAS inferred. The observed truncate-survival was finding 1's symmetric damage (an emptied bash tool exits 0, and empty diff empty passes) — closed by the same isolation escalation.**
 
 3. **Queue spec `CRIT` rows cannot declare deps.** The TSV grammar is
    `CRIT<TAB>id<TAB>desc<TAB>verify` — no deps field — so every queued goal's
@@ -40,6 +43,7 @@ only by a commit that closes them with a test.
    fix: optional field 5 `deps` (semicolon-separated globs), declared in both
    halves of the trust contract per the append-only discipline; absent field
    keeps today's behavior.*
+    **→ CLOSED in 4.0.0: CRIT field 4 is optional deps globs, declared in the contract's spec grammar, exercised by `test_many_goals_run_in_order`.**
 
 4. **Gate policies reset on queue advance.** `GATE_REDTEAM`/`GATE_FLAKY`/
    `GATE_MUTATE` live in the per-goal `state.env`, and `queue advance`
@@ -47,12 +51,14 @@ only by a commit that closes them with a test.
    every advance, from inside the working session. *Proposed fix: carry gate
    policies across `queue advance` (they are session posture, not goal
    content); or accept gate flags in the GOAL line's init options.*
+    **→ CLOSED in 4.0.0: `cmd_queue_advance` captures the three gate policies before the advance and re-sets them on the new goal. Enforced in `test_many_goals_run_in_order`.**
 
 5. **`goal.sh init --help` creates a draft goal named `--help`.** No help
    path on `init`; the flag is consumed as goal text. Observed in bench run 1
    — the session had to abort the accidental draft. *Proposed fix: `--help`
    (and `-h`) on every subcommand prints usage and exits 0, never parsed as
    an argument.*
+    **→ CLOSED in 4.0.0: `init --help`/`-h` prints usage and exits 0, no draft. Enforced by `test_cli_refuses_footguns`.**
 
 6. **Journal `MUTATE` line is easy to misread.** `survived=6 killed=0`
    counts *criteria with at least one surviving operator*, not operator
@@ -60,6 +66,7 @@ only by a commit that closes them with a test.
    by the person running it. *Proposed fix: journal
    `criteria_with_survivors=` / `criteria_all_killed=`, or add the
    per-criterion fractions.*
+    **→ CLOSED in 4.0.0: the journal keys are `criteria_with_survivors=` / `criteria_all_killed=`. Enforced in `test_mutation_probe`.**
 
 7. **Add-time lint for self-comparing criteria.** Both bench runs shipped an
    author-written vacuous criterion of the same class (`diff` whose every
@@ -69,6 +76,7 @@ only by a commit that closes them with a test.
    `add` time. *Proposed fix: `cmd_add` warns (not refuses) when no ordinary
    file path appears among the verify command's arguments — same spirit as
    the existing `can-never-fail` refusal, weaker verdict.*
+    **→ CLOSED in 4.0.0: `cmd_add` warns on a substitution-only diff and names the cheap fix; a diff anchored to a real file stays silent. Enforced by `test_cli_refuses_footguns`.**
 
 8. **A gate slower than the hook timeout is an open gate.** Measured, not
     theorized: bench run 2's final completion pipeline (two verify sweeps over
@@ -84,6 +92,7 @@ only by a commit that closes them with a test.
     — so a timeout costs an iteration, never a verdict. Plus: scale the
     shipped `timeout` to the measured cost, and document that hook timeouts
     fail OPEN in Claude Code.*
+    **→ CLOSED in 4.0.0: the gate watches its own clock (`GF_GATE_BUDGET`, default 540s under the shipped hook timeout of 600s) and blocks with `VERIFICATION INCOMPLETE` plus the next step when the budget expires — LAW.18, enforced by `test_a_slow_gate_blocks_instead_of_allowing` with an in-budget completion control.**
 
 9. **Five verdict-shaped strings the contract never declares.** Found by the
     goal-contract-auditor in the bench's closing audit: `LEDGER DRIFT` (vs
@@ -94,12 +103,14 @@ only by a commit that closes them with a test.
     proven a hostile criterion cannot speak them. *Proposed fix: declare them
     (or rename to declared forms), and the forgery attack then covers them
     automatically.*
+    **→ CLOSED in 4.0.0: all seven strings are declared VERDICT entities; `contract --verify` binds them and the forgery attack covers them automatically.**
 
 10. **`history.tsv` is an unregistered record.** `gf_history_append()` writes
     a real 8-field TSV that is not among the `RECORD.*` entities, so
     `schema --verify` cannot see a column change there — the exact defect
     class the record schema exists to close. *Proposed fix: declare it in
     both halves of the contract; the existing cross-check then binds it.*
+    **→ CLOSED in 4.0.0: `RECORD.history` declared in both halves; `schema --verify` reports it (records checked: 6).**
 
 ## Agents / dispatch
 
@@ -111,6 +122,7 @@ only by a commit that closes them with a test.
    (false positives). The stream logs from bench run 2 carry the exact
    commands — classify them, then fix the right side. *Deferred analysis:
    `bench2-csvq/bench-turns.jsonl`.*
+    **→ CLOSED in 4.0.0: classified from the bench stream logs — every denial was a read-only command whose `2>/dev/null`/`2>&1` matched the bare `>` rule. The guard now scrubs read-posture redirects before the test; a real redirect beside them still denies. Enforced in `test_guard_allows_reads_and_other_projects`.**
 
 12. **`/goal-swarm` dead-ends on Workflow approval in headless sessions.**
    The command prefers "a workflow when the harness has one" — but a
@@ -121,6 +133,7 @@ only by a commit that closes them with a test.
    the command's fallback must trigger on "Workflow not available OR not
    pre-approved OR session non-interactive" — parallel Task calls are the
    default posture, the workflow an upgrade, never a wall.*
+    **→ CLOSED in 4.0.0: `/goal-swarm` reaches for a Workflow only when it is present AND pre-approved AND the session is interactive; parallel Task calls are the default posture.**
 
 13. **`effort=` pass-through is prose-only today.** The current harness Task
    tool has no effort parameter, so `/goal-agent`/`/goal-swarm` fall back to
@@ -135,6 +148,7 @@ only by a commit that closes them with a test.
     `/rot-dtd-goal:goal-status` works headless (interactive sessions resolve
     unambiguous short names). Harness behavior, not plugin code — but the
     README should say so where it teaches the commands.
+    **→ CLOSED in 4.0.0: the README's install section now states the namespaced form for headless sessions.**
 
 ---
 

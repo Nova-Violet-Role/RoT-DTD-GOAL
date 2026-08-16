@@ -15,6 +15,61 @@ by a review that tried to break the previous answer.
 
 ---
 
+## [4.0.0] — 2026-08-16
+
+*The question: **who gates the gate?***
+
+The 3.0.0 bench campaign put the engine under strict gates on real work and
+then audited the auditor. Fourteen findings came back
+([`docs/FINDINGS-4.0.0.md`](docs/FINDINGS-4.0.0.md) keeps each with its
+closure); this release fixes every code-caused one, and none of the fixes
+buys correctness with engine speed — the one probe that got smarter spends
+its extra copies only on survivors.
+
+**The lead finding, and LAW.18.** Claude Code kills a hook at its timeout and
+treats the death as ALLOW. Bench 2 measured it: a completion pipeline needing
+~7 minutes was killed at 300s and the session ended with **no verdict at
+all**. The gate now watches its own clock (`GF_GATE_BUDGET`, default 540s
+under the shipped hook timeout of 600s) and blocks with `VERIFICATION
+INCOMPLETE` and the next step instead of dying silently — a slow gate costs
+an iteration, never a verdict. New law, new invariant row, new enforcing case
+with an in-budget control.
+
+* **The tamper guard no longer denies reads.** Seven bench denials, every one
+  a read-only `cat`/`ls`/`find`/`status` whose `2>/dev/null` or `2>&1`
+  matched the bare `>` rule. Read-posture redirects are scrubbed before the
+  test; a real redirect beside them still denies.
+* **The mutation probe re-probes survivors one dependency at a time.**
+  Symmetric damage commutes through comparison-shaped checks (truncate
+  empties both sides of a diff; an emptied bash tool exits 0) — every bench-2
+  criterion read "blind to truncate" while being sound. Isolation kills what
+  symmetry spares, and the report names the isolating dependency. The journal
+  line now counts what it counts: `criteria_with_survivors=`.
+* **Queued goals grew deps and keep their gates.** CRIT rows take an optional
+  fourth field of deps globs, and `queue advance` carries
+  `GATE_REDTEAM`/`GATE_FLAKY`/`GATE_MUTATE` across — gate policy is session
+  posture, not goal content. A strict run stays strict through the whole
+  queue.
+* **Seven verdict-shaped strings the engine spoke but never declared**
+  (`LEDGER DRIFT`, `ATTESTATION FAILED`, `STALL DETECTED`, `CONTRACT
+  OK`/`DRIFT`, `SCHEMA OK`/`DRIFT`) are now VERDICT entities — found by the
+  goal-contract-auditor in the bench's closing audit; the forgery attack
+  covers them automatically. `history.tsv` is a declared RECORD (the schema
+  check now binds 6 records). `VERIFICATION INCOMPLETE` joins the vocabulary.
+* **CLI paper cuts:** `init --help` prints usage instead of creating a goal
+  named `--help`; `add` warns at add time on the substitution-only diff class
+  that both benches shipped and only the red team caught (once at the price
+  of a strict escalation).
+* **`/goal-swarm` no longer dead-ends headless:** a Workflow is used only
+  when present AND pre-approved AND interactive; parallel Task calls are the
+  default posture. The README states the namespaced command form headless
+  sessions need.
+* One finding was **retracted with the correction on the record**: dependency
+  inference never missed process-substitution tokens — the observed survival
+  was the symmetric-damage mechanism all along.
+* Suite: 59 cases → **61**; the counts in the facts block are generated, as
+  ever.
+
 ## [3.0.0] — 2026-08-16
 
 *The question: **can a human send the roster, or only hope it shows up?***

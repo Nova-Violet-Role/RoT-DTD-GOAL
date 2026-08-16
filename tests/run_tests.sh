@@ -236,6 +236,15 @@ test_guard_allows_reads_and_other_projects() {
   assert_empty "guard: another project's goal state is not ours to block (v3)" "$out"
   out="$(guard '{"tool_name":"Write","tool_input":{"file_path":"src/main.c"}}')"
   assert_empty "guard: ordinary edits untouched" "$out"
+  # 4.0.0: the '>' inside stderr plumbing is not a write. The 3.0.0 bench
+  # measured seven denials and every one was a read-only cat/ls/find/status
+  # carrying 2>/dev/null or 2>&1.
+  out="$(guard '{"tool_name":"Bash","tool_input":{"command":"cat .claude/goal/journal.log 2>/dev/null | tail -5"}}')"
+  assert_empty "guard: 2>/dev/null on a read is still a read (4.0.0)" "$out"
+  out="$(guard '{"tool_name":"Bash","tool_input":{"command":"bash goal.sh status 2>&1 | grep -c goal"}}')"
+  assert_empty "guard: 2>&1 does not read as a write (4.0.0)" "$out"
+  out="$(guard '{"tool_name":"Bash","tool_input":{"command":"echo x 2>/dev/null >> .claude/goal/ledger"}}')"
+  assert_contains "guard control: a real redirect beside scrubbed plumbing still denies" "$out" '"permissionDecision":"deny"'
   drop_project
 }
 
@@ -420,6 +429,22 @@ test_mutation_probe() {
   # the probe must not touch the real tree -- it works on a sandbox copy
   [ -s "$CLAUDE_PROJECT_DIR/src/a.c" ] && ok "mutate: the real project is untouched" \
                                        || bad "mutate: the real project is untouched" "src/a.c was destroyed"
+  # 4.0.0: symmetric damage can commute through a comparison-shaped check --
+  # truncate empties both sides of a diff and corrupt rot13s them in lockstep,
+  # so the mutant survives while the check is actually sound. Measured in
+  # bench 2 (every criterion "blind to truncate"). A survivor is now re-probed
+  # one dependency at a time, and dies if any isolated damage kills it.
+  new_project > /dev/null
+  printf 'same\n' > "$CLAUDE_PROJECT_DIR/p.txt"
+  printf 'same\n' > "$CLAUDE_PROJECT_DIR/q.txt"
+  G init "isolation" --budget 3 > /dev/null
+  G add PAIR "identical pair diff" 'diff <(cat p.txt) q.txt' --deps 'p.txt;q.txt' > /dev/null
+  G activate > /dev/null
+  out="$(G mutate --ops truncate,corrupt)"
+  assert_contains "mutate: symmetric survivor dies under isolation (4.0.0)" "$out" "PAIR KILLED   2/2"
+  assert_contains "mutate: the report names the isolating dependency" "$out" "via single-dep isolation"
+  assert_contains "mutate: the journal counts criteria and says so (4.0.0)" \
+    "$(cat "$CLAUDE_PROJECT_DIR/.claude/goal/journal.log")" "criteria_with_survivors="
   # a wrong glob is reported as a defect rather than silently passing
   new_project > /dev/null
   G init "glob test" --budget 5 > /dev/null
@@ -1570,6 +1595,57 @@ YML
   rm -rf "$s"
 }
 
+test_a_slow_gate_blocks_instead_of_allowing() {
+  # LAW.18, from the finding that led 4.0.0: Claude Code kills a hook at its
+  # timeout and treats the death as ALLOW. Bench 2 measured it -- a completion
+  # pipeline needing ~7 minutes was killed at 300s and the session ended with
+  # no verdict, 300 seconds to the second. The gate now watches its own clock
+  # and blocks with the next step when the budget expires. A slow gate costs
+  # an iteration, never a verdict.
+  new_project > /dev/null
+  printf 'x\n' > "$CLAUDE_PROJECT_DIR/f.txt"
+  G init "budget test" --budget 5 > /dev/null
+  G add C1 "f exists" 'test -f f.txt' > /dev/null
+  G activate > /dev/null
+  local out
+  out="$(GF_GATE_BUDGET=0 gate '{}')"
+  assert_contains "slow gate: blocks instead of allowing" "$out" '"decision":"block"'
+  assert_contains "slow gate: names the declared verdict" "$out" "VERIFICATION INCOMPLETE"
+  assert_contains "slow gate: says which stage was starved" "$out" "red team"
+  assert_contains "slow gate: and carries the next step" "$out" "stop again"
+  assert_contains "slow gate: the journal records the timeout" \
+    "$(cat "$CLAUDE_PROJECT_DIR/.claude/goal/journal.log")" "GATE-TIMEOUT"
+  # negative control: with the shipped budget the same goal completes, so the
+  # clock cannot be the thing deciding ordinary completions.
+  out="$(gate '{}')"
+  assert_contains "slow gate control: an in-budget gate still completes" "$out" "GOAL COMPLETE"
+  drop_project
+}
+
+test_cli_refuses_footguns() {
+  # Two paper cuts, both measured in real bench sessions, both closed in 4.0.0.
+  new_project > /dev/null
+  local out rc
+  # 1. `init --help` created a draft goal literally named "--help" (bench 1).
+  out="$(G init --help)"; rc=$?
+  assert_eq "cli: init --help exits 0" "$rc" "0"
+  assert_contains "cli: init --help prints usage, not a goal" "$out" "usage: goal.sh init"
+  [ ! -f "$CLAUDE_PROJECT_DIR/.claude/goal/state.env" ] \
+    && ok "cli: init --help creates no draft" \
+    || bad "cli: init --help creates no draft" "state.env exists"
+  # 2. a diff whose every file sits inside a process substitution is vacuously
+  #    equal in an empty directory -- both benches shipped one; the red team
+  #    caught them only at completion, once at the price of an escalation.
+  G init "warn test" --budget 3 > /dev/null
+  out="$(G add W1 "pair" 'diff <(./tool fmt a.csv | ./tool fmt -) <(./tool fmt a.csv)' 2>&1)"
+  assert_contains "cli: a substitution-only diff warns at add time" "$out" "WARNING"
+  assert_contains "cli: and the warning carries the cheap fix" "$out" "test -x"
+  printf 'x\n' > "$CLAUDE_PROJECT_DIR/anchor.txt"
+  out="$(G add W2 "anchored" 'diff <(./tool fmt anchor.txt) anchor.txt' 2>&1)"
+  assert_lacks "cli: a diff anchored to a real file does not warn" "$out" "WARNING"
+  drop_project
+}
+
 test_the_plugin_installs_as_declared() {
   # This ships as a PLUGIN, installed from a marketplace. Everything else in
   # this suite tests what the engine decides; none of it tests whether a
@@ -2240,6 +2316,29 @@ test_many_goals_run_in_order() {
     "$(cd "$P" && bash -c '. '"$S"'/lib.sh; gf_queue_pending_count')" "0"
   assert_eq "queue: two archives exist, one per finished goal" \
     "$(ls "$P/.claude/goal/archive" | wc -l | tr -d ' ')" "2"
+  drop_project
+
+  # 5b. 4.0.0, both measured in bench 2: a CRIT row may carry deps in field 4,
+  #     and gate policies survive the advance -- they are session posture, not
+  #     goal content. Through 3.0.0 a strict run went silently soft on every
+  #     queued goal unless the working session re-set all three by hand.
+  new_project > /dev/null
+  P="$CLAUDE_PROJECT_DIR"
+  printf 'x\n' > "$P/a.txt"; mkdir -p "$P/specs"
+  printf 'GOAL\twith deps\t--budget 3\nCRIT\tQ1\ta nonempty\ttest -s a.txt\ta.txt\n' > "$P/specs/deps.tsv"
+  G init "carrier" --budget 3 > /dev/null
+  G add C1 "a exists" 'test -f a.txt' > /dev/null
+  G activate > /dev/null
+  G set GATE_REDTEAM strict > /dev/null
+  G set GATE_MUTATE warn > /dev/null
+  G queue add depgoal "$P/specs/deps.tsv" > /dev/null
+  # the gate completes the carrier and advances into depgoal, as in real use
+  out="$(gate '{}')"
+  assert_contains "queue: the carrier completed and the queue advanced" "$out" "QUEUE HAS ADVANCED"
+  assert_contains "queue: a CRIT deps field becomes declared deps (4.0.0)" \
+    "$(cat "$P/.claude/goal/criteria.d/Q1")" "deps=a.txt"
+  assert_eq "queue: GATE_REDTEAM survives the advance (4.0.0)" "$(statev GATE_REDTEAM)" "strict"
+  assert_eq "queue: GATE_MUTATE survives the advance (4.0.0)" "$(statev GATE_MUTATE)" "warn"
   drop_project
 
   # 6. THE GRAMMAR IS READ FROM THE DECLARATION, not hardcoded in the validator.
@@ -3333,6 +3432,8 @@ test_records_are_append_only
 test_the_contract_binds_the_engine
 test_a_refusal_always_carries_a_way_forward
 test_gate_defaults_survive_an_upgrade
+test_a_slow_gate_blocks_instead_of_allowing
+test_cli_refuses_footguns
 test_the_workflow_lint_can_fail
 "
 
