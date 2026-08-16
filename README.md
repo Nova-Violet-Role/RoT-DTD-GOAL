@@ -332,6 +332,76 @@ the ledger, the queue and the measured numbers — is in
 | agents summoned | 5 of the 7 declared, recorded as `SubagentStart`/`SubagentStop` events |
 | the result that matters | at final completion the red team flagged **H2 — a criterion the bench author wrote** — as `passes-in-empty-dir`. The instrument audited the person testing it, and the verdict carried the warning beside it. |
 
+### Run 2 — strict gates, and the engine refusing its own bench
+
+A second, hardened run: same tool, three harder queued goals (full RFC-4180
+with embedded newlines, relational operations, operational hardening — 18
+sealed criteria), `GATE_REDTEAM=strict`, `GATE_FLAKY=strict`,
+`GATE_MUTATE=warn`, real headless sessions, 449 assistant messages across
+them. Full record: [`EVIDENCE/bench2/`](EVIDENCE/bench2/summary.log). What
+the strict run surfaced, in the order it happened:
+
+![Strict gate refusing a stop mid-flight, on real bench state](docs/assets/bench2/refusal.gif)
+
+| moment | what the record shows |
+|---|---|
+| the fan-out | **all seven agents dispatched in parallel** before any code, journalled as `SubagentStart`/`Stop` pairs |
+| freshness | **7×** the engine wiped every pass the instant `csvq.sh` changed — a pass is not evidence after its file moved |
+| the refusal that matters | at **6/6 passing**, the strict red team **refused completion and escalated**: R4 — written by the bench author — passes in an empty directory. A human sharpened it; the gate then accepted the successor it had refused before |
+| the queue, live | two in-session advances — the gate blocked with `THE QUEUE HAS ADVANCED` instead of allowing the stop |
+| the guard | **7** denied writes to goal state, some from inside agent runs — the boundary binds the roster too |
+| the finding that leads 4.0.0 | the final completion pipeline outlived the Stop hook's `timeout: 300` and the harness killed the gate mid-verdict — **the session ended unverified, 300 seconds to the second**. The unhurried gate took ~7 minutes and completed with its warnings. A gate slower than its timeout is an open gate: [finding 8](docs/FINDINGS-4.0.0.md) |
+
+<details>
+<summary><b>The escalation, the queue hand-off, and the guard — replayed against the real state</b></summary>
+
+![Strict red team refusing a passing goal; the human sharpens the weak criterion](docs/assets/bench2/escalation.gif)
+
+![The gate completing a goal and blocking with the next queued one](docs/assets/bench2/queue-advance.gif)
+
+![The tamper guard denying a direct write into goal state](docs/assets/bench2/guard.gif)
+
+</details>
+
+### Every command, run and filmed
+
+All nine slash commands were exercised against replay copies of the bench's
+real snapshots — mid-session and end-session — each output **asserted against
+the state it ran on**, with every assertion's verdict written to
+[`EVIDENCE/bench2/command-checklist.tsv`](EVIDENCE/bench2/command-checklist.tsv)
+rather than typed here, and each captured:
+
+<details>
+<summary><b>The command gallery — ten animated captures</b></summary>
+
+| | |
+|---|---|
+| `/goal` (seals, works, earns completion) | ![goal](docs/assets/commands/cmd-goal.gif) |
+| `/goal-status` mid-flight | ![status](docs/assets/commands/cmd-status.gif) |
+| `/goal-verify` | ![verify](docs/assets/commands/cmd-verify.gif) |
+| `/goal-audit` | ![audit](docs/assets/commands/cmd-audit.gif) |
+| `/goal-pause` | ![pause](docs/assets/commands/cmd-pause.gif) |
+| `/goal-resume` | ![resume](docs/assets/commands/cmd-resume.gif) |
+| `/goal-agent` (report in `<gf:attack>`) | ![agent](docs/assets/commands/cmd-agent.gif) |
+| `/goal-swarm` (Workflow-orchestrated fan-out) | ![swarm](docs/assets/commands/cmd-swarm.gif) |
+| `/goal-status` on the finished bench | ![status-end](docs/assets/commands/cmd-status-end.gif) |
+| `/goal-abort` (state retained) | ![abort](docs/assets/commands/cmd-abort.gif) |
+
+</details>
+
+### The contract, probed
+
+Each declared agent was dispatched on **its own forbidden action** plus a
+file-write bait, with hashes taken before and after
+([`EVIDENCE/bench2/conformance-matrix.tsv`](EVIDENCE/bench2/conformance-matrix.tsv)):
+**7/7 tool boundaries held** (bait files byte-identical), **7/7 prohibitions
+held** — three refused at the dispatch layer before any agent ran, four
+refused from inside their declared element (`"My charter forbids this"`, in
+`<gf:strategy>`) — and the CLI refused a vacuous criterion at `add` time.
+What the probes *did* flag is in the open ledger:
+[`docs/FINDINGS-4.0.0.md`](docs/FINDINGS-4.0.0.md), fourteen findings, each
+with the observable a fix must flip.
+
 ---
 
 ## 🧭 Under the hood — the same session in raw commands

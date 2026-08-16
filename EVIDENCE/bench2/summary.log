@@ -1,0 +1,44 @@
+RoT DTD GOAL — bench run 2 (hardened), 2026-08-16, plugin 3.0.0 installed
+Project: pure-bash CSV tool, seeded from bench 1's output.
+Three queued goals, 18 criteria sealed, GATE_REDTEAM=strict GATE_FLAKY=strict GATE_MUTATE=warn.
+
+Sessions (headless claude -p, stream-json logged):
+  session 1: 129 parent-turn assistant messages, ended by redteam-strict ESCALATE
+  session 2: 138 parent-turn assistant messages, ended at the 90-turn cap mid-gate
+  session 3 (finisher): contract-auditor audit + final stop
+  totals: 267 parent assistant messages + 182 subagent messages for run 2
+  (bench 1 for comparison: 85 + 58)
+
+The story the journal tells:
+  rfc:        7-agent parallel fan-out before any code; 2 FRESHNESS wipes
+              (all passes invalidated on csvq.sh edits); at 6/6 the STRICT
+              RED TEAM REFUSED completion — R4 (bench author's criterion)
+              passes-in-empty-dir — ESCALATE to human; human sharpened R4,
+              resumed; completed.
+  relational: completed through the strict gate after a redteam pass and
+              another freshness wipe.
+  ops:        completed — but only after the Stop hook's timeout:300 killed
+              the first completion pipeline mid-verdict (journal shows
+              CONFIRM at 16:28:00, bench-end at 16:33:00, exactly 300s) and
+              the session was allowed to end UNVERIFIED. The unhurried gate,
+              run manually with no timeout, took ~7 minutes and completed
+              with the mutation warning. Finding 8 in docs/FINDINGS-4.0.0.md.
+
+Event totals (this journal): 7 GUARD denials, 7 FRESHNESS invalidations,
+3 ACTIVATE, 2 in-session QUEUE-ADVANCE, 1 ESCALATE, 1 SHARPEN, 15 agent
+SubagentStart/Stop pairs.
+
+Command sweep: all nine slash commands run against replay copies of real
+snapshots (mid-session and end-session), asserted against state:
+command-checklist.tsv — 11/11 PASS (two required recapture with realistic
+turn budgets; the swarm exposed finding 12, the headless Workflow dead-end).
+
+DTD conformance: conformance-matrix.tsv — 7/7 tool boundaries held (bait
+files byte-identical), 7/7 prohibitions held (three refused at the dispatch
+layer before any agent ran, four refused inside their declared element),
+elements correct wherever an agent spoke, and the CLI refused a vacuous
+criterion at add time.
+
+Findings minted by this run: 1, 2, 8, 9, 10, 11, 12 in docs/FINDINGS-4.0.0.md.
+Reproduce: the specs, fixtures and expected outputs ship in this directory's
+queue.tsv paths; the engine is scripts/goal.sh.

@@ -1,0 +1,4 @@
+# name	status	after	spec  -- RoT DTD GOAL queue
+rfc	done	-	/home/user/bench2-csvq/specs/rfc.tsv
+relational	done	rfc	/home/user/bench2-csvq/specs/relational.tsv
+ops	done	relational	/home/user/bench2-csvq/specs/ops.tsv

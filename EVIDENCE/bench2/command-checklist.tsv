@@ -1,0 +1,12 @@
+command	state	assertion	result
+goal-status	mid	state remained active (read-only)	PASS
+goal-verify	mid	verify sweep journalled	PASS
+goal-audit	mid	redteam/mutation journalled	PASS
+goal-pause	mid	STATUS=paused	PASS
+goal-resume	mid	STATUS=active after resume	PASS
+goal-agent	mid	report inside <gf:attack> (recapture, paused replay)	PASS
+goal-swarm	mid	6of7 gf: elements via Workflow orchestration (attack absent from synthesis)	PASS
+goal	fresh	criteria sealed in ledger	PASS
+goal	fresh	completion earned via gate	PASS
+goal-status	end	ran against end-of-bench state (complete)	PASS
+goal-abort	end	aborted, state retained	PASS
