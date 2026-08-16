@@ -70,7 +70,7 @@ only by a commit that closes them with a test.
    file path appears among the verify command's arguments — same spirit as
    the existing `can-never-fail` refusal, weaker verdict.*
 
-11. **A gate slower than the hook timeout is an open gate.** Measured, not
+8. **A gate slower than the hook timeout is an open gate.** Measured, not
     theorized: bench run 2's final completion pipeline (two verify sweeps over
     a goal with a 100k-row performance criterion, plus a warn-mode mutation
     probe copying the tree per operator per criterion) exceeded the Stop
@@ -85,7 +85,7 @@ only by a commit that closes them with a test.
     shipped `timeout` to the measured cost, and document that hook timeouts
     fail OPEN in Claude Code.*
 
-12. **Five verdict-shaped strings the contract never declares.** Found by the
+9. **Five verdict-shaped strings the contract never declares.** Found by the
     goal-contract-auditor in the bench's closing audit: `LEDGER DRIFT` (vs
     declared `INTEGRITY DRIFT`), `ATTESTATION FAILED`, `STALL DETECTED`,
     `CONTRACT OK`/`CONTRACT DRIFT`, `SCHEMA OK`/`SCHEMA DRIFT` are all
@@ -95,7 +95,7 @@ only by a commit that closes them with a test.
     (or rename to declared forms), and the forgery attack then covers them
     automatically.*
 
-13. **`history.tsv` is an unregistered record.** `gf_history_append()` writes
+10. **`history.tsv` is an unregistered record.** `gf_history_append()` writes
     a real 8-field TSV that is not among the `RECORD.*` entities, so
     `schema --verify` cannot see a column change there — the exact defect
     class the record schema exists to close. *Proposed fix: declare it in
@@ -103,7 +103,7 @@ only by a commit that closes them with a test.
 
 ## Agents / dispatch
 
-8. **Guard denials during agent fan-out need a look.** Four
+11. **Guard denials during agent fan-out need a look.** Four
    `GUARD denied tool=Bash reason=bash-mutation` events fired while the
    seven-agent swarm reviewed a spec (read-only roster). Either agents
    attempt state writes they should not (prompt gap in the agent files), or
@@ -112,7 +112,17 @@ only by a commit that closes them with a test.
    commands — classify them, then fix the right side. *Deferred analysis:
    `bench2-csvq/bench-turns.jsonl`.*
 
-9. **`effort=` pass-through is prose-only today.** The current harness Task
+12. **`/goal-swarm` dead-ends on Workflow approval in headless sessions.**
+   The command prefers "a workflow when the harness has one" — but a
+   harness can HAVE the Workflow tool while the session cannot APPROVE it
+   (headless `-p` runs have nobody to answer the permission dialog). Observed
+   in the bench-2 capture sweep: the swarm announced the workflow, waited for
+   approval that cannot come, and produced no agent reports. *Proposed fix:
+   the command's fallback must trigger on "Workflow not available OR not
+   pre-approved OR session non-interactive" — parallel Task calls are the
+   default posture, the workflow an upgrade, never a wall.*
+
+13. **`effort=` pass-through is prose-only today.** The current harness Task
    tool has no effort parameter, so `/goal-agent`/`/goal-swarm` fall back to
    a `requested effort:` line in the prompt (as documented). When the harness
    grows the parameter, wire it and add the conformance check. *Tracking
@@ -120,7 +130,7 @@ only by a commit that closes them with a test.
 
 ## Docs / harness notes
 
-10. **Headless sessions need the namespaced command form.**
+14. **Headless sessions need the namespaced command form.**
     `claude -p "/goal-status"` is not resolved; only
     `/rot-dtd-goal:goal-status` works headless (interactive sessions resolve
     unambiguous short names). Harness behavior, not plugin code — but the
