@@ -128,7 +128,7 @@ rather than an inconvenience.
   emits must carry a task or a remedy. A message that says "cannot continue" and
   stops is the failure mode this project exists to avoid, and there is a test
   that reads every outbound message and enforces it.
-* **`sorry` or `native_decide`** in the Lean sources under `EVIDENCE/lean/`.
+* **`sorry` or `native_decide`** in the Lean sources under `lean/Proofs/`.
   The first is an admission, the second trusts the compiler binary instead of
   the kernel.
 * **A theorem or test whose name promises more than it checks.** A statement

@@ -24,7 +24,7 @@
 # `leanchecker` in a Mathlib workspace. Reproducing that in CI needs a pinned
 # toolchain and a multi-gigabyte cache, and a job the author cannot rehearse
 # would go red on the first push for reasons unrelated to the proofs. So the
-# sources and the instrument transcript are PUBLISHED under EVIDENCE/ for
+# sources are PUBLISHED under lean/ and the instrument transcript under EVIDENCE/ for
 # anyone to re-run, CI asserts they are present and non-empty, and CI claims
 # nothing about their contents. A green tick that meant "Lean checked" while
 # no Lean ran would be the exact overclaim this project exists to refuse.
@@ -180,14 +180,14 @@ jobs:
         run: |
           rc=0
           for f in EVIDENCE/differential.log EVIDENCE/mutation-shell.log \
-                   EVIDENCE/mutation-lean.log EVIDENCE/flaky-policy-experiment.log \
-                   EVIDENCE/lean-instruments.log EVIDENCE/bench.log \
+                   lean/mutate/mutation-lean.log EVIDENCE/flaky-policy-experiment.log \
+                   lean/Proofs-instruments.log EVIDENCE/bench.log \
                    EVIDENCE/suite-tail.log EVIDENCE/dogfood/journal.log \
                    EVIDENCE/dogfood/ledger; do
             if [ ! -s "$f" ]; then echo "MISSING OR EMPTY: $f"; rc=1
             else printf '%-42s %s bytes\n' "$f" "$(wc -c < "$f")"; fi
           done
-          n=$(ls EVIDENCE/lean/*.lean 2>/dev/null | wc -l)
+          n=$(ls lean/Proofs/*.lean 2>/dev/null | wc -l)
           echo "lean sources published as evidence: $n"
           [ "$n" -ge 4 ] || { echo "the Lean sources are not published"; rc=1; }
           exit $rc

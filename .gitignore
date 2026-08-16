@@ -28,11 +28,14 @@ queue-advance.err
 # with the Stop hook owes the reader the material it was judged on -- including
 # the runs that went badly. Nothing about how this was verified is withheld.
 
-# The Lean working directory is NOT shipped from here: the modules live in the
-# author's Mathlib workspace, and the copies that a reader can check are under
-# EVIDENCE/lean/. Ignoring this path keeps a stray local build from shipping
-# twice under two names.
-/lean/
+# `lean/` IS shipped, and deliberately: lean/Proofs/ carries the modules,
+# lean/mutate/ the suites that attacked them, lean/README.md what they mean.
+# Only Lake's build products are ignored -- the artefacts, never the sources.
+# (This rule previously ignored /lean/ entirely, which is why the modules had
+# to live under EVIDENCE/. They live at the root now, where a reader looks.)
+/lean/.lake/
+/lean/build/
+/lean/lake-manifest.json
 
 # Tool caches, session state and agent scratch -- none of it is the plugin.
 .claude/

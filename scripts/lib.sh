@@ -560,7 +560,20 @@ gf_contract_policies() {
   local f enum; f="$(gf_contract_file)"
   [ -f "$f" ] || return 0
   enum="$(sed -n 's/.*<!ENTITY % policy  *"(\([^)]*\))".*/\1/p' "$f" | head -n1)"
-  sed -n 's/^ *\(redteam\|mutate\|flaky\)  *%policy;  *"\([^"]*\)".*/\1 '"$enum"' \2/p' "$f"
+  # awk, not sed: `\(a\|b\)` alternation in a BRE is a GNU EXTENSION. BSD sed
+  # -- which is what stock macOS ships -- does not implement it, so this
+  # expression matched NOTHING there. Nothing matching meant no policy was
+  # extracted, which meant `contract --verify` could not detect policy drift
+  # and its own negative control could not fail. A check that silently stops
+  # checking on an entire platform is worse than one that errors.
+  # POSIX awk alternation is portable; this was the only such construct in
+  # the tree, and test_portable_to_a_stranger_machine now scans for the class.
+  awk -v enum="$enum" '
+    /^[[:space:]]*(redteam|mutate|flaky)[[:space:]]+%policy;/ {
+      if (match($0, /"[^"]*"/)) {
+        print $1 " " enum " " substr($0, RSTART + 1, RLENGTH - 2)
+      }
+    }' "$f"
 }
 
 # ---- the unparsed channels, declared as NOTATION + NDATA entities ----------

@@ -69,8 +69,8 @@ gf_facts() {
   # cannot inflate the number.
   rows="$(awk -F'\t' '$2 == "decision" || $2 == "forensic" {n++} END {print n+0}' "$ROOT/hooks/event_consumers.tsv" 2>/dev/null)"
   scripts="$(ls "$ROOT/scripts"/*.sh 2>/dev/null | wc -l | tr -d ' ')"
-  modules="$(ls "$ROOT/EVIDENCE/lean"/*.lean 2>/dev/null | wc -l | tr -d ' ')"
-  theorems="$(grep -ch '^theorem ' "$ROOT/EVIDENCE/lean"/*.lean 2>/dev/null | awk '{s+=$1} END {print s+0}')"
+  modules="$(ls "$ROOT/lean/Proofs"/*.lean 2>/dev/null | wc -l | tr -d ' ')"
+  theorems="$(grep -ch '^theorem ' "$ROOT/lean/Proofs"/*.lean 2>/dev/null | awk '{s+=$1} END {print s+0}')"
   printf 'GF_VERSION=%s\n'        "${v:-unknown}"
   printf 'GF_SCRIPTS=%s\n'        "$scripts"
   printf 'GF_TEST_CASES=%s\n'     "$cases"
@@ -104,7 +104,7 @@ gf_sha256() { # reads stdin -> bare hex digest
 # not code changes, and a digest that moves when a typo is fixed teaches the
 # reader to ignore it.
 gf_tree_digest() {
-  { find "$ROOT/scripts" "$ROOT/hooks" "$ROOT/tests" "$ROOT/EVIDENCE/lean" -type f 2>/dev/null
+  { find "$ROOT/scripts" "$ROOT/hooks" "$ROOT/tests" "$ROOT/lean/Proofs" -type f 2>/dev/null
     echo "$ROOT/.claude-plugin/plugin.json"; } \
     | LC_ALL=C sort \
     | while IFS= read -r f; do [ -f "$f" ] && gf_sha256 < "$f"; done \

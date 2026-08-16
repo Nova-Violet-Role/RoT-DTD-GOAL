@@ -158,6 +158,44 @@ skipped test.
   answers *no* precisely when the answer is *yes*. Now asserted with
   `--no-index`, as a property that names no directory.
 
+### Added — the mutation suite ships, runnable
+
+- **`lean/` moved to the repository root and gained the suite that attacks it.**
+  `lean/Proofs/` holds the four modules, `lean/mutate/mutate-lean.sh` is the
+  eight-mutation harness, and `lean/README.md` says what each module proves and
+  **which theorems each mutation killed**. Previously the modules lived under
+  `EVIDENCE/` and the mutation record was a log with no way to re-run it — that
+  is a claim, not an instrument.
+- The harness reports **per-theorem attribution** (the declaration enclosing
+  each error Lean reported, not the line that was edited), counts the needle
+  before patching, deletes the stale `.olean` before each rebuild, restores the
+  tree and verifies the restored files hash identically.
+- Its exit codes separate findings that are usually conflated: `0` all killed,
+  `1` something **survived**, `2` a mutation was **discarded** or the tree was
+  not restored — a defect in the harness, not the proofs — and `3` **not run**,
+  because no Lean workspace is not a pass.
+- **The harness has its own negative control**: `GF_MUTATE_SELFTEST=1` rewords a
+  doc comment, which must SURVIVE and exit 1. Measured, it does. A mutation
+  runner that has never reported a survivor would print "8/8 killed" just as
+  cheerfully if it had silently stopped building anything.
+- Re-run for this release: **8 applied, 8 killed, 0 survived, 0 discarded**,
+  baseline green before and after.
+
+### Fixed — a fourth thing CI found
+
+- **`contract --verify` was off the air on macOS, silently, while exiting 0.**
+  `gf_contract_policies` used `\(a\|b\)` alternation in a `sed` BRE — a GNU
+  extension that BSD sed does not implement and simply does not match. No
+  policy was extracted, so policy drift could not be detected and the check's
+  own negative control could not fail. Rewritten in POSIX awk; it was the only
+  such construct in the tree, and `test_portable_to_a_stranger_machine` now
+  scans for the class with a planted control.
+- The scanner for that class needed **two greps**, because a single BRE cannot
+  say "contains `sed` and contains a literal backslash-pipe" without the
+  backslash-pipe being read as alternation — whose empty branch matches every
+  line of every file. Its first version flagged `set -u`. That is the third
+  empty-match defect in this release, all of the same shape.
+
 ### Changed
 - Version labels in shipped artefacts say `1.0.0`; the `v2 → v3.6` lineage is mapped below.
 - **`REVIEW.md` moved to `docs/`; `AMPLIFY.md` removed.** The root carries
@@ -165,7 +203,7 @@ skipped test.
   review packet — *what this release does not claim* and *what to try to
   break* — moved into README rather than being deleted with it.
 - **`EVIDENCE/` is committed**, including `dogfood/`, every log, and the Lean
-  sources under `EVIDENCE/lean/`. `lean/`, `.claude/`, `.codemap/` and
+  sources under `lean/Proofs/`. `lean/`, `.claude/`, `.codemap/` and
   `.rot-moe/` are ignored.
 - CI publishes the release: a `v*` tag produces a GitHub Release only after the
   suite passed on ubuntu, macOS **and** Windows (Git Bash), with a `green` job

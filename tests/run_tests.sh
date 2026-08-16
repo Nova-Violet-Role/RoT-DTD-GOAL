@@ -855,7 +855,7 @@ test_flake_scope_is_the_seal() {
   drop_project
 
   # 7. the Lean model this behaviour was designed against ships with the plugin
-  local lf="$GF_ROOT/EVIDENCE/lean/FlakyScope.lean"
+  local lf="$GF_ROOT/lean/Proofs/FlakyScope.lean"
   [ -f "$lf" ] && ok "seal scope: the Lean model ships" || bad "seal scope: the Lean model ships" "missing $lf"
   local body; body="$(cat "$lf" 2>/dev/null)"
   assert_contains "seal scope: narrowing is proved sound" "$body" "theorem narrowing_only_removes"
@@ -958,7 +958,7 @@ test_clock_cannot_hide_a_flip() {
   drop_project
 
   # 9. the Lean model states the assumption it dropped
-  local lf="$GF_ROOT/EVIDENCE/lean/FlakyScope.lean" body
+  local lf="$GF_ROOT/lean/Proofs/FlakyScope.lean" body
   body="$(cat "$lf" 2>/dev/null)"
   assert_contains "clock: the hole is a proved counterexample" "$body" "theorem clock_scope_can_hide_a_flip"
   assert_contains "clock: the repair is proved clock-independent" "$body" "theorem gen_scope_ignores_the_clock"
@@ -1409,6 +1409,37 @@ test_the_plugin_installs_as_declared() {
   done
   [ "$broken" -eq 0 ] && ok "plugin: every shipped script parses under bash -n"
 
+  # 4b. THE INSTALL INSTRUCTIONS MUST BE TRUE. A README is the first thing a
+  #     stranger executes, so a command named there that does not exist is a
+  #     defect of the same kind as a broken function -- it just fails in their
+  #     terminal instead of ours. Caught while writing this section: the draft
+  #     told the reader to run `/goal version` to check the install, and there
+  #     is no such slash command; `version` is a subcommand of goal.sh, and
+  #     `/goal` takes a goal description. It would have failed for every
+  #     single reader on their first minute.
+  local readme="$root/README.md" cmd_tok cmd_missing=0 cmd_seen=0
+  if [ -f "$readme" ]; then
+    for cmd_tok in $(grep -o '/goal-[a-z]*' "$readme" | sort -u); do
+      cmd_seen=$((cmd_seen + 1))
+      if [ ! -f "$root/commands${cmd_tok}.md" ]; then
+        cmd_missing=$((cmd_missing + 1))
+        bad "plugin: README command $cmd_tok exists" "no commands${cmd_tok}.md"
+      fi
+    done
+    [ "$cmd_seen" -ge 3 ] \
+      && ok "plugin: $cmd_seen distinct slash commands are named in the README" \
+      || bad "plugin: the README names the slash commands" "only $cmd_seen -- needle may have rotted"
+    [ "$cmd_missing" -eq 0 ] && ok "plugin: every slash command the README names actually ships"
+    # ...and the install line must name the plugin the manifest actually
+    # declares, not a name that was right when it was written.
+    grep -q "/plugin install $pname" "$readme" \
+      && ok "plugin: the README install line names the declared plugin ($pname)" \
+      || bad "plugin: the README install line names the declared plugin" "no '/plugin install $pname' in README"
+    grep -q '/plugin marketplace add' "$readme" \
+      && ok "plugin: the README tells the reader to add the marketplace first" \
+      || bad "plugin: the README tells the reader to add the marketplace first" "missing"
+  fi
+
   # 5. commands and agents referenced by the plugin layout must be non-empty
   local c empties=0 count=0
   for c in "$root"/commands/*.md "$root"/agents/*.md; do
@@ -1435,14 +1466,14 @@ test_the_plugin_installs_as_declared() {
   #    This asserts presence and non-emptiness only; the contents are the
   #    reader's to judge, which is the entire point of publishing them.
   local e missing_ev=0
-  for e in differential.log mutation-shell.log mutation-lean.log \
+  for e in differential.log mutation-shell.log \
            flaky-policy-experiment.log lean-instruments.log bench.log \
            suite-tail.log dogfood/journal.log dogfood/ledger README.md; do
     [ -s "$root/EVIDENCE/$e" ] || { missing_ev=$((missing_ev + 1)); \
       bad "evidence: EVIDENCE/$e ships and is non-empty" "missing or empty"; }
   done
   [ "$missing_ev" -eq 0 ] && ok "evidence: every published artefact ships and is non-empty"
-  local nlean; nlean="$(ls "$root"/EVIDENCE/lean/*.lean 2>/dev/null | wc -l | tr -d ' ')"
+  local nlean; nlean="$(ls "$root"/lean/Proofs/*.lean 2>/dev/null | wc -l | tr -d ' ')"
   [ "${nlean:-0}" -ge 4 ] \
     && ok "evidence: $nlean Lean sources are published, not just their transcript" \
     || bad "evidence: the Lean sources are published" "found ${nlean:-0}"
@@ -1584,7 +1615,7 @@ test_portable_to_a_stranger_machine() {
     fi
     # The instrument must be able to fire. --no-index is the whole point: the
     # default spelling would report this planted case as clean.
-    local ign_probe; ign_probe="$(printf 'EVIDENCE/lean\n' \
+    local ign_probe; ign_probe="$(printf 'lean/Proofs\n' \
       | git -C "$root" check-ignore --stdin --no-index 2>/dev/null || true)"
     local ign_ctl; ign_ctl="$(printf '.codemap/x.json\n' \
       | git -C "$root" check-ignore --stdin --no-index 2>/dev/null || true)"
@@ -1596,6 +1627,52 @@ test_portable_to_a_stranger_machine() {
     fi
   else
     ok "repo: no git index here -- ignored-but-tracked checked by CI (not measured)"
+  fi
+
+  # 4c. GNU-only regex extensions in sed. `\(a\|b\)` alternation in a BRE is a
+  #     GNU extension; BSD sed does not implement it and simply matches
+  #     NOTHING. That is the dangerous failure mode -- not an error, an empty
+  #     result -- and it took `contract --verify` off the air on macOS while it
+  #     still exited 0. Its own negative control could not fail either, which
+  #     is how a check that has stopped checking looks from the outside.
+  local gnu_sed_hits
+  # TWO greps, deliberately. A single BRE cannot say "contains sed AND contains
+  # a literal backslash-pipe" without the backslash-pipe being read as
+  # ALTERNATION -- which makes the right-hand branch empty, and an empty branch
+  # matches every line of every file. That is exactly what happened on the
+  # first run of this check: it flagged `set -u` in attest.sh. It is the same
+  # defect as the CI `grep -lU $'\r'` that matched the empty string, met twice
+  # in one day. `grep -F` on the second stage cannot be reinterpreted.
+  local gs_bs='\' gs_pipe='|' gs_needle
+  gs_needle="${gs_bs}${gs_pipe}"
+  gnu_sed_hits="$(grep -n 'sed' "$root"/scripts/*.sh "$root"/tests/*.sh \
+                    "$root"/tests/experiments/*.sh 2>/dev/null \
+                  | grep -F -- "$gs_needle" \
+                  | grep -v '^[^:]*:[0-9]*: *#' || true)"
+  if [ -z "$gnu_sed_hits" ]; then
+    ok "portable: no GNU-only alternation in a sed BRE"
+  else
+    bad "portable: no GNU-only alternation in a sed BRE" "$(printf '%s' "$gnu_sed_hits" | head -3 | tr '\n' ' ')"
+  fi
+  # The scanner must fire on the exact construct that broke macOS. Assembled
+  # so the needle never exists literally in this file.
+  local pre_dir; pre_dir="$(mktemp -d "${TMPDIR:-/tmp}/gf-pre.XXXXXX")"
+  local sed_ctl="$pre_dir/gnu_sed_control.sh"
+
+  # The needle is ASSEMBLED from a backslash and a pipe rather than written
+  # out, for the same reason the `$TMP` fixture is: a scanner that searches
+  # the shipped scripts would otherwise find its own control fixture and its
+  # own source line, and report the tree dirty forever. Measured: it did
+  # exactly that, flagging lines 1660-1661 of this file.
+  local bs='\' pipe='|' gnu_needle
+  gnu_needle="${bs}${pipe}"
+  printf 'sed -n %ss/^ *%s(redteam%smutate%s)  *x/&/p%s f\n' \
+         "'" "${bs}(" "$gnu_needle" "${bs})" "'" > "$sed_ctl"
+  if grep -F -- "$gnu_needle" "$sed_ctl" > /dev/null 2>&1; then
+    ok "portable control: the GNU-sed scanner catches the construct that broke macOS"
+  else
+    bad "portable control: the GNU-sed scanner catches the construct that broke macOS" \
+        "planted fixture did not match its own scanner -- control DISCARDED"
   fi
 
   # 5a. bash 3.2 is the floor, because stock macOS has never shipped anything
@@ -1792,7 +1869,7 @@ test_completion_is_simultaneous() {
   assert_contains "policy: it has a false-alarm arm" "$body" "progress"
   assert_contains "policy: and a positive control arm" "$body" "coinflip"
   # the Lean model states the blind spot the definition buys
-  body="$(cat "$GF_ROOT/EVIDENCE/lean/FlakyScope.lean" 2>/dev/null)"
+  body="$(cat "$GF_ROOT/lean/Proofs/FlakyScope.lean" 2>/dev/null)"
   assert_contains "policy: progress is proved not to be a coin flip" "$body" "theorem progress_is_not_a_coin_flip"
   assert_contains "policy: and the blind spot is a theorem, not a footnote" \
     "$body" "theorem fail_then_pass_is_not_accused"
@@ -1903,7 +1980,7 @@ test_many_goals_run_in_order() {
   drop_project
 
   # 7. the Lean model of the scheduler ships and states the properties
-  local lf="$GF_ROOT/EVIDENCE/lean/GoalQueue.lean" body
+  local lf="$GF_ROOT/lean/Proofs/GoalQueue.lean" body
   [ -f "$lf" ] && ok "queue: the Lean model ships" || bad "queue: the Lean model ships" "missing $lf"
   body="$(cat "$lf" 2>/dev/null)"
   assert_contains "queue: only an eligible goal is ever scheduled" "$body" "theorem next_is_eligible"
@@ -2079,7 +2156,7 @@ test_ships_no_tooling_artifacts() {
   # pattern matches every line and reports a file's line count as a CR count,
   # which is how this check first produced a false alarm of its own.
   local f total=0 n
-  for f in $(find "$GF_ROOT/scripts" "$GF_ROOT/tests" "$GF_ROOT/EVIDENCE/lean" -type f 2>/dev/null); do
+  for f in $(find "$GF_ROOT/scripts" "$GF_ROOT/tests" "$GF_ROOT/lean/Proofs" -type f 2>/dev/null); do
     n="$(tr -cd '\r' < "$f" | wc -c | tr -d ' ')"
     total=$((total + n))
   done
@@ -2164,7 +2241,7 @@ test_attestation_survives_a_stranger() {
   # 3. the digest notices a real code change, not just an edited attestation
   local scratch="${TMPDIR:-/tmp}/gf-attree.$$"
   rm -rf "$scratch"; mkdir -p "$scratch"
-  mkdir -p "$scratch/EVIDENCE"; cp -r "$GF_ROOT/scripts" "$GF_ROOT/hooks" "$GF_ROOT/tests" "$GF_ROOT/.claude-plugin" "$scratch/" 2>/dev/null; cp -r "$GF_ROOT/EVIDENCE/lean" "$scratch/EVIDENCE/" 2>/dev/null
+  mkdir -p "$scratch/lean"; cp -r "$GF_ROOT/scripts" "$GF_ROOT/hooks" "$GF_ROOT/tests" "$GF_ROOT/.claude-plugin" "$scratch/" 2>/dev/null; cp -r "$GF_ROOT/lean/Proofs" "$scratch/lean/" 2>/dev/null
   printf '\n# injected\n' >> "$scratch/scripts/lib.sh"
   out="$(bash "$scratch/scripts/attest.sh" --verify "$att" 2>&1)"; rc=$?
   assert_eq "attest: a modified script breaks the attestation" "$rc" "1"
@@ -2172,7 +2249,7 @@ test_attestation_survives_a_stranger() {
   # 4. documentation prose is NOT part of the digest: a typo fix must not
   #    invalidate a code attestation, or readers learn to ignore the alarm
   rm -rf "$scratch"; mkdir -p "$scratch"
-  mkdir -p "$scratch/EVIDENCE"; cp -r "$GF_ROOT/scripts" "$GF_ROOT/hooks" "$GF_ROOT/tests" "$GF_ROOT/.claude-plugin" "$scratch/" 2>/dev/null; cp -r "$GF_ROOT/EVIDENCE/lean" "$scratch/EVIDENCE/" 2>/dev/null
+  mkdir -p "$scratch/lean"; cp -r "$GF_ROOT/scripts" "$GF_ROOT/hooks" "$GF_ROOT/tests" "$GF_ROOT/.claude-plugin" "$scratch/" 2>/dev/null; cp -r "$GF_ROOT/lean/Proofs" "$scratch/lean/" 2>/dev/null
   printf 'a doc change\n' > "$scratch/README.md"
   bash "$scratch/scripts/attest.sh" --verify "$att" > /dev/null 2>&1
   assert_eq "attest: a documentation change does NOT break it" "$?" "0"
@@ -2438,7 +2515,7 @@ test_license_is_one_story() {
   assert_contains "license: LICENSE carries the SPDX identifier" "$(cat "$GF_ROOT/LICENSE" 2>/dev/null)" "$spdx"
   assert_contains "license: the plugin manifest agrees" \
     "$(cat "$GF_ROOT/.claude-plugin/plugin.json")" "\"license\": \"$spdx\""
-  for f in "$GF_ROOT"/scripts/*.sh "$GF_ROOT"/tests/*.sh "$GF_ROOT"/EVIDENCE/lean/*.lean; do
+  for f in "$GF_ROOT"/scripts/*.sh "$GF_ROOT"/tests/*.sh "$GF_ROOT"/lean/Proofs/*.lean; do
     [ -f "$f" ] || continue
     n=$((n + 1))
     grep -q "SPDX-License-Identifier: $spdx" "$f" \
@@ -2453,7 +2530,7 @@ test_license_is_one_story() {
   # scanning itself is a checker with a blind spot in the other direction.
   local old; old="M""I""T"
   if grep -rIl "\"license\": \"$old\"\|SPDX-License-Identifier: $old" \
-       "$GF_ROOT/scripts" "$GF_ROOT/tests" "$GF_ROOT/EVIDENCE/lean" "$GF_ROOT/.claude-plugin" 2>/dev/null | grep -q .; then
+       "$GF_ROOT/scripts" "$GF_ROOT/tests" "$GF_ROOT/lean/Proofs" "$GF_ROOT/.claude-plugin" 2>/dev/null | grep -q .; then
     bad "license: no shipped file still claims the old license" "found one"
   else
     ok "license: no shipped file still claims the old license"
@@ -2549,7 +2626,7 @@ test_timeout_corpus_binds_lean() {
   # about a model says nothing about the shell unless something binds them, so
   # this drives the REAL shell over the same corpus the Lean #guards use, and
   # checks the Lean file still carries each row.
-  local corpus="$GF_ROOT/tests/timeout_corpus.tsv" lean="$GF_ROOT/EVIDENCE/lean/LearnedTimeout.lean"
+  local corpus="$GF_ROOT/tests/timeout_corpus.tsv" lean="$GF_ROOT/lean/Proofs/LearnedTimeout.lean"
   [ -s "$corpus" ] && ok "corpus: the shared corpus file exists" \
                    || { bad "corpus: the shared corpus file exists" "missing $corpus"; return; }
   [ -s "$lean" ] && ok "corpus: the Lean model file exists" \

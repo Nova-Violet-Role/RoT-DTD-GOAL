@@ -1,0 +1,26 @@
+LEAN MUTATION SUITE -- RoT DTD GOAL
+date: 2026-08-16 05:29:42
+workspace: D:/Lean/proofs   modules: Proofs.GoalForge.*
+
+rule: the needle is COUNTED before the build; the stale .olean is DELETED
+      before each rebuild; a patch that did not apply is DISCARDED, never
+      recorded as survived.
+
+baseline build ...
+  baseline: exit 0 -- the proofs are green before anything is broken
+
+L1   a row with no generation is DROPPE KILLED -- broke: sameGen_mono legacy_rows_are_never_hidden fail_then_pass_is_not_accused
+L2   the pass-then-fail check is remove KILLED -- broke: regressed_imp clock_scope_can_hide_a_flip regressed_append_other real_flake_survives_the_narrowing
+L3   the generation comparison is flipp KILLED -- broke: sameGen_mono sameGen_eq_nil goal_scope_can_overreport fail_then_pass_is_not_accused
+L4   the seal window is dropped entirel KILLED -- broke: mem_afterSeal clock_scope_can_hide_a_flip ts_scope_needs_a_monotone_clock afterSeal_eq_nil
+L5   the dependency check is removed    KILLED -- broke: next_respects_dependencies cycle_never_runs longer_cycle_never_runs missing_dependency_never_runs
+L6   the scheduler ignores eligibility  KILLED -- broke: next_is_eligible none_means_nothing_eligible cycle_never_runs longer_cycle_never_runs
+L7   the progress measure is flattened  KILLED -- broke: advance_decreases_pending dependent_waits_for_done
+L8   starting a goal does not advance i KILLED -- broke: start_pending_le advance_decreases_pending dependent_waits_for_done
+
+restoring and rebuilding the clean tree ...
+  baseline restored: exit 0
+
+killed: 8   survived: 0   discarded: 0
+
+VERDICT: every mutation was applied and killed.

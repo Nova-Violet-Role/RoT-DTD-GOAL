@@ -78,7 +78,7 @@ After the change: **0 refusals in 40 goals** across the two false-alarm arms, an
 
 The price is a theorem, not a footnote: a random check seen only as
 fail-then-pass is not reported, and cannot be
-(`EVIDENCE/lean/FlakyScope.lean:fail_then_pass_is_not_accused`).
+(`lean/Proofs/FlakyScope.lean:fail_then_pass_is_not_accused`).
 
 ### Completion was never simultaneous
 
@@ -104,7 +104,7 @@ A queued goal is a two-verb TSV spec whose grammar is **declared** in
 narrow the declaration and the validator refuses what it previously accepted,
 which is how the test proves that binding is real. On completion the gate
 archives the finished goal, starts the next eligible one, and blocks instead of
-stopping. `EVIDENCE/lean/GoalQueue.lean` proves the scheduler never starts a goal whose
+stopping. `lean/Proofs/GoalQueue.lean` proves the scheduler never starts a goal whose
 predecessor is unfinished, that a cycle is refused rather than scheduled, and
 that every advance strictly reduces the pending count — so the loop terminates.
 

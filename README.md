@@ -17,7 +17,7 @@
 [![License](https://img.shields.io/badge/License-AGPL--3.0_OR_EUPL--1.2-764ba2?style=for-the-badge)](LICENSE)
 
 [![CI](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci.yml/badge.svg)](https://github.com/Nova-Violet-Role/RoT-DTD-GOAL/actions/workflows/ci.yml)
-[![Proved in Lean 4](https://img.shields.io/badge/Proved%20in-Lean%204-2C3E50?style=flat-square)](EVIDENCE/lean/)
+[![Proved in Lean 4](https://img.shields.io/badge/Proved%20in-Lean%204-2C3E50?style=flat-square)](lean/Proofs/)
 [![Kernel re-verified](https://img.shields.io/badge/leanchecker-exit%200-27ae60?style=flat-square)](#-verify-it-yourself)
 [![Zero sorry](https://img.shields.io/badge/sorry-0-27ae60?style=flat-square)](#-verify-it-yourself)
 [![Zero dependencies](https://img.shields.io/badge/dependencies-bash%20%2B%20coreutils-27ae60?style=flat-square)](#-requirements)
@@ -69,18 +69,48 @@ question that four rounds of review kept asking: **who checks the checks?**
 
 ## 🚀 Install
 
+**The short way — two lines, straight from Claude Code.** No clone, no path to
+get right:
+
+```
+/plugin marketplace add Nova-Violet-Role/RoT-DTD-GOAL
+/plugin install rot-dtd-goal
+```
+
+That is the whole installation. `/plugin marketplace add` reads
+`.claude-plugin/marketplace.json` from this repository; `/plugin install` wires
+`hooks/hooks.json`, and the gate is live on the next Stop.
+
+<details>
+<summary>The long way — clone first, if you want to read the code before you run it</summary>
+
+Reasonable instinct, given what this plugin does: **it runs shell commands you
+wrote, without asking each time.** See [`.github/SECURITY.md`](.github/SECURITY.md).
+
 ```sh
 git clone https://github.com/Nova-Violet-Role/RoT-DTD-GOAL.git
 cd "RoT-DTD-GOAL"
 claude
 ```
 
-Then, in Claude Code:
+Then, in Claude Code, point the marketplace at the checkout you just read:
 
 ```
 /plugin marketplace add ./
 /plugin install rot-dtd-goal
 ```
+
+</details>
+
+Verify it landed — `/goal-status` answers even with no goal running, so a
+reply at all means the plugin is wired:
+
+```
+/goal-status
+```
+
+The seven commands are `/goal`, `/goal-status`, `/goal-verify`, `/goal-audit`,
+`/goal-pause`, `/goal-resume`, `/goal-abort`.
 
 Or point Claude Code at the plugin directory directly — `hooks/hooks.json` is
 the whole wiring, and removing the plugin removes the behaviour. Nothing is
@@ -104,7 +134,7 @@ not the code — so here is the honest floor, per platform:
 | Windows + Git Bash / MSYS2 | supported | the author's own platform |
 | WSL | supported | it is Linux |
 
-The Lean 4 sources under `EVIDENCE/lean/` are a *specification*. **The plugin
+The Lean 4 sources under `lean/Proofs/` are a *specification*. **The plugin
 never invokes Lean at runtime**, and you do not need it installed.
 
 ### ⚙️ Configuration
@@ -421,7 +451,7 @@ not hidden.
 ### 4. Learned timeouts, and a clamp that can only ever grow
 
 Each criterion learns its own verify timeout from measured history. The clamp
-**may only ever** grow: `EVIDENCE/lean/LearnedTimeout.lean` proves
+**may only ever** grow: `lean/Proofs/LearnedTimeout.lean` proves
 `learned_never_below_base`, `learned_bounded` and `timeout_grows_strictly`, and
 the rotation that bounds the timings file is proved not to move a single learned
 budget (`rotation_preserves_budget`, with `naive_rotation_can_shrink` as the
@@ -432,7 +462,7 @@ counterexample showing why the obvious rotation is wrong).
 A criterion's history is scoped to **its own seal generation** — an integer that
 only counts up — not to a timestamp. A machine whose clock jumps backwards
 cannot push a real regression outside the window, because no clock is consulted.
-`EVIDENCE/lean/FlakyScope.lean` proves the narrowing is sound (`narrowing_only_removes`),
+`lean/Proofs/FlakyScope.lean` proves the narrowing is sound (`narrowing_only_removes`),
 that generation scoping is invariant under *any* rewriting of the timestamps
 (`gen_scope_ignores_the_clock`), and exhibits the case that justified seal
 scoping in the first place (`goal_scope_can_overreport`).
@@ -481,7 +511,7 @@ A queued goal is a two-verb TSV spec (`GOAL`, `CRIT`) whose grammar is declared
 in the same DTD and **read** by the validator rather than restated in it. On
 completion the gate archives the finished goal, starts the next eligible one and
 blocks instead of stopping — tagging the instruction so a reader can tell a
-record of what happened from a task to do next. `EVIDENCE/lean/GoalQueue.lean` proves the
+record of what happened from a task to do next. `lean/Proofs/GoalQueue.lean` proves the
 scheduler never starts a goal whose predecessor is unfinished, that a cycle is
 refused rather than scheduled, and that every advance strictly reduces the
 pending count, so the multi-goal loop terminates.
@@ -619,7 +649,7 @@ rather than a description.
    numbers, or renumber an existing field. `goal.sh schema --verify` must
    refuse and name the record.
 8. **The attestation.** Change one byte anywhere under `scripts/`, `hooks/`,
-   `tests/`, `EVIDENCE/lean/`; it must refuse and name the field.
+   `tests/`, `lean/Proofs/`; it must refuse and name the field.
 
 ---
 
@@ -629,12 +659,16 @@ rather than a description.
 scripts/     goal.sh stop_gate.sh guard.sh context.sh post_tool.sh
              journal_event.sh snapshot.sh attest.sh lib.sh
 hooks/       hooks.json · event_consumers.tsv · trust_contract.dtd · INVARIANTS.tsv
-EVIDENCE/    every run this was judged on -- differentials, both mutation logs,
-             the flake experiment, the bench, the dogfood journal + ledger,
-             and lean/ (LearnedTimeout · TimingsRotation · FlakyScope · GoalQueue)
+lean/        README.md -- what each module proves, and WHAT THE MUTATIONS KILLED
+             Proofs/  LearnedTimeout · TimingsRotation · FlakyScope · GoalQueue
+             mutate/  mutate-lean.sh -- the suite that attacked them, and its log
+EVIDENCE/    every run this was judged on -- differentials, the shell mutation
+             log, the flake experiment, the bench, the dogfood journal + ledger,
+             and the Lean instrument transcript
 tests/       run_tests.sh · experiments/flaky_policy.sh · experiments/bench.sh
 docs/        REVIEW.md (the review packet)
 .github/     workflows/ci.yml -- ubuntu + macOS + Windows, and the release itself
+             CONTRIBUTING.md · SECURITY.md · CODE_OF_CONDUCT.md · issue templates
 ```
 
 `hooks/INVARIANTS.tsv` maps every law declared in the trust contract to the test

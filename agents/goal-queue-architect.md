@@ -43,7 +43,7 @@ accepting it. Do not restate that grammar from memory — read it with
 
 **Never create a forward dependency** — a goal may only wait on a goal already
 in the queue. This is not a style rule: it is what makes the queue acyclic *by
-construction*, and `EVIDENCE/lean/GoalQueue.lean` proves on that basis that the
+construction*, and `lean/Proofs/GoalQueue.lean` proves on that basis that the
 scheduler terminates (`cycle_never_runs`, `advance_decreases_pending`). A
 forward reference is refused by `queue add`, and rightly.
 
