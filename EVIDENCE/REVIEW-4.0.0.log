@@ -1,0 +1,59 @@
+RoT DTD GOAL — the 100/100 pre-ship review of v4.0.0, 2026-08-16
+Question: does the latest release work exactly as the README declares?
+Method: verify like a stranger, then like an adversary. Every line below
+was executed, not recalled.
+
+THE RELEASED ARTIFACT, COLD
+  zip sha256 vs published .sha256 ......................... OK
+  MANIFEST.sha256 (100 files) ............................. OK
+  attest.sh --verify ATTESTATION.txt ...................... OK
+  goal.sh contract --verify ............................... OK
+  goal.sh version ......................................... 4.0.0
+  full suite from the unzipped tree ....................... 715 passed, 0 failed, exit 0
+
+THE INSTALL
+  marketplace add + plugin install ........................ enabled
+  FINDING (fixed): install metadata snapshots at install
+  time -- a pre-4.0.0 install kept reporting "Version:
+  1.0.0" in `claude plugin list` while executing current
+  code; `marketplace update` does not refresh it, a
+  reinstall does. Reinstalled: version 4.0.0, versioned
+  cache path, clean.
+
+THE DECLARED BEHAVIORS, LIVE (scratch projects, current main)
+  refusal: block + DTD laws + GF-UNTRUSTED fence +
+    only-the-failures + next step ......................... OK
+  recursion guard (stop_hook_active) ...................... OK (silent)
+  LAW.18: all-passing goal, GF_GATE_BUDGET=0 ............. VERIFICATION INCOMPLETE, block
+  completion with real budget ............................. GOAL COMPLETE (red team ran)
+  guard: read with 2>/dev/null allowed .................... OK
+  guard: write into goal state denied ..................... OK
+  init --help ............................................. usage, exit 0, no draft
+  vacuous-diff criterion at add ........................... WARNING with the cheap fix
+  contract --verify / schema --verify / attest --verify ... all OK on main
+  stall detector .......................................... escalated after sig x2 --
+    fired on the review battery itself, which had stopped
+    twice without fixing anything; the reviewer's script
+    was wrong and the plugin was right, twice over.
+
+FOUR APPARENT FAILURES, ALL ATTRIBUTED
+  Battery asserted LAW.18 on a failing goal (budget check
+  lives in the completion path -- correct), asserted a
+  draft-only warning on an active goal (correct refusal),
+  used a wrong cwd for attest (script bug), and read an
+  escalated goal's silence as a missing completion (the
+  gate correctly goes dormant on awaiting_human). None was
+  a plugin defect.
+
+THE CI RECORD
+  ci.yml @ v4.0.0 release ................................. green gate on ubuntu, macOS, Windows; release cold-verified by its own job
+  Plugin Extra Gift run 2 ................................. all three OS legs green: build + engine tests + byte-exact CLI answers
+
+VERDICT
+  v4.0.0 stands as latest. Every README claim checked is
+  real, the one finding surfaced (install metadata
+  staleness) is a harness behavior, documented here, with
+  the reinstall as the remedy. The open item in the
+  findings ledger remains #13 (effort= pass-through),
+  which awaits a harness parameter and is disclosed in
+  docs/FINDINGS-4.0.0.md.
