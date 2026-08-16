@@ -1,0 +1,67 @@
+{
+  "directory": "lean\\mutate",
+  "files": {
+    "mutate-lean.sh": {
+      "hash": "e0d4944e8b57",
+      "indexed_at": "2026-08-16T03:58:51.551249+00:00",
+      "language": "shell",
+      "lines": 288,
+      "mtime_ns": 1786850965287460000,
+      "size": 11289,
+      "symbols": [
+        {
+          "docstring": "------------------------------------------------------- the mutation table FIVE LINES PER MUTATION: id, file, needle, replacement, description.  Not a",
+          "lines": [
+            78,
+            137
+          ],
+          "name": "mutations",
+          "type": "function"
+        },
+        {
+          "docstring": "literal substring replacement, first occurrence per line, no regex anywhere",
+          "lines": [
+            140,
+            145
+          ],
+          "name": "apply_needle",
+          "type": "function"
+        },
+        {
+          "lines": [
+            147,
+            157
+          ],
+          "name": "count_needle",
+          "type": "function"
+        },
+        {
+          "lines": [
+            159,
+            163
+          ],
+          "name": "digest",
+          "type": "function"
+        },
+        {
+          "lines": [
+            181,
+            184
+          ],
+          "name": "build",
+          "type": "function"
+        },
+        {
+          "lines": [
+            186,
+            191
+          ],
+          "name": "drop_olean",
+          "type": "function"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T03:58:51.551319+00:00",
+  "version": "1.0"
+}

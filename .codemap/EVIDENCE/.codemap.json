@@ -1,0 +1,26 @@
+{
+  "directory": "EVIDENCE",
+  "files": {
+    "README.md": {
+      "hash": "c7c4efc090bc",
+      "indexed_at": "2026-08-16T03:33:52.432133+00:00",
+      "language": "markdown",
+      "lines": 31,
+      "mtime_ns": 1786851229134007700,
+      "size": 3984,
+      "symbols": [
+        {
+          "docstring": "- **No Linux or macOS suite tail produced by the author.** There is no Linux runtime on the author's machine. CI produces those on every push; until a",
+          "lines": [
+            22,
+            32
+          ],
+          "name": "What this evidence does not cover",
+          "type": "section"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T03:33:52.432217+00:00",
+  "version": "1.0"
+}

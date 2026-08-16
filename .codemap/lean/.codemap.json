@@ -1,0 +1,72 @@
+{
+  "directory": "lean",
+  "files": {
+    "README.md": {
+      "hash": "a8964f70bb5f",
+      "indexed_at": "2026-08-16T03:58:51.725840+00:00",
+      "language": "markdown",
+      "lines": 138,
+      "mtime_ns": 1786851182409473900,
+      "size": 7376,
+      "symbols": [
+        {
+          "docstring": "| module | the engine question it answers | theorems | |--------|-------------------------------|----------| | [`Proofs/FlakyScope.lean`](Proofs/Flaky",
+          "lines": [
+            19,
+            36
+          ],
+          "name": "What each module is about",
+          "type": "section"
+        },
+        {
+          "docstring": "A build exiting 0 means the file **elaborated**. That is not the same as the theorems being true of anything, so all three are run:",
+          "lines": [
+            37,
+            58
+          ],
+          "name": "The three instruments",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "lines": [
+                84,
+                107
+              ],
+              "name": "Re-run it yourself",
+              "type": "subsection"
+            },
+            {
+              "docstring": "A mutation runner that has never reported a survivor is an untested alarm \u2014 it would print `8/8 killed` just as cheerfully if it had silently stopped",
+              "lines": [
+                108,
+                123
+              ],
+              "name": "The harness has its own negative control",
+              "type": "subsection"
+            }
+          ],
+          "docstring": "`lake build` going green proves the files elaborate. It does not prove the theorems are load-bearing: a theorem that no broken definition can falsify",
+          "lines": [
+            59,
+            123
+          ],
+          "name": "What the mutations killed",
+          "type": "section"
+        },
+        {
+          "docstring": "* **They do not verify the shell.** They specify the *logic* of four decisions; `scripts/lib.sh` is the implementation, and nothing mechanically binds",
+          "lines": [
+            124,
+            139
+          ],
+          "name": "What these proofs do NOT claim",
+          "type": "section"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T03:58:51.725905+00:00",
+  "version": "1.0"
+}

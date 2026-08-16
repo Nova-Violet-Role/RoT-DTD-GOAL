@@ -1,0 +1,347 @@
+{
+  "directory": ".github",
+  "files": {
+    "CODE_OF_CONDUCT.md": {
+      "hash": "2a3ecc5b5dac",
+      "indexed_at": "2026-08-16T01:24:42.596030+00:00",
+      "language": "markdown",
+      "lines": 146,
+      "mtime_ns": 1786843480367754400,
+      "size": 6204,
+      "symbols": [
+        {
+          "docstring": "We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, b",
+          "lines": [
+            3,
+            14
+          ],
+          "name": "Our Pledge",
+          "type": "section"
+        },
+        {
+          "docstring": "Examples of behavior that contributes to a positive environment for our community include:",
+          "lines": [
+            15,
+            38
+          ],
+          "name": "Our Standards",
+          "type": "section"
+        },
+        {
+          "docstring": "This repository is built by adversarial review: issues and pull requests that try to **break** a claim are the point, and a report that falsifies some",
+          "lines": [
+            39,
+            49
+          ],
+          "name": "A note specific to this project",
+          "type": "section"
+        },
+        {
+          "docstring": "Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective acti",
+          "lines": [
+            50,
+            61
+          ],
+          "name": "Enforcement Responsibilities",
+          "type": "section"
+        },
+        {
+          "docstring": "This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public space",
+          "lines": [
+            62,
+            69
+          ],
+          "name": "Scope",
+          "type": "section"
+        },
+        {
+          "docstring": "Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the maintainers of this repository by opening an issue with the",
+          "lines": [
+            70,
+            85
+          ],
+          "name": "Enforcement",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "**Community Impact**: Use of inappropriate language or other behavior deemed unprofessional or unwelcome in the community.",
+              "lines": [
+                91,
+                99
+              ],
+              "name": "1. Correction",
+              "type": "subsection"
+            },
+            {
+              "docstring": "**Community Impact**: A violation through a single incident or series of actions.",
+              "lines": [
+                100,
+                111
+              ],
+              "name": "2. Warning",
+              "type": "subsection"
+            },
+            {
+              "docstring": "**Community Impact**: A serious violation of community standards, including sustained inappropriate behavior.",
+              "lines": [
+                112,
+                122
+              ],
+              "name": "3. Temporary Ban",
+              "type": "subsection"
+            },
+            {
+              "docstring": "**Community Impact**: Demonstrating a pattern of violation of community standards, including sustained inappropriate behavior, harassment of an indivi",
+              "lines": [
+                123,
+                131
+              ],
+              "name": "4. Permanent Ban",
+              "type": "subsection"
+            }
+          ],
+          "docstring": "Community leaders will follow these Community Impact Guidelines in determining the consequences for any action they deem in violation of this Code of",
+          "lines": [
+            86,
+            131
+          ],
+          "name": "Enforcement Guidelines",
+          "type": "section"
+        },
+        {
+          "docstring": "This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 2.1, available at https://www.contributor-covenant.org/version/2/1/",
+          "lines": [
+            132,
+            147
+          ],
+          "name": "Attribution",
+          "type": "section"
+        }
+      ]
+    },
+    "CONTRIBUTING.md": {
+      "hash": "1a6097a1080c",
+      "indexed_at": "2026-08-16T03:14:01.678147+00:00",
+      "language": "markdown",
+      "lines": 169,
+      "mtime_ns": 1786850039392179600,
+      "size": 6482,
+      "symbols": [
+        {
+          "docstring": "**No claim without a green run.** Not \"this should work\". Not \"the change is obviously safe\". You ran the suite, it exited 0 \u2192 say it passes. Non-zero",
+          "lines": [
+            11,
+            35
+          ],
+          "name": "The one rule that is not negotiable",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "Every behavioural change ships with a case in `tests/run_tests.sh`. The bar is not \"the test passes\" \u2014 a test that cannot fail proves nothing. The bar",
+              "lines": [
+                38,
+                59
+              ],
+              "name": "1. A test that can fail",
+              "type": "subsection"
+            },
+            {
+              "docstring": "If you add a case, add its name to the `ALL` list. Note the formatting quirk that has bitten this file once already: **the closing quote goes on its o",
+              "lines": [
+                60,
+                65
+              ],
+              "name": "2. Registration",
+              "type": "subsection"
+            },
+            {
+              "docstring": "Every file the engine writes is declared twice in `hooks/trust_contract.dtd` \u2014 as numbered append-only fields *and* as a DTD sequence content model. I",
+              "lines": [
+                66,
+                80
+              ],
+              "name": "3. The declaration, if you touched a record",
+              "type": "subsection"
+            },
+            {
+              "docstring": "`.gitattributes` normalises everything to LF. Before you push:",
+              "lines": [
+                81,
+                96
+              ],
+              "name": "4. Line endings and the exec bit",
+              "type": "subsection"
+            },
+            {
+              "lines": [
+                97,
+                105
+              ],
+              "name": "5. A regenerated attestation, if you changed the tree",
+              "type": "subsection"
+            }
+          ],
+          "lines": [
+            36,
+            105
+          ],
+          "name": "What a good pull request contains",
+          "type": "section"
+        },
+        {
+          "docstring": "Best case, in order:",
+          "lines": [
+            106,
+            124
+          ],
+          "name": "What a good issue contains",
+          "type": "section"
+        },
+        {
+          "docstring": "* **A blocking pattern with no way forward.** LAW.17: every refusal the engine emits must carry a task or a remedy. A message that says \"cannot contin",
+          "lines": [
+            125,
+            145
+          ],
+          "name": "What will get a change rejected",
+          "type": "section"
+        },
+        {
+          "docstring": "| path | what it is | |------|------------| | `scripts/` | the engine \u2014 `lib.sh` is shared, `goal.sh` is the CLI, `stop_gate.sh` is the gate | | `hook",
+          "lines": [
+            146,
+            165
+          ],
+          "name": "Development layout",
+          "type": "section"
+        },
+        {
+          "docstring": "By contributing you agree that your contribution is licensed under the same terms as the project \u2014 see [`LICENSE`](../LICENSE).",
+          "lines": [
+            166,
+            170
+          ],
+          "name": "Licence",
+          "type": "section"
+        }
+      ]
+    },
+    "PULL_REQUEST_TEMPLATE.md": {
+      "hash": "e4ec1f238b5d",
+      "indexed_at": "2026-08-16T01:27:34.904681+00:00",
+      "language": "markdown",
+      "lines": 43,
+      "mtime_ns": 1786843652405145500,
+      "size": 1889,
+      "symbols": [
+        {
+          "docstring": "<!-- One paragraph. This project's changelog is organised by the adversarial question each change answers \u2014 \"can a check pass while the thing it check",
+          "lines": [
+            3,
+            8
+          ],
+          "name": "What this changes, and what question it answers",
+          "type": "section"
+        },
+        {
+          "lines": [
+            9,
+            16
+          ],
+          "name": "The evidence",
+          "type": "section"
+        },
+        {
+          "docstring": "- [ ] The suite exits **0** on my machine, and I read the exit code directly. - [ ] Behavioural change ships with a test **that I have watched fail**",
+          "lines": [
+            17,
+            38
+          ],
+          "name": "Checklist",
+          "type": "section"
+        },
+        {
+          "docstring": "<!-- Say it plainly. \"I have no macOS machine; CI covers it\" is a fine answer and a far better one than silence. An honest gap is a result; a fabricat",
+          "lines": [
+            39,
+            44
+          ],
+          "name": "What I could not verify",
+          "type": "section"
+        }
+      ]
+    },
+    "SECURITY.md": {
+      "hash": "1ba238b5dc65",
+      "indexed_at": "2026-08-16T01:26:12.518517+00:00",
+      "language": "markdown",
+      "lines": 83,
+      "mtime_ns": 1786843570272755300,
+      "size": 3836,
+      "symbols": [
+        {
+          "docstring": "Be clear-eyed about the threat model before reading anything else.",
+          "lines": [
+            3,
+            21
+          ],
+          "name": "What this software actually does to your machine",
+          "type": "section"
+        },
+        {
+          "docstring": "| version | supported | |---------|-----------| | 1.0.x   | yes       | | < 1.0   | no \u2014 unpublished development line (`v2` \u2192 `v3.6`) |",
+          "lines": [
+            22,
+            28
+          ],
+          "name": "Supported versions",
+          "type": "section"
+        },
+        {
+          "children": [
+            {
+              "docstring": "The interesting attacks against this design are about **who gets to decide a goal is complete**, and about text that escapes the fence:",
+              "lines": [
+                43,
+                64
+              ],
+              "name": "What we consider a vulnerability",
+              "type": "subsection"
+            },
+            {
+              "docstring": "* A criterion you wrote running as you wrote it. See the top of this file. * The plugin reading and writing inside `.claude/goal/` in your own project",
+              "lines": [
+                65,
+                75
+              ],
+              "name": "What is not a vulnerability",
+              "type": "subsection"
+            }
+          ],
+          "docstring": "Use GitHub's **private vulnerability reporting** on this repository:",
+          "lines": [
+            29,
+            75
+          ],
+          "name": "Reporting a vulnerability",
+          "type": "section"
+        },
+        {
+          "docstring": "Reports are triaged as time allows \u2014 this is a small project, not a vendor with an on-call rotation, and saying so plainly is more useful than promisi",
+          "lines": [
+            76,
+            84
+          ],
+          "name": "Response",
+          "type": "section"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-16T03:14:01.715516+00:00",
+  "version": "1.0"
+}

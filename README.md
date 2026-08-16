@@ -109,8 +109,8 @@ reply at all means the plugin is wired:
 /goal-status
 ```
 
-The seven commands are `/goal`, `/goal-status`, `/goal-verify`, `/goal-audit`,
-`/goal-pause`, `/goal-resume`, `/goal-abort`.
+Then start working: **[How to use it](#-how-to-use-it--seven-slash-commands-and-only-one-to-start-with)**
+— seven slash commands, and only `/goal` to begin.
 
 Or point Claude Code at the plugin directory directly — `hooks/hooks.json` is
 the whole wiring, and removing the plugin removes the behaviour. Nothing is
@@ -226,7 +226,85 @@ from earlier.
 
 ---
 
-## 🧭 A session, end to end
+## 🎮 How to use it — seven slash commands, and only one to start with
+
+**You never have to type a `.sh` command.** Everything below is a slash command
+inside Claude Code. The shell script exists underneath, and the raw form is
+shown further down for people who want it — but the normal way to drive this
+plugin is here.
+
+### The seven commands
+
+| command | what it does | when you reach for it |
+|---|---|---|
+| **`/goal <what you want>`** | The only one you need to start. Turns your sentence into acceptance criteria — real shell commands — seals them, and switches the gate on. | Beginning of any piece of work you want *verified*, not just attempted. |
+| **`/goal-status`** | Shows the goal, every criterion pass/fail, the iteration budget, and the journal tail. | "Where are we?" Also the fastest way to confirm the plugin is installed. |
+| **`/goal-verify`** | Runs every acceptance criterion right now and reports. **Does not consume an iteration.** | "Would it pass if I stopped now?" — check without spending budget. |
+| **`/goal-audit`** | Attacks the criteria themselves: ledger integrity, the empty-directory negative control, and the mutation probe. **Does not consume an iteration.** | "Are these checks any good?" Use it when a criterion looks too easy. |
+| **`/goal-pause`** | The Stop gate goes dormant. You can end the session normally. | Interruption, meeting, end of day, or you need to ship something unrelated. |
+| **`/goal-resume`** | Wakes a paused *or* human-escalated goal, and resets the iteration budget and stall detector. | After a pause, or after the gate escalated to you and you have given guidance. |
+| **`/goal-abort`** | Ends the goal. State stays on disk for post-mortem. Asks for confirmation if there was real progress. | The goal was wrong, or the world changed. |
+
+### Your first goal, start to finish
+
+**1 — state it.** One sentence, in your own words:
+
+```
+/goal make the parser round-trip every fixture in tests/fixtures
+```
+
+Claude proposes acceptance criteria — each one a shell command that can *fail* —
+shows them to you, and seals them. Read them. **This is the one step that
+matters**: the criteria are the whole contract, and you are allowed to say "no,
+that check is too weak" before they are sealed.
+
+**2 — just work.** Nothing special to do. Talk to Claude normally.
+
+**3 — try to stop.** This is where the plugin earns its keep. When Claude
+attempts to end the turn, the gate runs every criterion for real:
+
+- **all pass** → the session ends, and it re-ran everything at that exact moment
+  so no pass is older than the verdict;
+- **any fails** → the session does **not** end. Claude gets the failing
+  criterion, its command and its output — only what failed — plus the task, and
+  keeps going.
+
+**4 — look in on it whenever you like:**
+
+```
+/goal-status        # what passed, what did not, which iteration
+/goal-verify        # run everything now, free — no iteration spent
+```
+
+### When something is off
+
+| situation | what to type |
+|---|---|
+| "It keeps failing the same way." | `/goal-status` — the journal tail shows the repeat; the gate escalates to you after the stall threshold. |
+| "That criterion is not actually checking anything." | `/goal-audit` — it re-runs each check in an empty directory and names the ones that still pass. |
+| "I need to stop for today." | `/goal-pause`, then `/goal-resume` tomorrow. |
+| "The goal itself was wrong." | `/goal-abort`. State is kept so you can read what happened. |
+| "It refused to let me stop and I do not know why." | The refusal always names the failing criterion **and the next step** — that is `LAW.17`, enforced by a test. Paste it back to Claude. |
+
+### The agents come along for free
+
+Seven sub-agents ship with the plugin (planner, verifier, critic, red team,
+forensic, queue architect, contract auditor). **You do not invoke them by
+name** — Claude reaches for them when the situation matches, and each is
+declared in the trust contract with the one thing it may never do. See
+[The agents](#-the-agents-and-how-to-configure-them) to pin their model or
+loosen their tool boundary.
+
+> One thing worth knowing early: **a sub-agent cannot escape the gate.** The
+> Stop hook fires when the *session* ends, so delegating work does not let an
+> unverified goal finish.
+
+---
+
+## 🧭 Under the hood — the same session in raw commands
+
+Everything above is `scripts/goal.sh` underneath. You never need this form, but
+it is what the slash commands run, and it is what CI and the test suite use:
 
 ```sh
 goal.sh init "ship the parser" --budget 8 --stall 2

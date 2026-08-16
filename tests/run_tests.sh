@@ -1430,6 +1430,31 @@ test_the_plugin_installs_as_declared() {
       && ok "plugin: $cmd_seen distinct slash commands are named in the README" \
       || bad "plugin: the README names the slash commands" "only $cmd_seen -- needle may have rotted"
     [ "$cmd_missing" -eq 0 ] && ok "plugin: every slash command the README names actually ships"
+
+    # THE OTHER DIRECTION, and it is the one that rots quietly. The check above
+    # catches a README naming a command nobody wrote. This catches a command
+    # that SHIPS and that no user will ever discover, because nothing tells
+    # them it exists. A plugin whose surface is undocumented is, from the
+    # user's side, a plugin that does not have it.
+    local cmd_file cmd_name undocumented=0 shipped=0
+    for cmd_file in "$root"/commands/*.md; do
+      [ -f "$cmd_file" ] || continue
+      cmd_name="/$(basename "$cmd_file" .md)"
+      shipped=$((shipped + 1))
+      grep -qF -- "$cmd_name" "$readme" || {
+        undocumented=$((undocumented + 1))
+        bad "plugin: shipped command $cmd_name is documented in the README" "never mentioned"
+      }
+    done
+    [ "$undocumented" -eq 0 ] \
+      && ok "plugin: all $shipped shipped slash commands are documented in the README"
+
+    # ...and the README must actually TEACH them, not merely list the names.
+    # Each command needs a line saying what it is for; the tutorial table is
+    # what makes this plugin usable by someone who did not write it.
+    grep -q 'How to use it' "$readme" \
+      && ok "plugin: the README carries a how-to-use section" \
+      || bad "plugin: the README carries a how-to-use section" "no tutorial for a user to follow"
     # ...and the install line must name the plugin the manifest actually
     # declares, not a name that was right when it was written.
     grep -q "/plugin install $pname" "$readme" \
