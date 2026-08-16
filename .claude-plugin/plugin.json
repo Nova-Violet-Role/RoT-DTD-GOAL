@@ -1,7 +1,7 @@
 {
   "name": "rot-dtd-goal",
   "displayName": "RoT DTD GOAL",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A /goal engine whose completion is EARNED, not announced. Acceptance criteria are real shell commands; the Stop hook re-runs every one of them and only exits 0 lets a goal finish. Verification defends itself: a sealed integrity ledger re-hashes each criterion before the gate trusts it, a negative-control red team refuses checks that also pass in an empty directory, and a six-operator mutation probe proves each check FAILS when the files it covers are damaged. Completion is simultaneous -- every criterion is re-run at the moment the goal would complete, so no pass is older than the verdict. Flake detection is scoped by seal generation rather than by any clock, and reports a REGRESSION (pass then fail) rather than mere disagreement, with the false-alarm rate measured rather than assumed. Untrusted command output is fenced so nothing the engine runs can speak in the engine's voice, with the verdict vocabulary declared once in a DTD-style trust contract. Goals can be queued with dependencies, and the scheduler is specified in Lean 4. State is plain text a human can read with cat; the floor is bash and coreutils, with no Python, no jq, no Node and no compiler.",
   "author": {
     "name": "Saimonokuma",

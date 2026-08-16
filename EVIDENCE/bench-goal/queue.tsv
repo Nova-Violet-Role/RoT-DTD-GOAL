@@ -1,0 +1,3 @@
+# name	status	after	spec  -- RoT DTD GOAL queue
+advanced	done	-	/home/user/bench-csvq/specs/advanced.tsv
+hardened	done	advanced	/home/user/bench-csvq/specs/hardened.tsv

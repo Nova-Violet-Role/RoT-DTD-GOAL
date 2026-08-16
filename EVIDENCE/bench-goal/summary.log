@@ -1,0 +1,39 @@
+RoT DTD GOAL bench -- three queued goals worked by real Claude Code sessions
+with the released plugin installed. 2026-08-16, Linux container, plugin 2.0.0.
+
+The project: build csvq.sh, a pure-bash CSV query tool, in three phases --
+base (select/count/sum, 10 criteria), advanced (sort/group/join/max/numeric
+where, 6 criteria), hardened (edge cases/stdin/unicode/scale, 6 criteria).
+Criteria were diffs of real output against expected files fixed in advance.
+Specs, fixtures and expected outputs predate the sessions; the sessions could
+edit only csvq.sh (and the PreToolUse guard denied 4 attempts to touch goal
+state, journalled as GUARD denied).
+
+measured, from the journal and the stream-json session logs:
+  sessions                    2   (headless claude -p, --max-turns 80 each)
+  wall clock                  ~15 min end to end
+  top-level assistant turns   85 (session 1) + 48 (session 2) = 133
+  top-level tool calls        40 + 24 = 64
+  goals completed             3 of 3, queue advanced LIVE in-session between
+                              goals 2 and 3 (gate blocked with the hand-off
+                              instruction instead of allowing the stop)
+  gate refusals               1 full block (iter 1, fail=10) + 1 queue-advance
+                              block; every completion via the CONFIRM sweep
+  guard denials               4 (bash-mutation attempts on .claude/goal/*)
+  agents summoned             5 of the 7 declared: goal-planner, goal-redteam
+                              (twice), goal-queue-architect, goal-contract-
+                              auditor; journalled as SubagentStart/Stop
+  red team                    weak=0 at both manual and activation runs; at
+                              the FINAL completion it flagged H2 -- a criterion
+                              the bench AUTHOR wrote -- as passes-in-empty-dir
+                              (vacuous: diff of a missing script's empty output
+                              against /dev/null). Completion carried the
+                              warning beside the verdict (GATE_REDTEAM=warn).
+
+That last line is the bench's real result: the instrument audited the person
+testing it. journal.log in this directory is the untouched single record;
+ledger, queue.tsv and timings.tsv are the goal-3 state as the session left it.
+The gif in docs/assets/gate.gif replays the gate against snapshots of this
+bench's real state (snapshot 017: one criterion failing; the finished tree:
+completion with the H2 warning) -- the text shown is the engine's own output,
+only the pacing is staged.

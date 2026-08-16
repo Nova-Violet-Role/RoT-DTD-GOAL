@@ -3,14 +3,14 @@
 #   bash scripts/attest.sh --verify <this file>
 # It attests what was MEASURED, not that anyone should trust the author.
 
-GF_VERSION=2.0.0
+GF_VERSION=3.0.0
 GF_SCRIPTS=9
 GF_TEST_CASES=59
 GF_HOOK_EVENTS=31
 GF_CONSUMER_ROWS=31
 GF_LEAN_MODULES=5
 GF_LEAN_THEOREMS=73
-tree.sha256=0b404352a4e368c344666522f70731d1f7af94c391d83170ba60692189d1eb97
+tree.sha256=d108eca5d78d7cac8e1f6534a657bdb7f573d46b69d1cf5e8f07e5e6de5218fd
 
 # environment measured at generation time -- expected to differ on
 # your machine, and not compared by --verify

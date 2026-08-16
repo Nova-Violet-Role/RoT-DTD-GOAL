@@ -15,6 +15,41 @@ by a review that tried to break the previous answer.
 
 ---
 
+## [3.0.0] — 2026-08-16
+
+*The question: **can a human send the roster, or only hope it shows up?***
+
+Through 2.0.0 the seven agents were declared in the trust contract and
+summoned only when the driving model judged the moment right — a user could
+not dispatch one deliberately. Two commands close that, and both read the
+roster FROM the contract at dispatch time, so the DTD stays the single source
+of who exists:
+
+* **`/goal-agent <name> [model=…] [effort=…] <task>`** — dispatch exactly one
+  agent. Unknown names are refused with the roster printed, never
+  nearest-matched; the report arrives inside the agent's declared element,
+  closed by the standing rule that agent output is a proposal and the gate
+  still decides by exit code (LAW.1).
+* **`/goal-swarm [agents=…] [model=…] [effort=…] <thing>`** — the whole roster
+  (or a subset) on one subject at once, genuinely in parallel — a workflow
+  when the harness has one, all dispatches in a single message otherwise —
+  synthesized without flattening: a disagreement between agents is a finding
+  and must survive into the summary.
+* `model=` and `effort=` are selectable per invocation in both; agent front
+  matter remains the durable default.
+
+**And the engine was benched on real work, in real sessions.** Three queued
+goals (build → extend → harden a pure-bash CSV tool, 22 sealed criteria)
+worked end-to-end by headless Claude Code sessions with the released plugin
+installed: all three completed through the gate, the queue advanced
+live in-session, the tamper guard denied four write attempts on goal state,
+five of the seven agents were summoned and journalled — and at the final
+completion the red team flagged a criterion **the bench author wrote** as
+vacuous (`H2 passes-in-empty-dir`). The full record ships in
+`EVIDENCE/bench-goal/`, and `docs/assets/gate.gif` replays the refusal and
+the earned completion against that bench's real state. See the README's
+*Seen working* section.
+
 ## [2.0.0] — 2026-08-16
 
 *The question: **which of our guarantees is only a comment?***
