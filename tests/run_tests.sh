@@ -878,7 +878,19 @@ test_flake_scope_is_the_seal() {
 #
 # The README calls strict-by-default a measured decision (60 goals, 4 refusals,
 # zero false alarms). A default nothing tests is a comment, not a default.
-test_the_flaky_default_survives_an_upgrade() {
+#
+# AND M8 WAS NOT SPECIAL. The first version of this case covered GATE_FLAKY
+# alone, so the campaign was extended to its two siblings -- and both survived:
+#
+#   M11  GATE_REDTEAM  ${policy:-warn}       -> :-off    SURVIVED
+#   M12  LAST_PASSED   ${last_passed:-0}     -> :-999    SURVIVED
+#
+# Three fallbacks, three untested. That is a CLASS of hole, not an incident:
+# every key `goal.sh init` writes has a gate-side default that no goal created
+# by this version can ever reach. The case is therefore about the class -- one
+# legacy state, every default exercised -- and it is named for the class so the
+# next person adding a `state_get X; X="${X:-...}"` knows where its test lives.
+test_gate_defaults_survive_an_upgrade() {
   new_project > /dev/null
   G init "upgrade" --budget 9 --stall 9 > /dev/null
   G add C1 "coin flip" 'test -f flip.txt' > /dev/null
@@ -916,6 +928,45 @@ test_the_flaky_default_survives_an_upgrade() {
   # about history, not an edit to it.
   assert_eq "upgrade: the ledger still has one sealed row" \
     "$(grep -c '^C1	' "$led")" "1"
+
+  # ---- M11: GATE_REDTEAM, whose default is warn -------------------------
+  # A criterion that also passes in an EMPTY directory measured nothing. warn
+  # completes but SAYS SO; off completes in silence. On a legacy state the
+  # difference is invisible unless something asserts the sentence exists.
+  new_project > /dev/null
+  G init "upgrade-redteam" --budget 9 --stall 9 > /dev/null
+  G add C1 "passes anywhere" 'test 1 = 1' > /dev/null
+  G activate > /dev/null
+  st="$CLAUDE_PROJECT_DIR/.claude/goal/state.env"
+  grep -v '^GATE_REDTEAM=' "$st" > "$st.f" && mv "$st.f" "$st"
+  assert_eq "upgrade: the legacy state carries no GATE_REDTEAM at all" \
+    "$(grep -c '^GATE_REDTEAM=' "$st")" "0"
+  out="$(gate '{}')"
+  assert_contains "upgrade: an unset GATE_REDTEAM still runs the red team" \
+    "$out" "RED TEAM WARNING"
+  assert_contains "upgrade: and names the criterion that proves nothing" "$out" "C1"
+
+  # ---- M12: LAST_PASSED, whose default is 0 -----------------------------
+  # The stall detector resets its streak when the passing count RISES. Default
+  # it to a large number instead of 0 and a legacy state looks permanently
+  # freshly-green: real progress never registers, so the streak never resets
+  # and the goal escalates as stalled while it is in fact advancing.
+  new_project > /dev/null
+  G init "upgrade-progress" --budget 9 --stall 9 > /dev/null
+  G add C1 "one" 'test -f a.txt' > /dev/null
+  G add C2 "two" 'test -f b.txt' > /dev/null
+  G activate > /dev/null
+  st="$CLAUDE_PROJECT_DIR/.claude/goal/state.env"
+  grep -v '^LAST_PASSED=' "$st" > "$st.f" && mv "$st.f" "$st"
+  assert_eq "upgrade: the legacy state carries no LAST_PASSED at all" \
+    "$(grep -c '^LAST_PASSED=' "$st")" "0"
+  printf 'ok\n' > "$CLAUDE_PROJECT_DIR/a.txt"     # 0 -> 1 passing: real progress
+  gate '{}' > /dev/null
+  assert_contains "upgrade: an unset LAST_PASSED still sees progress" \
+    "$(cat "$CLAUDE_PROJECT_DIR/.claude/goal/journal.log" 2>/dev/null)" "PROGRESS passed 0 -> 1"
+  assert_eq "upgrade: and resets the stall streak to 1" "$(statev SIG_STREAK)" "1"
+  assert_eq "upgrade: the count it records is the one it measured" \
+    "$(statev LAST_PASSED)" "1"
 }
 
 test_clock_cannot_hide_a_flip() {
@@ -1108,6 +1159,21 @@ gf_scan_winvar() { # file -> prints offending lines, empty if clean
 }
 gf_scan_cr() { # file -> number of carriage returns
   tr -dc '\r' < "$1" 2>/dev/null | wc -c | tr -d ' '
+}
+gf_scan_sed_i() { # file -> prints offending lines, empty if clean
+  # MEASURED on macos-latest: BSD sed's -i takes a mandatory backup SUFFIX, so
+  # `sed -i 's|a|b|' f` reads the SCRIPT as the suffix and the FILE as the
+  # script -- "sed: 1: ...: invalid command code f", and NOTHING IS EDITED.
+  # It fails silently in the reassuring direction: a fixture that was supposed
+  # to be broken stays intact and its check goes green.
+  #
+  # GNU accepts a bare -i, so this never fires on Linux or MINGW and the defect
+  # ships. Portable form, and the one this tree uses:
+  #     sed 'expr' f > f.tmp && mv f.tmp f
+  # Same declared hole as gf_scan_winvar: whole-line comments are skipped, so
+  # this paragraph can name the construct it forbids.
+  grep -nE '(^|[^a-zA-Z0-9_-])sed[[:space:]]+(-[a-zA-Z]*[[:space:]]+)*-i([[:space:]]|$)' "$1" 2>/dev/null \
+    | awk '{ body = $0; sub(/^[0-9]+:/, "", body); if (body !~ /^[[:space:]]*#/) print }'
 }
 gf_scan_bash32() { # file -> prints "file:line:text" for each fatal-on-macOS comment
   # MEASURED, on a machine this project does not own: stock macOS ships bash
@@ -1449,7 +1515,15 @@ YML
                 || bad "lint control: the clean fixture passes" "it does not, so every control below is meaningless"
 
   # control A -- a path that does not exist. THE defect that cost a red run.
-  sed -i 's|tests/lint_workflows.sh|tests/no_such_file.sh|' "$s/.github/workflows/fx.yml"
+  # NOT `sed -i`: BSD sed reads the next argument as a backup SUFFIX, so on
+  # macOS `sed -i 's|a|b|' f` treats the script as the suffix and f as the
+  # script -- "invalid command code f", nothing edited. Caught by CI on
+  # macos-latest, and caught HONESTLY: the needle check reported the control
+  # DISCARDED rather than passed, which is the whole reason that check exists.
+  sed_inplace() { # file expr
+    sed "$2" "$1" > "$1.sedtmp" && mv "$1.sedtmp" "$1"
+  }
+  sed_inplace "$s/.github/workflows/fx.yml" 's|tests/lint_workflows.sh|tests/no_such_file.sh|'
   local n; n=$(grep -c 'no_such_file' "$s/.github/workflows/fx.yml")
   if [ "$n" -lt 1 ]; then
     bad "lint control A applied" "needle absent -- control DISCARDED, not survived"
@@ -1473,7 +1547,7 @@ YML
   cp "$s/fx.orig" "$s/.github/workflows/fx.yml"
 
   # control C -- an unpinned action, which is a supply-chain hole
-  sed -i 's|actions/checkout@v4|actions/checkout|' "$s/.github/workflows/fx.yml"
+  sed_inplace "$s/.github/workflows/fx.yml" 's|actions/checkout@v4|actions/checkout|'
   n=$(grep -c 'checkout@' "$s/.github/workflows/fx.yml")
   if [ "$n" -ne 0 ]; then
     bad "lint control C applied" "the version is still pinned -- control DISCARDED"
@@ -1695,6 +1769,19 @@ test_portable_to_a_stranger_machine() {
                 "$root/agents" "$root/.claude-plugin" -type f 2>/dev/null)
   assert_eq "portability: zero CR bytes in shipped files" "$crfiles/$crtotal" "0/0"
 
+  # 2b. no bare `sed -i`. Found the expensive way: a control fixture in
+  #     test_the_workflow_lint_can_fail used it, passed on MINGW and Linux, and
+  #     turned macos-latest red -- because BSD sed silently edited nothing and
+  #     the control could not tell "did not apply" from "survived". Fixing the
+  #     two call sites is not enough; without this scan the next one ships.
+  local sedi=""
+  for f in $shipped; do
+    hit="$(gf_scan_sed_i "$f")"
+    [ -n "$hit" ] && sedi="$sedi ${f#$root/}"
+  done
+  [ -z "$sedi" ] && ok "portability: no bare 'sed -i' in shipped scripts" \
+    || bad "portability: no bare 'sed -i' in shipped scripts" "offenders:$sedi"
+
   # 3. negative controls -- both scanners must FIRE on a known-bad fixture,
   #    using the same functions the real check just used
   local bad_dir; bad_dir="$(mktemp -d "${TMPDIR:-/tmp}/gf-port.XXXXXX")"
@@ -1710,6 +1797,20 @@ test_portable_to_a_stranger_machine() {
   [ "$(gf_scan_cr "$bad_dir/crlf.sh")" -gt 0 ] \
     && ok "portability: the CR scanner fires on a CRLF file (control)" \
     || bad "portability: the CR scanner fires on a CRLF file (control)" "scanner is blind"
+  # the sed scanner: fires on the bare form, stays quiet on the portable one and
+  # on `-i.bak`, which IS portable and which a blunter regex would condemn.
+  printf '%s -i %s\n' 'sed' "'s|a|b|' f" > "$bad_dir/sedi.sh"
+  printf '%s -i.bak %s\n' 'sed' "'s|a|b|' f" > "$bad_dir/sedbak.sh"
+  printf '%s %s > f.t && mv f.t f\n' 'sed' "'s|a|b|' f" > "$bad_dir/sedok.sh"
+  [ -n "$(gf_scan_sed_i "$bad_dir/sedi.sh")" ] \
+    && ok "portability: the sed scanner fires on the bare -i form (control)" \
+    || bad "portability: the sed scanner fires on the bare -i form (control)" "scanner is blind"
+  [ -z "$(gf_scan_sed_i "$bad_dir/sedbak.sh")" ] \
+    && ok "portability: and leaves the portable -i.bak form alone" \
+    || bad "portability: and leaves the portable -i.bak form alone" "false alarm"
+  [ -z "$(gf_scan_sed_i "$bad_dir/sedok.sh")" ] \
+    && ok "portability: and leaves redirect-and-move alone" \
+    || bad "portability: and leaves redirect-and-move alone" "false alarm"
   # and must NOT fire on the portable spelling
   printf 'x="${TMPDIR:-/tmp}/thing"\n' > "$bad_dir/good.sh"
   [ -z "$(gf_scan_winvar "$bad_dir/good.sh")" ] \
@@ -3218,7 +3319,7 @@ test_the_plugin_installs_as_declared
 test_records_are_append_only
 test_the_contract_binds_the_engine
 test_a_refusal_always_carries_a_way_forward
-test_the_flaky_default_survives_an_upgrade
+test_gate_defaults_survive_an_upgrade
 test_the_workflow_lint_can_fail
 "
 

@@ -208,6 +208,18 @@ scripts/lib.sh
 gf_ledger_hash() { # id -> sealed hash ("" if unsealed)
 gf_ledger_hash() { echo ""; } ; gf_ledger_hash_unused() { # id -> sealed hash ("" if unsealed)
 --
+M11
+the red-team default falls back to off instead of warn on a legacy state
+scripts/stop_gate.sh
+  policy="$(state_get GATE_REDTEAM)"; policy="${policy:-warn}"
+  policy="$(state_get GATE_REDTEAM)"; policy="${policy:-off}"
+--
+M12
+the last-passed default is a large number, so a legacy state looks freshly green
+scripts/stop_gate.sh
+last_passed="$(state_get LAST_PASSED)"; last_passed="${last_passed:-0}"
+last_passed="$(state_get LAST_PASSED)"; last_passed="${last_passed:-999}"
+--
 RECORDS
 }
 
@@ -259,8 +271,12 @@ main() {
     # because several cases hang under a broken gate and wait out the watchdog,
     # and re-running all ten to re-check one fix is how a survivor stops being
     # re-checked at all.
-    if [ -n "${GF_MUTATE_ONLY:-}" ] && [ "$GF_MUTATE_ONLY" != "$id" ]; then
-      continue
+    # Accepts one id or a space/comma separated list: GF_MUTATE_ONLY="M8 M11".
+    if [ -n "${GF_MUTATE_ONLY:-}" ]; then
+      case " $(printf '%s' "$GF_MUTATE_ONLY" | tr ',' ' ') " in
+        *" $id "*) : ;;
+        *) continue ;;
+      esac
     fi
     total=$((total + 1))
     file="$ROOT/$rel"

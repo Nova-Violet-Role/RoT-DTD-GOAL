@@ -54,8 +54,31 @@ M8 alone against it: **KILLED**.
   Mutation **L9** kills it. The `]]>` escaping remains **MEASURED** (shell M4),
   not proved — stated in the module header, because the honest half of a
   specification is what it does *not* cover.
+**And M8 was not special — it was a class.** The campaign was extended to the
+gate's two sibling fallbacks, and **both survived too**:
+
+| mutation | fallback | flipped to | first run |
+|---|---|---|---|
+| M8 | `GATE_FLAKY` `${fpolicy:-strict}` | `:-off` | SURVIVED |
+| M11 | `GATE_REDTEAM` `${policy:-warn}` | `:-off` | SURVIVED |
+| M12 | `LAST_PASSED` `${last_passed:-0}` | `:-999` | SURVIVED |
+
+Every key `goal.sh init` writes has a gate-side default that no goal created by
+this version can reach, and none of the three was tested. Under M11 a completion
+whose criteria also pass in an empty directory stops saying so; under M12 real
+progress never registers, so a goal that is advancing escalates as stalled. The
+case is now named for the class — `test_gate_defaults_survive_an_upgrade`, one
+legacy state, every default exercised. **All three: KILLED.**
+
+* **macOS caught a defect in the new lint controls, and caught it honestly.**
+  They used `sed -i 's|…|…|'`; BSD sed reads the script as the backup *suffix*,
+  edits nothing, and exits noisily — so the fixture stayed intact. The control
+  reported **DISCARDED, not survived**, which is exactly the distinction that
+  check exists to make. Both call sites moved to `sed … > f.t && mv f.t f`, and
+  `gf_scan_sed_i` now refuses a bare `sed -i` anywhere in a shipped script, with
+  controls proving it fires on the bare form and stays quiet on `-i.bak`.
 * Lean: 4 modules → **5**, 65 theorems → **73**, mutations 8/8 → **9/9 killed**.
-* Suite: 58 cases / 677 assertions → **59 / 683**.
+* Suite: 58 cases / 677 assertions → **59 / 694**.
 
 ## [1.0.0] — 2026-08-16
 
